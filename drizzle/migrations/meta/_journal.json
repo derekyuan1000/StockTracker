@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1782528227554,
+      "tag": "0000_colossal_nomad",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1782528300000,
+      "tag": "0001_cash_flows",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1782528360000,
+      "tag": "0002_trades",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1782842130091,
+      "tag": "0003_smart_risque",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1782846375183,
+      "tag": "0004_stiff_talisman",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1782846960497,
+      "tag": "0005_dusty_meggan",
+      "breakpoints": true
+    }
+  ]
+}
