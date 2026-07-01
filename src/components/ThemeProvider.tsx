@@ -9,8 +9,8 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: "dark",
-  resolvedTheme: "dark",
+  theme: "light",
+  resolvedTheme: "light",
   setTheme: () => {},
 });
 
@@ -19,8 +19,8 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
-  const [resolvedTheme, setResolvedTheme] = useState<"dark" | "light">("dark");
+  const [theme, setThemeState] = useState<Theme>("light");
+  const [resolvedTheme, setResolvedTheme] = useState<"dark" | "light">("light");
 
   useEffect(() => {
     const stored = localStorage.getItem("st-theme") as Theme | null;
@@ -56,4 +56,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 // Inline script to prevent flash — inject into <head> before stylesheets paint.
-export const themeInitScript = `(function(){try{var t=localStorage.getItem('st-theme');document.documentElement.classList.toggle('dark',t!=='light');}catch(e){document.documentElement.classList.add('dark');}})();`;
+export const themeInitScript = `(function(){try{var t=localStorage.getItem('st-theme');document.documentElement.classList.toggle('dark',t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches));}catch(e){}})();`;

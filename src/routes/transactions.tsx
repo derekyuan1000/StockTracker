@@ -33,6 +33,16 @@ import {
 import { dirClass, fmtGBP, fmtGBPSigned, fmtNum } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableNumericCell,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -231,9 +241,12 @@ function TransactionsPage() {
 
   return (
     <AppShell>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-text-strong">Transactions</h1>
-        <p className="mt-1 text-sm text-text-muted">
+      <div className="mb-8">
+        <p className="eyebrow text-text-muted">Transaction History</p>
+        <h1 className="mt-2 text-4xl font-medium tracking-[-0.02em] text-text-strong">
+          Transactions
+        </h1>
+        <p className="mt-2 text-[15px] text-text-muted">
           Manage cash flow and purchase lots in one place.
         </p>
       </div>
@@ -315,9 +328,9 @@ function TransactionsTab({ refresh }: { refresh: () => void }) {
 
   const TYPE_STYLE: Record<TradeRow["type"], { label: string; cls: string }> = {
     buy: { label: "BUY", cls: "bg-[var(--primary)]/15 text-[var(--primary)]" },
-    sell: { label: "SELL", cls: "bg-[#f6465d]/15 text-[#f6465d]" },
-    deposit: { label: "DEPOSIT", cls: "bg-[#0ecb81]/15 text-[#0ecb81]" },
-    fee: { label: "FEE", cls: "bg-[#f0b90b]/15 text-[#f0b90b]" },
+    sell: { label: "SELL", cls: "bg-[var(--down)]/15 text-[var(--down)]" },
+    deposit: { label: "DEPOSIT", cls: "bg-[var(--up)]/15 text-[var(--up)]" },
+    fee: { label: "FEE", cls: "bg-[var(--brand-orange)]/10 text-[var(--brand-orange)]" },
   };
 
   return (
@@ -331,7 +344,7 @@ function TransactionsTab({ refresh }: { refresh: () => void }) {
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Button
-            variant="outline"
+            variant="ghost-line"
             className="border-hairline text-text-muted hover:text-text-strong"
             onClick={() => fileInputRef.current?.click()}
           >
@@ -339,7 +352,7 @@ function TransactionsTab({ refresh }: { refresh: () => void }) {
             Import CSV
           </Button>
           <Button
-            variant="outline"
+            variant="ghost-line"
             className="border-hairline text-text-muted hover:text-text-strong"
             onClick={() => exportCSV(transactions)}
             disabled={transactions.length === 0}
@@ -348,7 +361,7 @@ function TransactionsTab({ refresh }: { refresh: () => void }) {
             Export CSV
           </Button>
           <Button
-            variant="outline"
+            variant="ghost-line"
             className="border-hairline text-text-muted hover:text-text-strong"
             onClick={() => setAddCashOpen(true)}
           >
@@ -356,7 +369,7 @@ function TransactionsTab({ refresh }: { refresh: () => void }) {
             Add Cash
           </Button>
           <Button
-            variant="outline"
+            variant="ghost-line"
             className="border-hairline text-text-muted hover:text-text-strong"
             onClick={() => setAddOpen(true)}
           >
@@ -373,73 +386,72 @@ function TransactionsTab({ refresh }: { refresh: () => void }) {
         />
       </div>
 
-      <section className="overflow-x-auto rounded-xl border border-hairline bg-surface">
+      <Card className="overflow-x-auto">
         <div className="flex items-center justify-between border-b border-hairline px-6 py-3">
-          <span className="text-sm font-semibold text-text-strong">Transaction history</span>
-          <span className="text-xs text-text-muted">{combined.length} entries</span>
+          <span className="eyebrow text-text-muted">Transaction history</span>
+          <span className="num text-xs text-text-muted">{combined.length} entries</span>
         </div>
-        <table className="w-full min-w-[680px] border-collapse text-sm">
-          <thead>
-            <tr className="text-[11px] uppercase tracking-wider text-text-muted">
-              <Th className="pl-6 text-left">Date</Th>
-              <Th className="text-left">Type</Th>
-              <Th className="text-left">Description</Th>
-              <Th className="text-right">Units</Th>
-              <Th className="text-right">Price</Th>
-              <Th className="text-right">Amount (£)</Th>
-              <Th className="pr-4 text-right">Actions</Th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table className="min-w-[680px]">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="pl-6">Date</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead className="text-right">Units</TableHead>
+              <TableHead className="text-right">Price</TableHead>
+              <TableHead className="text-right">Amount (£)</TableHead>
+              <TableHead className="pr-4 text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {combined.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-6 py-10 text-center text-sm text-text-muted">
+              <TableRow>
+                <TableCell colSpan={7} className="px-6 py-10 text-center text-text-muted">
                   No transactions yet.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
             {combined.map((row) => {
               if (row.kind === "flow") {
                 const f = row.f;
                 const isDeposit = f.type === "deposit";
                 return (
-                  <tr
-                    key={row.key}
-                    className="border-t border-hairline hover:bg-[var(--surface-elevated)]/40"
-                  >
-                    <Td className="pl-6 font-mono text-xs text-text-muted">{f.date}</Td>
-                    <Td>
+                  <TableRow key={row.key}>
+                    <TableCell className="pl-6 font-mono text-xs text-text-muted">
+                      {f.date}
+                    </TableCell>
+                    <TableCell>
                       <span
-                        className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                        className={`inline-block rounded-sm px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] ${
                           isDeposit
-                            ? "bg-[#0ecb81]/15 text-[#0ecb81]"
-                            : "bg-[#f6465d]/15 text-[#f6465d]"
+                            ? "bg-[var(--up)]/10 text-[var(--up)]"
+                            : "bg-[var(--down)]/10 text-[var(--down)]"
                         }`}
                       >
                         {f.type}
                       </span>
-                    </Td>
-                    <Td className="text-text-muted">
+                    </TableCell>
+                    <TableCell className="text-text-muted">
                       {f.note || <span className="opacity-40">—</span>}
-                    </Td>
-                    <TdNum className="text-text-muted">—</TdNum>
-                    <TdNum className="text-text-muted">—</TdNum>
-                    <TdNum
-                      className={`font-semibold ${isDeposit ? "text-[#0ecb81]" : "text-[#f6465d]"}`}
+                    </TableCell>
+                    <TableNumericCell className="text-text-muted">—</TableNumericCell>
+                    <TableNumericCell className="text-text-muted">—</TableNumericCell>
+                    <TableNumericCell
+                      className={`font-medium ${isDeposit ? "text-[var(--up)]" : "text-[var(--down)]"}`}
                     >
                       {isDeposit ? "+" : "-"}
                       {fmtGBP(f.amountGBP)}
-                    </TdNum>
-                    <td className="px-2 py-2 pr-4 text-right">
+                    </TableNumericCell>
+                    <TableCell className="pr-4 text-right">
                       <button
                         title="Delete"
-                        className="ml-auto flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-[#f6465d] opacity-60 transition-all hover:bg-[#f6465d]/10 hover:opacity-100"
+                        className="ml-auto flex h-7 w-7 cursor-pointer items-center justify-center rounded-sm text-[var(--down)] opacity-60 transition-all hover:bg-[var(--down)]/10 hover:opacity-100"
                         onClick={() => setDeleteFlowTarget(f)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               }
 
@@ -450,22 +462,21 @@ function TransactionsTab({ refresh }: { refresh: () => void }) {
               const isSell = tx.type === "sell";
               const isStockTx = isBuy || isSell;
               return (
-                <tr
-                  key={row.key}
-                  className="border-t border-hairline hover:bg-[var(--surface-elevated)]/40"
-                >
-                  <Td className="pl-6 font-mono text-xs text-text-muted">{tx.date}</Td>
-                  <Td>
+                <TableRow key={row.key}>
+                  <TableCell className="pl-6 font-mono text-xs text-text-muted">{tx.date}</TableCell>
+                  <TableCell>
                     <span
-                      className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${style.cls}`}
+                      className={`inline-block rounded-sm px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] ${style.cls}`}
                     >
                       {style.label}
                     </span>
-                  </Td>
-                  <Td>
+                  </TableCell>
+                  <TableCell>
                     {isStockTx ? (
                       <>
-                        <span className="font-semibold text-text-strong">{tx.ticker}</span>
+                        <span className="font-mono font-medium uppercase text-text-strong">
+                          {tx.ticker}
+                        </span>
                         {tx.name !== tx.ticker && (
                           <span className="ml-2 text-xs text-text-muted">{tx.name}</span>
                         )}
@@ -475,34 +486,34 @@ function TransactionsTab({ refresh }: { refresh: () => void }) {
                         {tx.type === "deposit" ? "Cash deposit" : "Fee / charge"}
                       </span>
                     )}
-                  </Td>
-                  <TdNum className={isStockTx ? "" : "text-text-muted"}>
+                  </TableCell>
+                  <TableNumericCell className={isStockTx ? "" : "text-text-muted"}>
                     {isStockTx ? fmtNum(tx.units, 2) : "—"}
-                  </TdNum>
-                  <TdNum className={isStockTx ? "" : "text-text-muted"}>
+                  </TableNumericCell>
+                  <TableNumericCell className={isStockTx ? "" : "text-text-muted"}>
                     {isStockTx ? fmtNum(tx.price, 2) : "—"}
-                  </TdNum>
-                  <TdNum
-                    className={`font-semibold ${isSell ? "text-[#0ecb81]" : isBuy ? "" : tx.type === "deposit" ? "text-[#0ecb81]" : "text-[#f6465d]"}`}
+                  </TableNumericCell>
+                  <TableNumericCell
+                    className={`font-medium ${isSell ? "text-[var(--up)]" : isBuy ? "" : tx.type === "deposit" ? "text-[var(--up)]" : "text-[var(--down)]"}`}
                   >
                     {isSell ? "+" : isBuy ? "-" : tx.type === "deposit" ? "+" : "-"}
                     {fmtGBP(tx.amountGBP)}
-                  </TdNum>
-                  <td className="px-2 py-2 pr-4 text-right">
+                  </TableNumericCell>
+                  <TableCell className="pr-4 text-right">
                     <button
                       title="Delete"
-                      className="ml-auto flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-[#f6465d] opacity-60 transition-all hover:bg-[#f6465d]/10 hover:opacity-100"
+                      className="ml-auto flex h-7 w-7 cursor-pointer items-center justify-center rounded-sm text-[var(--down)] opacity-60 transition-all hover:bg-[var(--down)]/10 hover:opacity-100"
                       onClick={() => setDeleteTradeTarget(tx)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
-      </section>
+          </TableBody>
+        </Table>
+      </Card>
 
       <AddTransactionDialog open={addOpen} onClose={() => setAddOpen(false)} onSuccess={refresh} />
       <CashFlowDialog
@@ -569,12 +580,12 @@ function CashTab({ refresh }: { refresh: () => void }) {
     <>
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div
-          className="rounded-xl border bg-surface p-6"
-          style={{ borderColor: cashGBP >= 0 ? "#0ecb81" : "#f6465d" }}
+          className="rounded-sm border bg-surface p-6"
+          style={{ borderColor: cashGBP >= 0 ? "var(--up)" : "var(--down)" }}
         >
           <div className="text-[11px] uppercase tracking-wider text-text-muted">Available cash</div>
           <div
-            className={`num mt-2 text-4xl font-bold ${cashGBP >= 0 ? "text-[#0ecb81]" : "text-[#f6465d]"}`}
+            className={`num mt-2 text-4xl font-bold ${cashGBP >= 0 ? "text-[var(--up)]" : "text-[var(--down)]"}`}
           >
             {fmtGBP(cashGBP)}
           </div>
@@ -588,11 +599,11 @@ function CashTab({ refresh }: { refresh: () => void }) {
           </Button>
         </div>
 
-        <div className="rounded-xl border border-hairline bg-surface p-6">
+        <div className="rounded-sm border border-hairline bg-surface p-6">
           <div className="text-[11px] uppercase tracking-wider text-text-muted">
             Total deposited
           </div>
-          <div className="num mt-2 text-2xl font-semibold text-[#0ecb81]">
+          <div className="num mt-2 text-2xl font-semibold text-[var(--up)]">
             {fmtGBP(totalDeposited)}
           </div>
           <div className="mt-1 text-xs text-text-muted">
@@ -600,11 +611,11 @@ function CashTab({ refresh }: { refresh: () => void }) {
           </div>
         </div>
 
-        <div className="rounded-xl border border-hairline bg-surface p-6">
+        <div className="rounded-sm border border-hairline bg-surface p-6">
           <div className="text-[11px] uppercase tracking-wider text-text-muted">
             Total withdrawn
           </div>
-          <div className="num mt-2 text-2xl font-semibold text-[#f6465d]">
+          <div className="num mt-2 text-2xl font-semibold text-[var(--down)]">
             {fmtGBP(totalWithdrawn)}
           </div>
           <div className="mt-1 text-xs text-text-muted">
@@ -771,7 +782,7 @@ function AddTransactionDialog({
                 autoComplete="off"
               />
               {showSuggestions && suggestions.length > 0 && (
-                <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-52 overflow-auto rounded-lg border border-hairline bg-[var(--surface-elevated)] py-1 shadow-lg">
+                <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-52 overflow-auto rounded-sm border border-[var(--hairline)] bg-[var(--surface-elevated)] py-1">
                   {suggestions.slice(0, 8).map((s) => (
                     <li
                       key={s.ticker}
@@ -834,7 +845,7 @@ function AddTransactionDialog({
                   priceFetching && !priceLocked
                     ? "border-[var(--primary)]/60"
                     : !priceLocked && autoPrice?.price && autoPrice.price > 0
-                      ? "border-[#0ecb81]/60"
+                      ? "border-[var(--up)]/60"
                       : "border-hairline"
                 }`}
               />
@@ -847,7 +858,7 @@ function AddTransactionDialog({
                 {priceFetching && !priceLocked ? (
                   <Loader2 className="h-4 w-4 animate-spin text-[var(--primary)]" />
                 ) : priceLocked ? (
-                  <Unlock className="h-4 w-4 text-[#f0b90b]" />
+                  <Unlock className="h-4 w-4 text-[var(--brand-orange)]" />
                 ) : (
                   <Lock className="h-4 w-4" />
                 )}
@@ -864,7 +875,7 @@ function AddTransactionDialog({
             </p>
           </div>
 
-          {error && <p className="text-xs text-[#f6465d]">{error}</p>}
+          {error && <p className="text-xs text-[var(--down)]">{error}</p>}
         </div>
         <DialogFooter>
           <Button
@@ -876,9 +887,10 @@ function AddTransactionDialog({
             Cancel
           </Button>
           <Button
+            variant="default"
             onClick={handleSubmit}
             disabled={loading}
-            className="!bg-[#F0B90B] !text-gray-600 font-semibold shadow-sm hover:!bg-[#d4a00b] hover:shadow-md active:scale-[0.98]"
+            className="active:scale-[0.98]"
           >
             {loading ? "Adding…" : "Add holding"}
           </Button>
@@ -892,9 +904,9 @@ function AddTransactionDialog({
 
 const KIND_STYLE: Record<CsvRow["kind"], { label: string; cls: string }> = {
   BUY: { label: "BUY", cls: "bg-[var(--up)]/15 text-[var(--up)]" },
-  SELL: { label: "SELL", cls: "bg-[#f6465d]/15 text-[#f6465d]" },
+  SELL: { label: "SELL", cls: "bg-[var(--down)]/15 text-[var(--down)]" },
   DEPOSIT: { label: "DEPOSIT", cls: "bg-[var(--info)]/15 text-[var(--info)]" },
-  FEE: { label: "FEE", cls: "bg-[#f0b90b]/15 text-[#f0b90b]" },
+  FEE: { label: "FEE", cls: "bg-[var(--brand-orange)]/10 text-[var(--brand-orange)]" },
 };
 
 function ImportCSVDialog({
@@ -994,7 +1006,7 @@ function ImportCSVDialog({
             {result.errors > 0 && (
               <>
                 {" "}
-                <span className="font-semibold text-[#f6465d]">{result.errors}</span> failed.
+                <span className="font-semibold text-[var(--down)]">{result.errors}</span> failed.
               </>
             )}
           </div>
@@ -1178,7 +1190,7 @@ function EditLotDialog({
               className="border-hairline bg-canvas text-text-strong"
             />
           </div>
-          {error && <p className="text-xs text-[#f6465d]">{error}</p>}
+          {error && <p className="text-xs text-[var(--down)]">{error}</p>}
         </div>
         <DialogFooter>
           <Button variant="ghost" className="text-text-muted" onClick={onClose} disabled={loading}>
@@ -1312,7 +1324,7 @@ function CashFlowDialog({
   };
 
   const isDeposit = type === "deposit";
-  const accent = isDeposit ? "#0ecb81" : "#f6465d";
+  const accent = isDeposit ? "var(--up)" : "var(--down)";
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
@@ -1327,7 +1339,7 @@ function CashFlowDialog({
               onClick={() => setType("deposit")}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-semibold transition-all ${
                 isDeposit
-                  ? "bg-[#0ecb81]/15 text-[#0ecb81]"
+                  ? "bg-[var(--up)]/15 text-[var(--up)]"
                   : "text-text-muted hover:text-text-body"
               }`}
             >
@@ -1339,7 +1351,7 @@ function CashFlowDialog({
               onClick={() => setType("withdrawal")}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-semibold transition-all ${
                 !isDeposit
-                  ? "bg-[#f6465d]/15 text-[#f6465d]"
+                  ? "bg-[var(--down)]/15 text-[var(--down)]"
                   : "text-text-muted hover:text-text-body"
               }`}
             >
@@ -1380,7 +1392,7 @@ function CashFlowDialog({
               className="border-hairline bg-canvas text-text-strong"
             />
           </div>
-          {error && <p className="text-xs text-[#f6465d]">{error}</p>}
+          {error && <p className="text-xs text-[var(--down)]">{error}</p>}
         </div>
         <DialogFooter>
           <Button
@@ -1394,7 +1406,7 @@ function CashFlowDialog({
           <Button
             onClick={handleSubmit}
             disabled={isPending}
-            style={{ backgroundColor: accent, color: "#0b0e11" }}
+            style={{ backgroundColor: accent, color: "var(--canvas-dark)" }}
           >
             {isPending ? "Saving…" : isDeposit ? "Deposit" : "Withdraw"}
           </Button>
@@ -1463,7 +1475,7 @@ function SetBalanceDialog({
               autoFocus
             />
           </div>
-          {error && <p className="text-xs text-[#f6465d]">{error}</p>}
+          {error && <p className="text-xs text-[var(--down)]">{error}</p>}
         </div>
         <DialogFooter>
           <Button
@@ -1587,18 +1599,4 @@ function DeleteTradeDialog({
       </AlertDialogContent>
     </AlertDialog>
   );
-}
-
-// ─── Table helpers ────────────────────────────────────────────────────────────
-
-function Th({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <th className={`px-3 py-3 font-medium ${className}`}>{children}</th>;
-}
-
-function Td({ children, className = "" }: { children?: React.ReactNode; className?: string }) {
-  return <td className={`px-3 py-3 text-left ${className}`}>{children}</td>;
-}
-
-function TdNum({ children, className = "" }: { children?: React.ReactNode; className?: string }) {
-  return <td className={`num px-3 py-3 text-right ${className}`}>{children}</td>;
 }

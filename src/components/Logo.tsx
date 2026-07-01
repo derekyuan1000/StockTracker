@@ -2,9 +2,12 @@ interface LogoProps {
   size?: number;
   showWordmark?: boolean;
   className?: string;
+  /** Render the accent bar + wordmark in light ink for dark bands. */
+  onDark?: boolean;
 }
 
-export function Logo({ size = 20, showWordmark = true, className = "" }: LogoProps) {
+export function Logo({ size = 20, showWordmark = true, className = "", onDark = false }: LogoProps) {
+  const accent = onDark ? "#ffffff" : "var(--primary)";
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <svg
@@ -69,24 +72,29 @@ export function Logo({ size = 20, showWordmark = true, className = "" }: LogoPro
           y1="2"
           x2="20"
           y2="5"
-          stroke="var(--primary)"
+          stroke={accent}
           strokeWidth="1.5"
           strokeLinecap="round"
         />
-        <rect x="18" y="5" width="4" height="12" rx="0.75" fill="var(--primary)" />
+        <rect x="18" y="5" width="4" height="12" rx="0.75" fill={accent} />
         <line
           x1="20"
           y1="17"
           x2="20"
           y2="20"
-          stroke="var(--primary)"
+          stroke={accent}
           strokeWidth="1.5"
           strokeLinecap="round"
         />
       </svg>
 
       {showWordmark && (
-        <span className="text-sm font-bold tracking-tight text-[var(--primary)]">StockTracker</span>
+        <span
+          className="text-sm font-medium tracking-tight"
+          style={{ color: onDark ? "#ffffff" : "var(--primary)" }}
+        >
+          StockTracker
+        </span>
       )}
     </div>
   );
