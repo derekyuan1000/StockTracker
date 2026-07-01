@@ -161,10 +161,13 @@ function FundamentalsPage() {
   if (!h) {
     return (
       <AppShell>
-        <h1 className="mb-1 text-2xl font-semibold text-text-strong">Fundamentals</h1>
-        <p className="text-sm text-text-muted">
-          No holdings to display. Add holdings to get started.
-        </p>
+        <div className="-mx-6 -mt-8 mb-8 bg-[var(--canvas-dark)] px-8 py-16 text-[var(--on-dark)]">
+          <p className="eyebrow text-[var(--accent-mint)]">Fundamentals</p>
+          <h1 className="mt-3 text-4xl font-medium tracking-[-0.02em]">Fundamentals</h1>
+          <p className="mt-3 max-w-xl text-[15px] text-white/60">
+            No holdings to display. Add holdings to get started.
+          </p>
+        </div>
       </AppShell>
     );
   }
@@ -181,12 +184,21 @@ function FundamentalsPage() {
 
   return (
     <AppShell>
+      {/* ── Dark band header ── */}
+      <div className="-mx-6 -mt-8 mb-8 bg-[var(--canvas-dark)] px-8 py-16 text-[var(--on-dark)]">
+        <p className="eyebrow text-[var(--accent-mint)]">Fundamentals</p>
+        <h1 className="mt-3 text-4xl font-medium tracking-[-0.02em]">Fundamentals</h1>
+        <p className="mt-3 max-w-xl text-[15px] text-white/60">
+          Per-holding deep dive — chart, valuation, growth, financial health and analyst view.
+        </p>
+      </div>
+
       {/* ── Stock identity header ── */}
       <div className="mb-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="rounded border border-hairline bg-[var(--surface-elevated)] px-2 py-0.5 font-mono text-[11px] font-bold tracking-widest text-text-strong">
+              <span className="rounded border border-hairline bg-[var(--surface-elevated)] px-2 py-0.5 font-mono text-[11px] font-medium tracking-widest text-text-strong">
                 {current}
               </span>
               {h.sector && h.sector.length > 0 && (
@@ -195,9 +207,9 @@ function FundamentalsPage() {
                 </span>
               )}
             </div>
-            <h1 className="text-xl font-semibold text-text-strong">{h.name}</h1>
+            <h2 className="text-xl font-medium tracking-[-0.02em] text-text-strong">{h.name}</h2>
             <div className="mt-2 flex flex-wrap items-baseline gap-3">
-              <span className="num text-4xl font-bold tracking-tight text-text-strong">
+              <span className="num text-4xl font-medium tracking-tight text-text-strong">
                 {fmtNum(h.lastPrice, h.currency === "GBp" ? 0 : 2)}
               </span>
               <span className="text-sm text-text-muted">{h.currency}</span>
@@ -249,8 +261,8 @@ function FundamentalsPage() {
 
       {/* ── Chart + valuation sidebar ── */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="self-start rounded-xl border border-hairline bg-surface p-5">
-          <h2 className="mb-4 text-sm font-semibold text-text-strong">Price history</h2>
+        <div className="self-start rounded-sm border border-hairline bg-surface p-5">
+          <h2 className="eyebrow mb-4 text-text-muted">Price history</h2>
           <StockChart
             ticker={current}
             avgBuyP={h.avgBuyP}
@@ -288,8 +300,8 @@ function FundamentalsPage() {
 
       {/* ── Trading data ── */}
       <section className="mt-6">
-        <div className="rounded-xl border border-hairline bg-surface p-5">
-          <h3 className="mb-4 text-sm font-semibold text-text-strong">Trading data</h3>
+        <div className="rounded-sm border border-hairline bg-surface p-5">
+          <h3 className="eyebrow mb-4 text-text-muted">Trading data</h3>
           <dl className="grid grid-cols-2 gap-x-8 gap-y-4 text-xs sm:grid-cols-3 lg:grid-cols-6">
             <TradingStat
               label="Day range"
@@ -371,8 +383,8 @@ function FundamentalsPage() {
 
       {/* ── News ── */}
       <section className="mt-6">
-        <div className="rounded-xl border border-hairline bg-surface p-5">
-          <h3 className="mb-4 text-sm font-semibold text-text-strong">Latest news</h3>
+        <div className="rounded-sm border border-hairline bg-surface p-5">
+          <h3 className="eyebrow mb-4 text-text-muted">Latest news</h3>
           {news.length > 0 ? (
             <ul className="divide-y divide-hairline">
               {news.map((n, i) => (
@@ -459,14 +471,14 @@ function PositionSummaryCard({
 }) {
   const isGain = row.unrealisedGL >= 0;
   return (
-    <div className="relative overflow-hidden rounded-xl border border-hairline bg-surface p-5">
+    <div className="relative overflow-hidden rounded-sm border border-hairline bg-surface p-5">
       <div
         className={`absolute bottom-0 left-0 top-0 w-[3px] ${isGain ? "bg-[var(--up)]" : "bg-[var(--down)]"}`}
       />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 pl-3">
-        <h3 className="text-sm font-semibold text-text-strong">Your position</h3>
+        <h3 className="eyebrow text-text-muted">Your position</h3>
         <div className="flex items-baseline gap-2">
-          <span className={`num text-base font-bold ${dirClass(row.unrealisedGL)}`}>
+          <span className={`num text-base font-medium ${dirClass(row.unrealisedGL)}`}>
             {fmtGBPSigned(row.unrealisedGL)}
           </span>
           <span className={`num text-xs ${dirClass(row.unrealisedGL)}`}>
@@ -501,8 +513,8 @@ function ValuationCard({
   x2: (v?: number) => string | undefined;
 }) {
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-5">
-      <h3 className="mb-3 text-sm font-semibold text-text-strong">Valuation</h3>
+    <div className="rounded-sm border border-hairline bg-surface p-5">
+      <h3 className="eyebrow mb-3 text-text-muted">Valuation</h3>
       <dl className="divide-y divide-hairline">
         <MetricRow label="P/E (TTM)" v={x1(h.pe)} />
         <MetricRow label="Forward P/E" v={x1(h.forwardPe)} />
@@ -540,8 +552,8 @@ function MetricRow({ label, v, tone }: { label: string; v?: string; tone?: numbe
 
 function SectionEmpty({ title, message }: { title: string; message: string }) {
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-5">
-      <h3 className="mb-3 text-sm font-semibold text-text-strong">{title}</h3>
+    <div className="rounded-sm border border-hairline bg-surface p-5">
+      <h3 className="eyebrow mb-3 text-text-muted">{title}</h3>
       <p className="text-xs text-text-muted">{message}</p>
     </div>
   );
@@ -563,8 +575,8 @@ function AnalystConsensusCard({
     );
   }
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-5">
-      <h3 className="mb-3 text-sm font-semibold text-text-strong">Analyst consensus</h3>
+    <div className="rounded-sm border border-hairline bg-surface p-5">
+      <h3 className="eyebrow mb-3 text-text-muted">Analyst consensus</h3>
       <AnalystBar buy={h.analyst.buy} hold={h.analyst.hold} sell={h.analyst.sell} />
       {h.targetP > 0 && (
         <div className="mt-4 border-t border-hairline pt-4">
@@ -574,7 +586,7 @@ function AnalystConsensusCard({
               {fmtPct(upside, 1)} upside
             </span>
           </div>
-          <div className="num mb-3 text-2xl font-bold text-text-strong">{fmtNum(h.targetP, 0)}</div>
+          <div className="num mb-3 text-2xl font-medium text-text-strong">{fmtNum(h.targetP, 0)}</div>
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
               <div className="num text-sm text-text-body">{fmtNum(h.analyst.targetLow, 0)}</div>
@@ -607,8 +619,8 @@ function ProfitabilityCard({
   pct: (v?: number) => string | undefined;
 }) {
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-5">
-      <h3 className="mb-4 text-sm font-semibold text-text-strong">Profitability</h3>
+    <div className="rounded-sm border border-hairline bg-surface p-5">
+      <h3 className="eyebrow mb-4 text-text-muted">Profitability</h3>
       <div className="space-y-3">
         <MarginMetric label="Gross margin" raw={h.grossMargin} v={pct(h.grossMargin)} />
         <MarginMetric label="Operating margin" raw={h.operatingMargin} v={pct(h.operatingMargin)} />
@@ -661,8 +673,8 @@ function GrowthCard({
   pct: (v?: number) => string | undefined;
 }) {
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-5">
-      <h3 className="mb-4 text-sm font-semibold text-text-strong">Growth</h3>
+    <div className="rounded-sm border border-hairline bg-surface p-5">
+      <h3 className="eyebrow mb-4 text-text-muted">Growth</h3>
       <div className="space-y-5">
         <GrowthStat label="Revenue growth (YoY)" v={pct(h.revenueGrowth)} tone={h.revenueGrowth} />
         <GrowthStat label="Earnings growth" v={pct(h.earningsGrowth)} tone={h.earningsGrowth} />
@@ -680,7 +692,7 @@ function GrowthStat({ label, v, tone }: { label: string; v?: string; tone?: numb
   return (
     <div className="border-b border-hairline pb-5 last:border-b-0 last:pb-0">
       <div className="mb-1 text-[11px] text-text-muted">{label}</div>
-      <div className={`num text-2xl font-bold ${tone != null ? dirClass(tone) : "text-text-body"}`}>
+      <div className={`num text-2xl font-medium ${tone != null ? dirClass(tone) : "text-text-body"}`}>
         {v ?? "—"}
       </div>
     </div>
@@ -699,8 +711,8 @@ function FinancialHealthCard({
   x2: (v?: number) => string | undefined;
 }) {
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-5">
-      <h3 className="mb-3 text-sm font-semibold text-text-strong">Financial health</h3>
+    <div className="rounded-sm border border-hairline bg-surface p-5">
+      <h3 className="eyebrow mb-3 text-text-muted">Financial health</h3>
       <dl className="divide-y divide-hairline">
         <MetricRow label="Net debt/EBITDA" v={x1(h.netDebtEbitda)} />
         <MetricRow
@@ -780,8 +792,8 @@ function EarningsCalendarCard({
   const dateLabel = `${day}${suffix} ${month} ${next.getFullYear()}`;
 
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-5">
-      <h3 className="mb-4 text-sm font-semibold text-text-strong">Earnings calendar</h3>
+    <div className="rounded-sm border border-hairline bg-surface p-5">
+      <h3 className="eyebrow mb-4 text-text-muted">Earnings calendar</h3>
       <div className="mb-4">
         <div className="num text-base font-semibold text-text-strong">{dateLabel}</div>
         <div className="mt-0.5 text-xs text-text-muted">
@@ -837,8 +849,8 @@ function RevenueEpsChart({
   }));
 
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-5">
-      <h3 className="mb-1 text-sm font-semibold text-text-strong">Quarterly financials</h3>
+    <div className="rounded-sm border border-hairline bg-surface p-5">
+      <h3 className="eyebrow mb-1 text-text-muted">Quarterly financials</h3>
       <p className="mb-4 text-[11px] text-text-muted">Revenue</p>
       <ResponsiveContainer width="100%" height={180}>
         <BarChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }} barGap={2}>
@@ -857,20 +869,19 @@ function RevenueEpsChart({
           />
           <Tooltip
             contentStyle={{
-              background: "#0f1923",
-              border: "1px solid #38bdf8",
-              borderRadius: 8,
+              background: "var(--canvas-dark)",
+              border: "1px solid var(--hairline)",
+              borderRadius: 4,
               fontSize: 12,
-              fontFamily: "JetBrains Mono",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+              fontFamily: "var(--font-mono)",
             }}
-            labelStyle={{ color: "#38bdf8", fontSize: 11 }}
-            itemStyle={{ color: "#e2e8f0" }}
+            labelStyle={{ color: "var(--accent-mint)", fontSize: 11 }}
+            itemStyle={{ color: "var(--on-dark)" }}
             formatter={(v: number) => [fmtWordNum(v), "Revenue"]}
           />
           <Bar dataKey="revenue" name="Revenue" radius={[3, 3, 0, 0]}>
             {data.map((_, i) => (
-              <Cell key={i} fill="#3b82f6" opacity={0.7} />
+              <Cell key={i} fill="var(--brand-periwinkle)" opacity={0.7} />
             ))}
           </Bar>
         </BarChart>
@@ -883,8 +894,8 @@ function RevenueEpsChart({
 
 function DividendCard({ h }: { h: import("@/data/portfolio").Holding }) {
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-5">
-      <h3 className="mb-4 text-sm font-semibold text-text-strong">Dividend details</h3>
+    <div className="rounded-sm border border-hairline bg-surface p-5">
+      <h3 className="eyebrow mb-4 text-text-muted">Dividend details</h3>
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs sm:grid-cols-3 lg:grid-cols-6">
         <DivStat
           label="Annual yield"
@@ -944,8 +955,8 @@ function TechnicalSignalsCard({
     t.rsi >= 70 ? "text-[var(--down)]" : t.rsi <= 30 ? "text-[var(--up)]" : "text-text-muted";
 
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-5">
-      <h3 className="mb-4 text-sm font-semibold text-text-strong">Technical signals</h3>
+    <div className="rounded-sm border border-hairline bg-surface p-5">
+      <h3 className="eyebrow mb-4 text-text-muted">Technical signals</h3>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <SignalTile
           label="RSI (14)"
@@ -1000,7 +1011,7 @@ function SignalTile({
   return (
     <div className="rounded-lg border border-hairline bg-[var(--surface-elevated)] p-3">
       <div className="mb-2 text-[10px] text-text-muted">{label}</div>
-      <div className={`num text-lg font-bold ${valueClass ?? "text-text-body"}`}>{value}</div>
+      <div className={`num text-lg font-medium ${valueClass ?? "text-text-body"}`}>{value}</div>
       {sub && <div className="mt-1 text-[10px] text-text-muted">{sub}</div>}
       {rsi !== undefined && (
         <div
@@ -1037,7 +1048,7 @@ function AnalystBar({ buy, hold, sell }: { buy: number; hold: number; sell: numb
     <>
       <div className="flex h-2.5 overflow-hidden rounded-full">
         <div style={{ width: `${(buy / total) * 100}%`, background: "var(--up)", opacity: 0.8 }} />
-        <div style={{ width: `${(hold / total) * 100}%`, background: "#707a8a", opacity: 0.6 }} />
+        <div style={{ width: `${(hold / total) * 100}%`, background: "var(--text-muted)", opacity: 0.6 }} />
         <div
           style={{ width: `${(sell / total) * 100}%`, background: "var(--down)", opacity: 0.8 }}
         />

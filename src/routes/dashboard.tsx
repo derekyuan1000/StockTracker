@@ -40,6 +40,16 @@ import {
 } from "recharts";
 import { AppShell } from "@/components/AppShell";
 import { ChartSkeleton } from "@/components/Skeletons";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableNumericCell,
+} from "@/components/ui/table";
 
 import { toast } from "sonner";
 import {
@@ -87,18 +97,21 @@ const BENCHMARKS = [
   { label: "Vanguard FTSE All-World", ticker: "VWRL.L" },
 ] as const;
 
+// Brand-aligned chart palette — periwinkle / orange / magenta / mint family,
+// no Binance yellow. Two accent hues (orange #ff7a45, magenta #e5484d,
+// periwinkle #8b8bff) plus cool supporting tones.
 const SECTOR_COLORS: Record<string, string> = {
-  Fund: "#38bdf8",
+  Fund: "#8b8bff",
   ETF: "#a78bfa",
   MUTUALFUND: "#a78bfa",
-  Bond: "#fbbf24",
-  BOND: "#fbbf24",
-  Gilt: "#fbbf24",
+  Bond: "#ff7a45",
+  BOND: "#ff7a45",
+  Gilt: "#ff7a45",
   Future: "#fb923c",
   FUTURE: "#fb923c",
   Technology: "#f472b6",
   Tech: "#f472b6",
-  Pharma: "#fcd535",
+  Pharma: "#8b8bff",
   Banking: "#22d3ee",
   Defence: "#818cf8",
   Consumer: "#f87171",
@@ -117,22 +130,38 @@ const SECTOR_COLORS: Record<string, string> = {
 };
 
 const STOCK_PALETTE = [
-  "#f472b6",
+  "#8b8bff",
   "#60a5fa",
   "#34d399",
-  "#fbbf24",
+  "#ff7a45",
   "#a78bfa",
   "#fb923c",
   "#22d3ee",
   "#4ade80",
   "#f87171",
   "#818cf8",
-  "#fcd535",
+  "#e5484d",
   "#38bdf8",
   "#86efac",
   "#c084fc",
   "#67e8f9",
 ];
+
+// ─── Shared Recharts theme (brand tokens, no yellow) ─────────────────────────
+const CHART_TICK = { fill: "var(--text-muted)", fontSize: 11, fontFamily: "JetBrains Mono" };
+const CHART_GRID = "var(--hairline)";
+const CHART_TOOLTIP_STYLE: React.CSSProperties = {
+  background: "var(--surface-card)",
+  border: "1px solid var(--hairline)",
+  borderRadius: 4,
+  fontSize: 13,
+  fontFamily: "JetBrains Mono",
+  boxShadow: "none",
+};
+const CHART_TOOLTIP_LABEL: React.CSSProperties = { color: "var(--text-strong)", fontSize: 11 };
+const CHART_TOOLTIP_ITEM: React.CSSProperties = { color: "var(--text-body)" };
+const CHART_UP = "var(--up)";
+const CHART_DOWN = "var(--down)";
 
 function SummaryPage() {
   const queryClient = useQueryClient();
@@ -297,13 +326,29 @@ function SummaryPage() {
 
   return (
     <AppShell>
+      {/* PAGE HEADER — dark editorial band */}
+      <header className="-mx-6 -mt-8 mb-8 bg-[var(--canvas-dark)] px-8 py-16 text-[var(--on-dark)]">
+        <div className="mx-auto max-w-[1200px]">
+          <p className="eyebrow text-white/50">Portfolio Overview</p>
+          <h1 className="mt-3 text-4xl font-medium tracking-[-0.02em] text-[var(--on-dark)]">
+            {fmtGBP(p.totalValue)}
+          </h1>
+          <p
+            className="mt-3 font-mono text-sm tabular-nums"
+            style={{
+              color: p.dayChangeGBP >= 0 ? "var(--up)" : "var(--down)",
+            }}
+          >
+            {fmtGBPSigned(p.dayChangeGBP)} ({fmtPct(p.dayChangePct)}) today
+          </p>
+        </div>
+      </header>
+
       {/* HERO: KPI + performance chart */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
-        <div className="rounded-xl border border-hairline bg-surface p-6">
-          <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-text-muted">
-            Total portfolio value
-          </div>
-          <div className="num mt-2 text-[40px] font-bold leading-none text-text-strong">
+        <div className="rounded-sm border border-hairline bg-surface p-6">
+          <div className="eyebrow text-text-muted">Total portfolio value</div>
+          <div className="num mt-2 text-[40px] font-medium leading-none text-text-strong">
             {fmtGBP(p.totalValue)}
           </div>
           {holdings.length === 0 && (
@@ -330,12 +375,10 @@ function SummaryPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-hairline bg-surface p-6">
+        <div className="rounded-sm border border-hairline bg-surface p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <div className="text-[11px] font-medium uppercase tracking-[0.12em] text-text-muted">
-                Performance
-              </div>
+              <div className="eyebrow text-text-muted">Performance</div>
               <div className="mt-1 flex items-baseline gap-3">
                 <div className="num text-2xl font-semibold text-text-strong">
                   {fmtGBP(lastValue)}
@@ -366,7 +409,7 @@ function SummaryPage() {
                   </option>
                 ))}
               </select>
-              <div className="flex flex-wrap gap-1 rounded-md border border-hairline bg-[var(--surface-elevated)] p-1">
+              <div className="flex flex-wrap gap-0.5 rounded-sm bg-[var(--surface-elevated)] p-1">
                 {RANGES.map((r) => (
                   <button
                     key={r}
@@ -374,9 +417,9 @@ function SummaryPage() {
                       setRange(r);
                       setPerfZoomDomain(null);
                     }}
-                    className={`rounded num px-2.5 py-1 text-xs transition-colors ${
+                    className={`rounded-xs px-2.5 py-1 font-mono text-xs uppercase tracking-[0.04em] tabular-nums transition-colors ${
                       range === r
-                        ? "bg-canvas text-[var(--primary)]"
+                        ? "bg-[var(--primary)] text-[var(--on-primary)]"
                         : "text-text-muted hover:text-text-body"
                     }`}
                   >
@@ -419,8 +462,8 @@ function SummaryPage() {
               >
                 <defs>
                   <linearGradient id="perfGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#fcd535" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#fcd535" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#8b8bff" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#8b8bff" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis
@@ -433,31 +476,24 @@ function SummaryPage() {
                       return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
                     return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
                   }}
-                  tick={{ fill: "#707a8a", fontSize: 11, fontFamily: "JetBrains Mono" }}
-                  axisLine={{ stroke: "#2b3139" }}
+                  tick={CHART_TICK}
+                  axisLine={{ stroke: CHART_GRID }}
                   tickLine={false}
                   minTickGap={48}
                 />
                 <YAxis
                   domain={[perfYMin, perfYMax]}
                   tickFormatter={(v) => `£${(v / 1000).toFixed(1)}k`}
-                  tick={{ fill: "#707a8a", fontSize: 11, fontFamily: "JetBrains Mono" }}
+                  tick={CHART_TICK}
                   axisLine={false}
                   tickLine={false}
                   width={56}
                 />
                 <Tooltip
-                  cursor={{ stroke: "#38bdf8", strokeWidth: 1, strokeDasharray: "3 3" }}
-                  contentStyle={{
-                    background: "#0f1923",
-                    border: "1px solid #38bdf8",
-                    borderRadius: 8,
-                    fontSize: 12,
-                    fontFamily: "JetBrains Mono",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-                  }}
-                  labelStyle={{ color: "#38bdf8", fontSize: 11 }}
-                  itemStyle={{ color: "#e2e8f0" }}
+                  cursor={{ stroke: "var(--brand-periwinkle)", strokeWidth: 1, strokeDasharray: "3 3" }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  labelStyle={CHART_TOOLTIP_LABEL}
+                  itemStyle={CHART_TOOLTIP_ITEM}
                   labelFormatter={(t) => new Date(t as number).toLocaleString("en-GB")}
                   formatter={(v: number, name: string) => [
                     fmtGBP(v),
@@ -469,11 +505,11 @@ function SummaryPage() {
                 {costBasis > 0 && (
                   <ReferenceLine
                     y={costBasis}
-                    stroke="#f6465d"
+                    stroke="var(--down)"
                     strokeDasharray="4 4"
                     label={{
                       value: `Cost £${(costBasis / 1000).toFixed(1)}k`,
-                      fill: "#f6465d",
+                      fill: "var(--down)",
                       fontSize: 10,
                       position: "insideTopLeft",
                     }}
@@ -482,7 +518,7 @@ function SummaryPage() {
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="#fcd535"
+                  stroke="#8b8bff"
                   strokeWidth={2}
                   fill="url(#perfGrad)"
                   isAnimationActive={false}
@@ -491,7 +527,7 @@ function SummaryPage() {
                   <Line
                     type="monotone"
                     dataKey="benchValue"
-                    stroke="#38bdf8"
+                    stroke="var(--brand-magenta)"
                     strokeWidth={1.5}
                     strokeDasharray="5 3"
                     dot={false}
@@ -503,9 +539,9 @@ function SummaryPage() {
                   <ReferenceArea
                     x1={Math.min(perfRefLeft, perfRefRight)}
                     x2={Math.max(perfRefLeft, perfRefRight)}
-                    fill="#929aa5"
+                    fill="var(--brand-periwinkle)"
                     fillOpacity={0.12}
-                    stroke="#929aa5"
+                    stroke="var(--brand-periwinkle)"
                     strokeOpacity={0.4}
                     strokeWidth={1}
                   />
@@ -529,7 +565,7 @@ function SummaryPage() {
                   innerRadius={42}
                   outerRadius={78}
                   paddingAngle={1}
-                  stroke="#0b0e11"
+                  stroke="var(--surface-card)"
                   strokeWidth={2}
                   activeShape={(props: any) => <Sector {...props} />}
                 >
@@ -538,16 +574,9 @@ function SummaryPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{
-                    background: "#0f1923",
-                    border: "1px solid #38bdf8",
-                    borderRadius: 8,
-                    fontSize: 12,
-                    fontFamily: "JetBrains Mono",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-                  }}
-                  itemStyle={{ color: "#e2e8f0" }}
-                  labelStyle={{ color: "#38bdf8", fontSize: 11 }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  itemStyle={CHART_TOOLTIP_ITEM}
+                  labelStyle={CHART_TOOLTIP_LABEL}
                   formatter={(v: number, _n, item) => [fmtGBP(v), item?.payload?.name]}
                 />
               </PieChart>
@@ -577,7 +606,7 @@ function SummaryPage() {
                   innerRadius={42}
                   outerRadius={78}
                   paddingAngle={1}
-                  stroke="#0b0e11"
+                  stroke="var(--surface-card)"
                   strokeWidth={2}
                   activeShape={(props: any) => <Sector {...props} />}
                 >
@@ -586,16 +615,9 @@ function SummaryPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{
-                    background: "#0f1923",
-                    border: "1px solid #38bdf8",
-                    borderRadius: 8,
-                    fontSize: 12,
-                    fontFamily: "JetBrains Mono",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-                  }}
-                  itemStyle={{ color: "#e2e8f0" }}
-                  labelStyle={{ color: "#38bdf8", fontSize: 11 }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  itemStyle={CHART_TOOLTIP_ITEM}
+                  labelStyle={CHART_TOOLTIP_LABEL}
                   formatter={(v: number, _n, item) => [fmtGBP(v), item?.payload?.name]}
                 />
               </PieChart>
@@ -627,28 +649,21 @@ function SummaryPage() {
                   dataKey="name"
                   type="category"
                   width={110}
-                  tick={{ fill: "#929aa5", fontSize: 11, fontFamily: "JetBrains Mono" }}
+                  tick={CHART_TICK}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip
-                  contentStyle={{
-                    background: "#0f1923",
-                    border: "1px solid #38bdf8",
-                    borderRadius: 8,
-                    fontSize: 12,
-                    fontFamily: "JetBrains Mono",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-                  }}
-                  itemStyle={{ color: "#e2e8f0" }}
-                  labelStyle={{ color: "#38bdf8", fontSize: 11 }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  itemStyle={CHART_TOOLTIP_ITEM}
+                  labelStyle={CHART_TOOLTIP_LABEL}
                   formatter={(v: number) => [`${v >= 0 ? "+" : ""}${v.toFixed(2)}%`, "Day"]}
-                  cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                  cursor={{ fill: "rgba(0,0,0,0.04)" }}
                 />
-                <ReferenceLine x={0} stroke="#2b3139" />
+                <ReferenceLine x={0} stroke={CHART_GRID} />
                 <Bar dataKey="pct">
                   {moversData.map((m) => (
-                    <Cell key={m.name} fill={m.pct >= 0 ? "#0ecb81" : "#f6465d"} />
+                    <Cell key={m.name} fill={m.pct >= 0 ? CHART_UP : CHART_DOWN} />
                   ))}
                 </Bar>
               </BarChart>
@@ -669,28 +684,21 @@ function SummaryPage() {
                   dataKey="name"
                   type="category"
                   width={110}
-                  tick={{ fill: "#929aa5", fontSize: 11, fontFamily: "JetBrains Mono" }}
+                  tick={CHART_TICK}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip
-                  contentStyle={{
-                    background: "#0f1923",
-                    border: "1px solid #38bdf8",
-                    borderRadius: 8,
-                    fontSize: 12,
-                    fontFamily: "JetBrains Mono",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-                  }}
-                  itemStyle={{ color: "#e2e8f0" }}
-                  labelStyle={{ color: "#38bdf8", fontSize: 11 }}
+                  contentStyle={CHART_TOOLTIP_STYLE}
+                  itemStyle={CHART_TOOLTIP_ITEM}
+                  labelStyle={CHART_TOOLTIP_LABEL}
                   formatter={(v: number) => [`${v >= 0 ? "+" : ""}${v.toFixed(2)}%`, "YTD"]}
-                  cursor={{ fill: "rgba(255,255,255,0.03)" }}
+                  cursor={{ fill: "rgba(0,0,0,0.04)" }}
                 />
-                <ReferenceLine x={0} stroke="#2b3139" />
+                <ReferenceLine x={0} stroke={CHART_GRID} />
                 <Bar dataKey="pct">
                   {ytdMoversData.map((m) => (
-                    <Cell key={m.name} fill={m.pct >= 0 ? "#0ecb81" : "#f6465d"} />
+                    <Cell key={m.name} fill={m.pct >= 0 ? CHART_UP : CHART_DOWN} />
                   ))}
                 </Bar>
               </BarChart>
@@ -700,75 +708,90 @@ function SummaryPage() {
       </section>
 
       {/* HOLDINGS TABLE */}
-      <section className="mt-8 rounded-xl border border-hairline bg-surface">
+      <section className="mt-8 rounded-sm border border-hairline bg-surface">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-6 py-4">
-          <h2 className="text-base font-semibold text-text-strong">Holdings</h2>
+          <div>
+            <p className="eyebrow text-text-muted">Holdings</p>
+            <h2 className="mt-1 text-base font-medium tracking-[-0.01em] text-text-strong">
+              Positions
+            </h2>
+          </div>
           <div className="flex items-center gap-3">
             <AddHoldingDialog />
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px] border-collapse text-sm">
-            <thead>
-              <tr className="text-[11px] uppercase tracking-wider text-text-muted border-b border-hairline">
-                <th
-                  className="text-left pl-6 py-3 font-semibold text-[#fcd535]"
-                  style={{ borderLeft: "3px solid #fcd535" }}
+          <Table className="min-w-[800px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead
+                  className="pl-6 text-[var(--brand-periwinkle)]"
+                  style={{ borderLeft: "3px solid var(--brand-periwinkle)" }}
                   rowSpan={2}
                 >
                   Positions
-                </th>
-                <th className="text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="text-right" rowSpan={2}>
                   Units held
-                </th>
-                <th className="text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="text-right" rowSpan={2}>
                   Price (p)
-                </th>
-                <th className="text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="text-right" rowSpan={2}>
                   Value (£)
-                </th>
-                <th className="text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="text-right" rowSpan={2}>
                   Cost (£)
-                </th>
-                <th
-                  className="text-center px-3 py-2 font-semibold border-l border-hairline"
+                </TableHead>
+                <TableHead
+                  className="text-center border-l border-[var(--hairline)]"
                   colSpan={2}
                 >
                   Gain / loss
-                </th>
-                <th className="text-right px-3 pr-6 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="text-right pr-6" rowSpan={2}>
                   Actions
-                </th>
-              </tr>
-              <tr className="text-[11px] uppercase tracking-wider text-text-muted border-b border-hairline">
-                <th className="text-center px-3 py-2 font-medium border-l border-hairline">£</th>
-                <th className="text-center px-3 py-2 font-medium">%</th>
-              </tr>
-            </thead>
-            <tbody>
+                </TableHead>
+              </TableRow>
+              <TableRow>
+                <TableHead className="text-center border-l border-[var(--hairline)]">£</TableHead>
+                <TableHead className="text-center">%</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {grouped.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-sm text-text-muted">
+                <TableRow>
+                  <TableCell colSpan={8} className="px-6 py-10 text-center text-text-muted">
                     No holdings yet — click &ldquo;Add holding&rdquo; to get started.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
               {grouped.map((g) => (
                 <Fragment key={g.bucket}>
-                  <tr
+                  <TableRow
                     style={{
-                      borderLeft: `3px solid ${g.bucket === "Fund" ? "#38bdf8" : "#818cf8"}`,
+                      borderLeft: `3px solid ${
+                        g.bucket === "Fund" ? "var(--brand-periwinkle)" : "var(--text-muted)"
+                      }`,
                     }}
-                    className={g.bucket === "Fund" ? "bg-[#38bdf8]/[0.08]" : "bg-[#818cf8]/[0.08]"}
+                    className={
+                      g.bucket === "Fund"
+                        ? "bg-[var(--brand-periwinkle)]/[0.08] hover:bg-[var(--brand-periwinkle)]/[0.08]"
+                        : "bg-[var(--surface-elevated)] hover:bg-[var(--surface-elevated)]"
+                    }
                   >
-                    <td
+                    <TableCell
                       colSpan={8}
-                      className={`px-6 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${g.bucket === "Fund" ? "text-[#38bdf8]" : "text-[#818cf8]"}`}
+                      className={`px-6 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] ${
+                        g.bucket === "Fund"
+                          ? "text-[var(--brand-periwinkle)]"
+                          : "text-[var(--text-muted)]"
+                      }`}
                     >
                       {g.bucket === "Stock" ? "Stocks" : g.bucket} · {g.rows.length}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                   {g.rows.map((r) => {
                     const pricePence = r.currency === "GBp" ? r.lastPrice : r.lastPrice * 100;
                     const unitsFmt = new Intl.NumberFormat("en-GB", {
@@ -780,41 +803,40 @@ function SummaryPage() {
                       maximumFractionDigits: 2,
                     }).format(pricePence);
                     return (
-                      <tr
-                        key={r.ticker}
-                        className="border-t border-hairline transition-colors hover:bg-[var(--surface-elevated)]/40"
-                      >
-                        <td className="pl-6 pr-3 py-3">
+                      <TableRow key={r.ticker}>
+                        <TableCell className="pl-6">
                           <Link
                             to="/fundamentals"
                             search={{ ticker: r.ticker }}
-                            className="block font-semibold leading-tight text-text-strong hover:text-[var(--primary)]"
+                            className="block font-medium leading-tight text-text-strong hover:text-[var(--primary)]"
                           >
                             {r.name}
                           </Link>
-                          <span className="font-mono text-[11px] text-text-muted">{r.ticker}</span>
-                        </td>
-                        <td className="num px-3 py-3 text-right text-text-body">{unitsFmt}</td>
-                        <td className="num px-3 py-3 text-right text-text-body">{priceFmt}</td>
-                        <td className="num px-3 py-3 text-right text-text-body">
+                          <span className="font-mono text-[11px] uppercase text-text-muted">
+                            {r.ticker}
+                          </span>
+                        </TableCell>
+                        <TableNumericCell className="text-text-body">{unitsFmt}</TableNumericCell>
+                        <TableNumericCell className="text-text-body">{priceFmt}</TableNumericCell>
+                        <TableNumericCell className="text-text-body">
                           {fmtGBP(r.marketValueGBP)}
-                        </td>
-                        <td className="num px-3 py-3 text-right text-text-body">
+                        </TableNumericCell>
+                        <TableNumericCell className="text-text-body">
                           {fmtGBP(r.costGBP)}
-                        </td>
-                        <td
-                          className={`num px-3 py-3 text-right border-l border-hairline ${dirClass(r.unrealisedGL)}`}
+                        </TableNumericCell>
+                        <TableNumericCell
+                          className={`border-l border-[var(--hairline)] ${dirClass(r.unrealisedGL)}`}
                         >
                           {fmtGBPSigned(r.unrealisedGL)}
-                        </td>
-                        <td className={`num px-3 py-3 text-right ${dirClass(r.unrealisedPct)}`}>
+                        </TableNumericCell>
+                        <TableNumericCell className={dirClass(r.unrealisedPct)}>
                           {fmtPct(r.unrealisedPct)}
-                        </td>
-                        <td className="px-2 py-2 pr-4">
+                        </TableNumericCell>
+                        <TableCell className="pr-4">
                           <div className="flex items-center justify-end gap-1">
                             <button
                               title="Trade"
-                              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-[#0ecb81] opacity-60 transition-all hover:bg-[#0ecb81]/10 hover:opacity-100"
+                              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-sm text-[var(--up)] opacity-60 transition-all hover:bg-[var(--up)]/10 hover:opacity-100"
                               onClick={() =>
                                 setTradeTarget({
                                   ticker: r.ticker,
@@ -829,7 +851,7 @@ function SummaryPage() {
                             </button>
                             <button
                               title="Delete"
-                              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-[#f6465d] opacity-60 transition-all hover:bg-[#f6465d]/10 hover:opacity-100"
+                              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-sm text-[var(--down)] opacity-60 transition-all hover:bg-[var(--down)]/10 hover:opacity-100"
                               onClick={() =>
                                 setDeleteTarget({
                                   ticker: r.ticker,
@@ -842,40 +864,40 @@ function SummaryPage() {
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
                           </div>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
                 </Fragment>
               ))}
-              {grouped.length > 0 && (
-                <tr className="border-t-2 border-[#fcd535]/40 bg-[#fcd535]/[0.07]">
-                  <td className="pl-6 pr-3 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#fcd535]">
+            </TableBody>
+            {grouped.length > 0 && (
+              <TableFooter>
+                <TableRow className="border-t-2 border-[var(--brand-periwinkle)]/40">
+                  <TableCell className="pl-6 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--brand-periwinkle)]">
                     Total
-                  </td>
-                  <td className="px-3 py-3" />
-                  <td className="px-3 py-3" />
-                  <td className="num px-3 py-3 text-right font-semibold text-text-strong">
+                  </TableCell>
+                  <TableCell />
+                  <TableCell />
+                  <TableNumericCell className="font-medium text-text-strong">
                     {fmtGBP(p.marketValue)}
-                  </td>
-                  <td className="num px-3 py-3 text-right font-semibold text-text-strong">
+                  </TableNumericCell>
+                  <TableNumericCell className="font-medium text-text-strong">
                     {fmtGBP(p.cost)}
-                  </td>
-                  <td
-                    className={`num px-3 py-3 text-right font-semibold border-l border-hairline ${dirClass(p.unrealisedGL)}`}
+                  </TableNumericCell>
+                  <TableNumericCell
+                    className={`border-l border-[var(--hairline)] font-medium ${dirClass(p.unrealisedGL)}`}
                   >
                     {fmtGBPSigned(p.unrealisedGL)}
-                  </td>
-                  <td
-                    className={`num px-3 py-3 text-right font-semibold ${dirClass(p.unrealisedPct)}`}
-                  >
+                  </TableNumericCell>
+                  <TableNumericCell className={`font-medium ${dirClass(p.unrealisedPct)}`}>
                     {fmtPct(p.unrealisedPct)}
-                  </td>
-                  <td className="px-2 pr-4 py-3" />
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  </TableNumericCell>
+                  <TableCell className="pr-4" />
+                </TableRow>
+              </TableFooter>
+            )}
+          </Table>
         </div>
       </section>
 
@@ -974,7 +996,7 @@ function SummaryTradeDialog({
             <button
               key={m}
               type="button"
-              className={`flex-1 cursor-pointer rounded-md py-1.5 text-sm font-semibold transition-all ${mode === m ? (m === "buy" ? "bg-[#0ecb81] text-[#0b0e11]" : "bg-[#f6465d] text-white") : "text-text-muted hover:text-text-strong"}`}
+              className={`flex-1 cursor-pointer rounded-md py-1.5 text-sm font-semibold transition-all ${mode === m ? (m === "buy" ? "bg-[var(--up)] text-[var(--canvas-dark)]" : "bg-[var(--down)] text-white") : "text-text-muted hover:text-text-strong"}`}
               onClick={() => {
                 setMode(m);
                 setError("");
@@ -1000,7 +1022,7 @@ function SummaryTradeDialog({
               {mode === "sell" && target && (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost-line"
                   size="sm"
                   className="shrink-0 border-hairline text-xs text-text-muted"
                   onClick={() => setTradeUnits(String(target.units))}
@@ -1037,7 +1059,7 @@ function SummaryTradeDialog({
               />
             </div>
           )}
-          {error && <p className="text-xs text-[#f6465d]">{error}</p>}
+          {error && <p className="text-xs text-[var(--down)]">{error}</p>}
         </div>
         <DialogFooter>
           <Button variant="ghost" className="text-text-muted" onClick={onClose} disabled={loading}>
@@ -1046,8 +1068,8 @@ function SummaryTradeDialog({
           <Button
             className={
               mode === "buy"
-                ? "bg-[#0ecb81] text-[#0b0e11] hover:bg-[#0ecb81]/90"
-                : "bg-[#f6465d] text-white hover:bg-[#f6465d]/90"
+                ? "bg-[var(--up)] text-[var(--canvas-dark)] hover:bg-[var(--up)]/90"
+                : "bg-[var(--down)] text-white hover:bg-[var(--down)]/90"
             }
             onClick={handleSubmit}
             disabled={loading}
@@ -1102,8 +1124,8 @@ function SummaryDeleteDialog({
             Cancel
           </AlertDialogCancel>
           <Button
-            variant="outline"
-            className="border-[#0ecb81]/40 text-[#0ecb81] hover:bg-[#0ecb81]/10"
+            variant="ghost-line"
+            className="border-[var(--up)]/40 text-[var(--up)] hover:bg-[var(--up)]/10"
             onClick={() => {
               onSellInstead();
               onClose();
@@ -1266,7 +1288,7 @@ function AddHoldingDialog() {
       }}
     >
       <DialogTrigger asChild>
-        <button className="flex items-center gap-1.5 rounded-md bg-[var(--primary)] px-3 py-1.5 text-xs font-semibold text-[#181a20] transition-colors hover:bg-[var(--primary-active)]">
+        <button className="flex items-center gap-1.5 rounded-md bg-[var(--primary)] px-3 py-1.5 text-xs font-semibold text-[var(--on-primary)] transition-colors hover:bg-[var(--primary-active)]">
           <Plus className="size-3.5" />
           Add holding
         </button>
@@ -1296,7 +1318,7 @@ function AddHoldingDialog() {
                   autoComplete="off"
                 />
                 {showSuggestions && suggestions.length > 0 && (
-                  <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-52 overflow-auto rounded-lg border border-hairline bg-[var(--surface-elevated)] py-1 shadow-lg">
+                  <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-52 overflow-auto rounded-sm border border-[var(--hairline)] bg-[var(--surface-elevated)] py-1">
                     {suggestions.slice(0, 8).map((s) => (
                       <li
                         key={s.ticker}
@@ -1361,7 +1383,7 @@ function AddHoldingDialog() {
                     priceFetching && !priceLocked
                       ? "border-[var(--primary)]/60"
                       : !priceLocked && autoPrice?.price && autoPrice.price > 0
-                        ? "border-[#0ecb81]/60"
+                        ? "border-[var(--up)]/60"
                         : "border-hairline"
                   }`}
                 />
@@ -1374,7 +1396,7 @@ function AddHoldingDialog() {
                   {priceFetching && !priceLocked ? (
                     <Loader2 className="h-4 w-4 animate-spin text-[var(--primary)]" />
                   ) : priceLocked ? (
-                    <Unlock className="h-4 w-4 text-[#f0b90b]" />
+                    <Unlock className="h-4 w-4 text-[#ff7a45]" />
                   ) : (
                     <Lock className="h-4 w-4" />
                   )}
@@ -1391,7 +1413,7 @@ function AddHoldingDialog() {
               </p>
             </div>
 
-            {error && <p className="text-xs text-[#f6465d]">{error}</p>}
+            {error && <p className="text-xs text-[var(--down)]">{error}</p>}
           </div>
           <DialogFooter className="mt-4">
             <Button
@@ -1405,8 +1427,9 @@ function AddHoldingDialog() {
             </Button>
             <Button
               type="submit"
+              variant="default"
               disabled={isPending}
-              className="!bg-[#F0B90B] !text-gray-600 font-semibold shadow-sm hover:!bg-[#d4a00b] hover:shadow-md active:scale-[0.98]"
+              className="active:scale-[0.98]"
             >
               {isPending ? "Adding…" : "Add holding"}
             </Button>
@@ -1457,10 +1480,10 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-hairline bg-surface p-5">
+    <div className="rounded-sm border border-hairline bg-surface p-5">
       <div className="mb-3">
-        <h3 className="text-sm font-semibold text-text-strong">{title}</h3>
-        {subtitle && <p className="text-[11px] text-text-muted">{subtitle}</p>}
+        <p className="eyebrow text-text-muted">{title}</p>
+        {subtitle && <p className="mt-1 text-[11px] text-text-muted opacity-70">{subtitle}</p>}
       </div>
       {children}
     </div>
