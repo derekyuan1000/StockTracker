@@ -16,6 +16,21 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
 );
 Card.displayName = "Card";
 
+/** Interactive card variant: adds hover border-brightening + cursor for clickable cards. */
+const CardInteractive = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        "rounded-sm border border-[var(--hairline)] bg-[var(--surface-card)] text-[var(--text-body)] cursor-pointer transition-colors hover:border-[var(--text-muted)]",
+        className,
+      )}
+      {...props}
+    />
+  ),
+);
+CardInteractive.displayName = "CardInteractive";
+
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div ref={ref} className={cn("flex flex-col space-y-1.5 p-6", className)} {...props} />
@@ -65,4 +80,13 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 );
 CardFooter.displayName = "CardFooter";
 
-export { Card, CardHeader, CardFooter, CardTitle, CardEyebrow, CardDescription, CardContent };
+export {
+  Card,
+  CardInteractive,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardEyebrow,
+  CardDescription,
+  CardContent,
+};

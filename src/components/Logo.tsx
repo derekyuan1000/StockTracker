@@ -7,7 +7,7 @@ interface LogoProps {
 }
 
 export function Logo({ size = 20, showWordmark = true, className = "", onDark = false }: LogoProps) {
-  const accent = onDark ? "#ffffff" : "var(--primary)";
+  const accent = onDark ? "#ffffff" : "var(--accent-mint)";
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <svg
@@ -90,8 +90,9 @@ export function Logo({ size = 20, showWordmark = true, className = "", onDark = 
 
       {showWordmark && (
         <span
-          className="text-sm font-medium tracking-tight"
-          style={{ color: onDark ? "#ffffff" : "var(--primary)" }}
+          className={`text-sm font-medium tracking-tight ${
+            onDark ? "text-[var(--on-dark)]" : "text-[var(--text-strong)]"
+          }`}
         >
           StockTracker
         </span>
