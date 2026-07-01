@@ -43,6 +43,13 @@
       "when": 1782846960497,
       "tag": "0005_dusty_meggan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1782900000000,
+      "tag": "0006_user_settings",
+      "breakpoints": true
     }
   ]
 }

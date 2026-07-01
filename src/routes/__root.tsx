@@ -11,20 +11,22 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteProgress } from "@/components/RouteProgress";
+import { Logo } from "@/components/Logo";
+import { ThemeProvider, themeInitScript } from "@/components/ThemeProvider";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { getSession } from "@/fns/auth";
+import { getSettings } from "@/fns/settings";
+
+const PUBLIC_PATHS = ["/", "/community", "/login"];
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-canvas px-4 text-text-body">
       <div className="max-w-md text-center">
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <span className="inline-block size-3 rounded-sm bg-[var(--primary)]" />
-          <span className="text-sm font-bold tracking-tight text-[var(--primary)]">
-            StockTracker
-          </span>
+        <div className="mb-6 flex items-center justify-center">
+          <Logo size={20} showWordmark />
         </div>
         <h1 className="num text-7xl font-bold leading-none text-text-strong">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-text-strong">Page not found</h2>
@@ -54,9 +56,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-canvas px-4 text-text-body">
       <div className="max-w-md text-center">
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <span className="inline-block size-3 rounded-sm bg-[var(--down)]" />
-          <span className="text-sm font-bold tracking-tight text-text-strong">StockTracker</span>
+        <div className="mb-6 flex items-center justify-center">
+          <Logo size={20} showWordmark />
         </div>
         <h1 className="text-xl font-semibold tracking-tight text-text-strong">
           This page didn't load
@@ -88,14 +89,24 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ location }) => {
-    // Let the login page and the auth API endpoints through unauthenticated.
-    if (location.pathname === "/login" || location.pathname.startsWith("/api")) {
+    const isPublic =
+      PUBLIC_PATHS.includes(location.pathname) ||
+      location.pathname.startsWith("/api") ||
+      location.pathname.startsWith("/profiles/");
+
+    const session = await getSession();
+
+    if (!session) {
+      if (!isPublic) throw redirect({ to: "/login" });
       return {};
     }
-    const session = await getSession();
-    if (!session) {
-      throw redirect({ to: "/login" });
+
+    // Onboarding gate: redirect new users to /welcome on first login
+    if (location.pathname !== "/welcome" && location.pathname !== "/login") {
+      const settings = await getSettings();
+      if (!settings.onboarded) throw redirect({ to: "/welcome" });
     }
+
     return { session };
   },
   head: () => ({
@@ -115,6 +126,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap",
       },
     ],
+    scripts: [{ children: themeInitScript }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -124,7 +136,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>
@@ -140,10 +152,12 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <RouteProgress />
-      <Outlet />
-      <Toaster richColors position="bottom-right" />
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouteProgress />
+        <Outlet />
+        <Toaster richColors position="bottom-right" />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

@@ -9,18 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as TransactionsRouteImport } from './routes/transactions'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResearchRouteImport } from './routes/research'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HoldingsRouteImport } from './routes/holdings'
 import { Route as FundamentalsRouteImport } from './routes/fundamentals'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CommunityRouteImport } from './routes/community'
 import { Route as CashRouteImport } from './routes/cash'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProfilesUserIdRouteImport } from './routes/profiles.$userId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResearchRoute = ResearchRouteImport.update({
@@ -43,6 +58,16 @@ const FundamentalsRoute = FundamentalsRouteImport.update({
   path: '/fundamentals',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CashRoute = CashRouteImport.update({
   id: '/cash',
   path: '/cash',
@@ -51,6 +76,11 @@ const CashRoute = CashRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilesUserIdRoute = ProfilesUserIdRouteImport.update({
+  id: '/profiles/$userId',
+  path: '/profiles/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -62,32 +92,47 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cash': typeof CashRoute
+  '/community': typeof CommunityRoute
+  '/dashboard': typeof DashboardRoute
   '/fundamentals': typeof FundamentalsRoute
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
   '/research': typeof ResearchRoute
+  '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
+  '/welcome': typeof WelcomeRoute
+  '/profiles/$userId': typeof ProfilesUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cash': typeof CashRoute
+  '/community': typeof CommunityRoute
+  '/dashboard': typeof DashboardRoute
   '/fundamentals': typeof FundamentalsRoute
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
   '/research': typeof ResearchRoute
+  '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
+  '/welcome': typeof WelcomeRoute
+  '/profiles/$userId': typeof ProfilesUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cash': typeof CashRoute
+  '/community': typeof CommunityRoute
+  '/dashboard': typeof DashboardRoute
   '/fundamentals': typeof FundamentalsRoute
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
   '/research': typeof ResearchRoute
+  '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
+  '/welcome': typeof WelcomeRoute
+  '/profiles/$userId': typeof ProfilesUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -95,52 +140,86 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/cash'
+    | '/community'
+    | '/dashboard'
     | '/fundamentals'
     | '/holdings'
     | '/login'
     | '/research'
+    | '/settings'
     | '/transactions'
+    | '/welcome'
+    | '/profiles/$userId'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/cash'
+    | '/community'
+    | '/dashboard'
     | '/fundamentals'
     | '/holdings'
     | '/login'
     | '/research'
+    | '/settings'
     | '/transactions'
+    | '/welcome'
+    | '/profiles/$userId'
     | '/api/auth/$'
   id:
     | '__root__'
     | '/'
     | '/cash'
+    | '/community'
+    | '/dashboard'
     | '/fundamentals'
     | '/holdings'
     | '/login'
     | '/research'
+    | '/settings'
     | '/transactions'
+    | '/welcome'
+    | '/profiles/$userId'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CashRoute: typeof CashRoute
+  CommunityRoute: typeof CommunityRoute
+  DashboardRoute: typeof DashboardRoute
   FundamentalsRoute: typeof FundamentalsRoute
   HoldingsRoute: typeof HoldingsRoute
   LoginRoute: typeof LoginRoute
   ResearchRoute: typeof ResearchRoute
+  SettingsRoute: typeof SettingsRoute
   TransactionsRoute: typeof TransactionsRoute
+  WelcomeRoute: typeof WelcomeRoute
+  ProfilesUserIdRoute: typeof ProfilesUserIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/transactions': {
       id: '/transactions'
       path: '/transactions'
       fullPath: '/transactions'
       preLoaderRoute: typeof TransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/research': {
@@ -171,6 +250,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FundamentalsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cash': {
       id: '/cash'
       path: '/cash'
@@ -183,6 +276,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profiles/$userId': {
+      id: '/profiles/$userId'
+      path: '/profiles/$userId'
+      fullPath: '/profiles/$userId'
+      preLoaderRoute: typeof ProfilesUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -198,11 +298,16 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CashRoute: CashRoute,
+  CommunityRoute: CommunityRoute,
+  DashboardRoute: DashboardRoute,
   FundamentalsRoute: FundamentalsRoute,
   HoldingsRoute: HoldingsRoute,
   LoginRoute: LoginRoute,
   ResearchRoute: ResearchRoute,
+  SettingsRoute: SettingsRoute,
   TransactionsRoute: TransactionsRoute,
+  WelcomeRoute: WelcomeRoute,
+  ProfilesUserIdRoute: ProfilesUserIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
