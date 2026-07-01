@@ -119,6 +119,22 @@ export const trades = sqliteTable("trades", {
     .default(sql`(unixepoch())`),
 });
 
+// Per-user settings: public/private toggle, theme preference, onboarding flag
+export const userSettings = sqliteTable("user_settings", {
+  userId: text("user_id").primaryKey(),
+  portfolioPublic: integer("portfolio_public", { mode: "boolean" }).notNull().default(false),
+  theme: text("theme", { enum: ["dark", "light", "system"] })
+    .notNull()
+    .default("dark"),
+  onboarded: integer("onboarded", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
 // Per-ticker, per-kind cache so Yahoo isn't hit on every request (global, shared)
 export const quoteCache = sqliteTable(
   "quote_cache",

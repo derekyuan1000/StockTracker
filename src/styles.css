@@ -49,7 +49,30 @@
   --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
 }
 
+/* Light theme (default :root) */
 :root {
+  --canvas: #f5f6f7;
+  --surface-card: #ffffff;
+  --surface-elevated: #eef0f3;
+  --hairline: #dde0e5;
+
+  --primary: #c99000;
+  --primary-active: #a87800;
+  --primary-disabled: #e8d9a0;
+  --on-primary: #ffffff;
+
+  --text-strong: #0b0e11;
+  --text-body: #1e2329;
+  --text-muted: #6b7280;
+  --text-muted-strong: #4b5563;
+
+  --up: #0aaf6e;
+  --down: #dc2626;
+  --info: #2563eb;
+}
+
+/* Dark theme overrides */
+.dark {
   --canvas: #0b0e11;
   --surface-card: #1e2329;
   --surface-elevated: #2b3139;
@@ -58,6 +81,7 @@
   --primary: #fcd535;
   --primary-active: #f0b90b;
   --primary-disabled: #3a3a1f;
+  --on-primary: #181a20;
 
   --text-strong: #ffffff;
   --text-body: #eaecef;
@@ -145,12 +169,23 @@
 }
 .splash-bar { animation: splash-bar 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
 
+/* Horizontal ticker tape scroll */
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+.ticker-scroll {
+  animation: ticker-scroll 25s linear infinite;
+  will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .route-progress-slide,
   .shimmer::after,
   .splash-breathe,
   .splash-bar,
-  .dot-live { animation: none; }
+  .dot-live,
+  .ticker-scroll { animation: none; }
 }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }

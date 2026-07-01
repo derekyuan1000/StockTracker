@@ -450,6 +450,33 @@ export async function fetchNews(ticker: string): Promise<NewsItem[]> {
   });
 }
 
+// Curated tickers for the public ticker tape header
+const TICKER_TAPE_SYMBOLS = [
+  "AAPL",
+  "MSFT",
+  "NVDA",
+  "GOOGL",
+  "AMZN",
+  "^GSPC",
+  "^FTSE",
+  "^IXIC",
+  "BTC-USD",
+  "ETH-USD",
+];
+
+export async function fetchTickerTape(): Promise<
+  Array<{ ticker: string; name: string; last: number; changePct: number }>
+> {
+  const results = await Promise.allSettled(TICKER_TAPE_SYMBOLS.map(fetchQuote));
+  return results
+    .filter((r): r is PromiseFulfilledResult<Quote> => r.status === "fulfilled")
+    .map((r) => {
+      const q = r.value;
+      const changePct = q.prevClose > 0 ? ((q.lastPrice - q.prevClose) / q.prevClose) * 100 : 0;
+      return { ticker: q.ticker, name: q.name, last: q.lastPrice, changePct };
+    });
+}
+
 // No cache — live search for the Add-holding dialog
 export async function searchSymbols(query: string): Promise<SearchResult[]> {
   const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=10&newsCount=0`;

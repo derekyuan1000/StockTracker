@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { Logo } from "@/components/Logo";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -13,7 +14,7 @@ function LoginPage() {
   async function signInWithGoogle() {
     setLoading(true);
     try {
-      await authClient.signIn.social({ provider: "google", callbackURL: "/" });
+      await authClient.signIn.social({ provider: "google", callbackURL: "/dashboard" });
     } catch {
       setLoading(false);
     }
@@ -26,11 +27,8 @@ function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-canvas px-4 text-text-body">
       <div className="w-full max-w-sm rounded-lg border border-hairline bg-canvas p-8 shadow-sm">
-        <div className="mb-6 flex items-center gap-2">
-          <span className="inline-block size-3 rounded-sm bg-[var(--primary)]" />
-          <span className="text-sm font-bold tracking-tight text-[var(--primary)]">
-            StockTracker
-          </span>
+        <div className="mb-6">
+          <Logo size={20} showWordmark />
         </div>
         <h1 className="text-xl font-semibold tracking-tight text-text-strong">Sign in</h1>
         <p className="mt-2 text-sm text-text-muted">Sign in to view and manage your portfolio.</p>

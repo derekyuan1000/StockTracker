@@ -51,7 +51,7 @@ for (const entry of journal.entries) {
       await client.execute(trimmed);
     } catch (err) {
       // Treat "already exists" as idempotent — the table was created outside migrations
-      if (err.message?.includes("already exists")) {
+      if (err.message?.includes("already exists") || err.message?.includes("duplicate column name")) {
         console.log(`  note: skipped "${trimmed.slice(0, 60).trim()}..." (already exists)`);
       } else {
         throw err;

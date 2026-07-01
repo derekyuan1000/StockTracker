@@ -1,8 +1,5 @@
-/**
- * Full-screen branded splash. Used as the router's default pending component
- * (shown during slow route loaders) and during the auth redirect on /login.
- * Intentionally chrome-free so it is safe in both authed and unauthed contexts.
- */
+import { Logo } from "./Logo";
+
 export function LoadingScreen({ label = "Loading your portfolio…" }: { label?: string }) {
   return (
     <div
@@ -11,11 +8,8 @@ export function LoadingScreen({ label = "Loading your portfolio…" }: { label?:
       aria-busy="true"
       className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-6 bg-canvas text-text-body"
     >
-      <div className="flex items-center gap-2.5">
-        <span className="splash-breathe inline-block size-4 rounded-sm bg-[var(--primary)]" />
-        <span className="text-base font-bold tracking-tight text-[var(--primary)]">
-          StockTracker
-        </span>
+      <div className="splash-breathe">
+        <Logo size={24} showWordmark />
       </div>
 
       {/* Indeterminate fill bar */}
