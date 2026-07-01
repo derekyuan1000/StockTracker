@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { useTheme } from "@/components/ThemeProvider";
-import { getSettings, updateSettings } from "@/fns/settings";
+import { getSettings, updateSettings, type UserSettings } from "@/fns/settings";
 import type { Theme } from "@/components/ThemeProvider";
 
 export const Route = createFileRoute("/settings")({
@@ -30,7 +30,7 @@ function Toggle({
       }`}
     >
       <span
-        className={`inline-block size-5 rounded-full bg-white shadow-sm transition-transform ${
+        className={`inline-block size-5 rounded-full bg-white transition-transform ${
           checked ? "translate-x-5" : "translate-x-0.5"
         }`}
       />
@@ -74,7 +74,7 @@ function SettingsPage() {
   });
 
   const { mutate: save, isPending: saving } = useMutation({
-    mutationFn: (data: Parameters<typeof updateSettings>[0]["data"]) => updateSettings({ data }),
+    mutationFn: (data: Partial<UserSettings>) => updateSettings({ data }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["settings"] });
       toast.success("Settings saved");
@@ -97,7 +97,7 @@ function SettingsPage() {
   return (
     <AppShell>
       <div className="max-w-2xl">
-        <h1 className="mb-6 text-2xl font-bold tracking-tight text-text-strong">Settings</h1>
+        <h1 className="mb-6 text-2xl font-medium tracking-tight text-text-strong">Settings</h1>
 
         <div className="space-y-4">
           {/* Visibility */}
@@ -122,7 +122,7 @@ function SettingsPage() {
                 }`}
               >
                 <span
-                  className={`inline-block size-5 rounded-full bg-white shadow-sm transition-transform ${
+                  className={`inline-block size-5 rounded-full bg-white transition-transform ${
                     settings.portfolioPublic ? "translate-x-5" : "translate-x-0.5"
                   }`}
                 />

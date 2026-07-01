@@ -198,7 +198,7 @@ function FundamentalsPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <span className="rounded border border-hairline bg-[var(--surface-elevated)] px-2 py-0.5 font-mono text-[11px] font-bold tracking-widest text-text-strong">
+              <span className="rounded border border-hairline bg-[var(--surface-elevated)] px-2 py-0.5 font-mono text-[11px] font-medium tracking-widest text-text-strong">
                 {current}
               </span>
               {h.sector && h.sector.length > 0 && (
@@ -207,9 +207,9 @@ function FundamentalsPage() {
                 </span>
               )}
             </div>
-            <h1 className="text-xl font-semibold text-text-strong">{h.name}</h1>
+            <h2 className="text-xl font-medium tracking-[-0.02em] text-text-strong">{h.name}</h2>
             <div className="mt-2 flex flex-wrap items-baseline gap-3">
-              <span className="num text-4xl font-bold tracking-tight text-text-strong">
+              <span className="num text-4xl font-medium tracking-tight text-text-strong">
                 {fmtNum(h.lastPrice, h.currency === "GBp" ? 0 : 2)}
               </span>
               <span className="text-sm text-text-muted">{h.currency}</span>
@@ -478,7 +478,7 @@ function PositionSummaryCard({
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 pl-3">
         <h3 className="eyebrow text-text-muted">Your position</h3>
         <div className="flex items-baseline gap-2">
-          <span className={`num text-base font-bold ${dirClass(row.unrealisedGL)}`}>
+          <span className={`num text-base font-medium ${dirClass(row.unrealisedGL)}`}>
             {fmtGBPSigned(row.unrealisedGL)}
           </span>
           <span className={`num text-xs ${dirClass(row.unrealisedGL)}`}>
@@ -586,7 +586,7 @@ function AnalystConsensusCard({
               {fmtPct(upside, 1)} upside
             </span>
           </div>
-          <div className="num mb-3 text-2xl font-bold text-text-strong">{fmtNum(h.targetP, 0)}</div>
+          <div className="num mb-3 text-2xl font-medium text-text-strong">{fmtNum(h.targetP, 0)}</div>
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
               <div className="num text-sm text-text-body">{fmtNum(h.analyst.targetLow, 0)}</div>
@@ -692,7 +692,7 @@ function GrowthStat({ label, v, tone }: { label: string; v?: string; tone?: numb
   return (
     <div className="border-b border-hairline pb-5 last:border-b-0 last:pb-0">
       <div className="mb-1 text-[11px] text-text-muted">{label}</div>
-      <div className={`num text-2xl font-bold ${tone != null ? dirClass(tone) : "text-text-body"}`}>
+      <div className={`num text-2xl font-medium ${tone != null ? dirClass(tone) : "text-text-body"}`}>
         {v ?? "—"}
       </div>
     </div>
@@ -1011,7 +1011,7 @@ function SignalTile({
   return (
     <div className="rounded-lg border border-hairline bg-[var(--surface-elevated)] p-3">
       <div className="mb-2 text-[10px] text-text-muted">{label}</div>
-      <div className={`num text-lg font-bold ${valueClass ?? "text-text-body"}`}>{value}</div>
+      <div className={`num text-lg font-medium ${valueClass ?? "text-text-body"}`}>{value}</div>
       {sub && <div className="mt-1 text-[10px] text-text-muted">{sub}</div>}
       {rsi !== undefined && (
         <div

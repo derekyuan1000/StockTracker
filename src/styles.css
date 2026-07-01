@@ -133,6 +133,20 @@
   }
   h1, h2, h3, h4, h5, h6 { letter-spacing: -0.02em; }
   .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+  /* Smooth color transitions for band swap and theme toggle */
+  * {
+    transition-property: color, background-color, border-color;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
+  }
+  /* Respect reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition-duration: 0ms !important;
+      animation-duration: 0ms !important;
+    }
+  }
 }
 
 @utility num {

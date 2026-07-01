@@ -585,7 +585,7 @@ function CashTab({ refresh }: { refresh: () => void }) {
         >
           <div className="text-[11px] uppercase tracking-wider text-text-muted">Available cash</div>
           <div
-            className={`num mt-2 text-4xl font-bold ${cashGBP >= 0 ? "text-[var(--up)]" : "text-[var(--down)]"}`}
+            className={`num mt-2 text-4xl font-medium ${cashGBP >= 0 ? "text-[var(--up)]" : "text-[var(--down)]"}`}
           >
             {fmtGBP(cashGBP)}
           </div>
@@ -1034,53 +1034,50 @@ function ImportCSVDialog({
                 </span>
               )}
             </div>
-            <div className="max-h-72 overflow-auto rounded-lg border border-hairline text-xs">
-              <table className="w-full border-collapse">
-                <thead className="sticky top-0 bg-[var(--surface-elevated)] text-[10px] uppercase tracking-wider text-text-muted">
-                  <tr>
-                    <th className="px-3 py-2 text-left">Type</th>
-                    <th className="px-3 py-2 text-left">Ticker / Description</th>
-                    <th className="px-3 py-2 text-right">Units / Amount</th>
-                    <th className="px-3 py-2 text-right">Price (p)</th>
-                    <th className="px-3 py-2 text-left">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <div className="max-h-72 overflow-auto rounded-sm border border-hairline">
+              <Table>
+                <TableHeader className="sticky top-0">
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Ticker / Description</TableHead>
+                    <TableHead className="text-right">Units / Amount</TableHead>
+                    <TableHead className="text-right">Price (p)</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {(rows ?? []).map((r, i) => {
                     const style = KIND_STYLE[r.kind];
                     return (
-                      <tr
-                        key={i}
-                        className="border-t border-hairline odd:bg-[var(--surface)] even:bg-[var(--surface-elevated)]/20"
-                      >
-                        <td className="px-3 py-1.5">
+                      <TableRow key={i}>
+                        <TableCell>
                           <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${style.cls}`}
+                            className={`rounded-sm px-1.5 py-0.5 text-[10px] font-semibold ${style.cls}`}
                           >
                             {style.label}
                           </span>
-                        </td>
-                        <td className="num px-3 py-1.5 font-semibold text-[var(--primary)]">
+                        </TableCell>
+                        <TableCell className="font-mono font-medium text-[var(--text-strong)]">
                           {r.kind === "BUY" || r.kind === "SELL"
                             ? r.ticker
                             : r.kind === "DEPOSIT"
                               ? "Cash deposit"
                               : "Fee / charge"}
-                        </td>
-                        <td className="num px-3 py-1.5 text-right">
+                        </TableCell>
+                        <TableNumericCell>
                           {r.kind === "BUY" || r.kind === "SELL"
                             ? r.units
                             : `£${r.amount.toFixed(2)}`}
-                        </td>
-                        <td className="num px-3 py-1.5 text-right text-text-muted">
+                        </TableNumericCell>
+                        <TableNumericCell className="text-text-muted">
                           {r.kind === "BUY" ? r.price.toFixed(2) : "—"}
-                        </td>
-                        <td className="px-3 py-1.5 text-text-muted">{r.date}</td>
-                      </tr>
+                        </TableNumericCell>
+                        <TableCell className="text-text-muted">{r.date}</TableCell>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           </div>
         )}

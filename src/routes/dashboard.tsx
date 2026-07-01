@@ -348,7 +348,7 @@ function SummaryPage() {
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
         <div className="rounded-sm border border-hairline bg-surface p-6">
           <div className="eyebrow text-text-muted">Total portfolio value</div>
-          <div className="num mt-2 text-[40px] font-bold leading-none text-text-strong">
+          <div className="num mt-2 text-[40px] font-medium leading-none text-text-strong">
             {fmtGBP(p.totalValue)}
           </div>
           {holdings.length === 0 && (

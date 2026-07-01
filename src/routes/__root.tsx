@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteProgress } from "@/components/RouteProgress";
 import { Logo } from "@/components/Logo";
+import { Button } from "@/components/ui/button";
 import { ThemeProvider, themeInitScript } from "@/components/ThemeProvider";
 
 import appCss from "../styles.css?url";
@@ -21,25 +22,40 @@ import { getSettings } from "@/fns/settings";
 
 const PUBLIC_PATHS = ["/", "/community", "/login"];
 
+/** Low-opacity brand gradient ribbon echo for the full-screen state bands. */
+function StateRibbon() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 opacity-[0.18]"
+      style={{
+        background:
+          "radial-gradient(60% 55% at 78% 30%, rgba(139,139,255,0.5) 0%, transparent 60%)," +
+          "radial-gradient(50% 50% at 20% 80%, rgba(255,122,69,0.45) 0%, transparent 55%)",
+      }}
+    />
+  );
+}
+
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-canvas px-4 text-text-body">
-      <div className="max-w-md text-center">
-        <div className="mb-6 flex items-center justify-center">
-          <Logo size={20} showWordmark />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--canvas-dark)] px-6 text-[var(--on-dark)]">
+      <StateRibbon />
+      <div className="relative max-w-lg text-center">
+        <div className="mb-8 flex items-center justify-center">
+          <Logo size={22} showWordmark onDark />
         </div>
-        <h1 className="num text-7xl font-bold leading-none text-text-strong">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-text-strong">Page not found</h2>
-        <p className="mt-2 text-sm text-text-muted">
+        <p className="eyebrow text-white/50">404 Not Found</p>
+        <h1 className="mt-4 text-6xl font-medium leading-[1.05] tracking-[-0.02em] text-[var(--on-dark)] md:text-7xl">
+          Page not found
+        </h1>
+        <p className="mt-4 text-white/60">
           The page you're looking for doesn't exist or has been moved.
         </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-sm bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--on-primary)] transition-colors hover:bg-[var(--primary-active)]"
-          >
-            Go home
-          </Link>
+        <div className="mt-8 flex justify-center">
+          <Button variant="mint" asChild>
+            <Link to="/">Go home</Link>
+          </Button>
         </div>
       </div>
     </div>
@@ -54,33 +70,32 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-canvas px-4 text-text-body">
-      <div className="max-w-md text-center">
-        <div className="mb-6 flex items-center justify-center">
-          <Logo size={20} showWordmark />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--canvas-dark)] px-6 text-[var(--on-dark)]">
+      <StateRibbon />
+      <div className="relative max-w-lg text-center">
+        <div className="mb-8 flex items-center justify-center">
+          <Logo size={22} showWordmark onDark />
         </div>
-        <h1 className="text-xl font-semibold tracking-tight text-text-strong">
+        <p className="eyebrow text-white/50">Error</p>
+        <h1 className="mt-4 text-5xl font-medium leading-[1.05] tracking-[-0.02em] text-[var(--on-dark)] md:text-6xl">
           This page didn't load
         </h1>
-        <p className="mt-2 text-sm text-text-muted">
+        <p className="mt-4 text-white/60">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Button
+            variant="mint"
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-sm bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--on-primary)] transition-colors hover:bg-[var(--primary-active)]"
           >
             Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-hairline bg-surface px-4 py-2 text-sm font-medium text-text-body transition-colors hover:bg-[var(--surface-elevated)]"
-          >
-            Go home
-          </a>
+          </Button>
+          <Button variant="ghost-line" className="border-white/25 text-[var(--on-dark)] hover:bg-white/10" asChild>
+            <a href="/">Go home</a>
+          </Button>
         </div>
       </div>
     </div>

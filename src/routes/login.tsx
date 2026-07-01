@@ -3,6 +3,7 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { Logo } from "@/components/Logo";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -25,17 +26,24 @@ function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-canvas px-4 text-text-body">
-      <div className="w-full max-w-sm rounded-lg border border-hairline bg-canvas p-8 shadow-sm">
-        <div className="mb-6">
-          <Logo size={20} showWordmark />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--canvas-dark)] px-4">
+      {/* Brand gradient echo behind the card */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#ff7a45]/10 via-[#e5484d]/10 to-[#8b8bff]/10" />
+
+      <div className="relative mx-auto w-full max-w-md rounded-sm border border-[var(--hairline)] bg-[var(--surface-card)] p-10">
+        <div className="mb-8">
+          <Logo size={22} showWordmark />
         </div>
-        <h1 className="text-xl font-semibold tracking-tight text-text-strong">Sign in</h1>
-        <p className="mt-2 text-sm text-text-muted">Sign in to view and manage your portfolio.</p>
-        <button
+        <p className="eyebrow text-text-muted">Welcome back</p>
+        <h1 className="mt-3 text-3xl font-medium tracking-[-0.02em] text-text-strong">Sign in</h1>
+        <p className="mt-2 text-sm text-text-muted">
+          Sign in to view and manage your portfolio.
+        </p>
+        <Button
+          variant="ghost-line"
+          className="mt-8 w-full"
           onClick={signInWithGoogle}
           disabled={loading}
-          className="mt-6 flex w-full items-center justify-center gap-3 rounded-md border border-hairline bg-background px-4 py-2.5 text-sm font-medium text-text-body transition-colors hover:bg-accent disabled:opacity-60"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
             <path
@@ -56,7 +64,7 @@ function LoginPage() {
             />
           </svg>
           {loading ? "Redirecting…" : "Sign in with Google"}
-        </button>
+        </Button>
       </div>
     </div>
   );
