@@ -35,7 +35,10 @@ export function RouteProgress() {
         isLoading ? "opacity-100" : "opacity-0"
       }`}
     >
-      <div className="route-progress-slide h-full w-full bg-gradient-to-r from-transparent via-[var(--primary)] to-transparent shadow-[0_0_8px_var(--primary)]" />
+      <div
+        className="route-progress-slide h-full w-full"
+        style={{ background: "var(--gradient-brand)" }}
+      />
     </div>
   );
 }

@@ -1,8 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { AppShell } from "@/components/AppShell";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableNumericCell,
+} from "@/components/ui/table";
 import { listResearchPicks, setChecklist as setChecklistFn } from "@/fns/research";
 
 export const Route = createFileRoute("/research")({
@@ -34,9 +44,9 @@ const CHECKLIST = [
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  Researching: "#fcd535",
-  Bought: "#0ecb81",
-  Passed: "#707a8a",
+  Researching: "var(--brand-periwinkle)",
+  Bought: "var(--up)",
+  Passed: "var(--text-muted)",
 };
 
 const SUGGESTED_SECTORS = [
@@ -46,6 +56,15 @@ const SUGGESTED_SECTORS = [
   "Industrial",
   "Financial",
   "Contrarian",
+];
+
+const SECTOR_PALETTE = [
+  "var(--brand-periwinkle)",
+  "#2dbdb6",
+  "#3b82f6",
+  "var(--up)",
+  "var(--down)",
+  "#8b5cf6",
 ];
 
 function ResearchPage() {
@@ -92,16 +111,19 @@ function ResearchPage() {
 
   return (
     <AppShell>
-      <h1 className="mb-1 text-2xl font-semibold text-text-strong">Research</h1>
-      <p className="mb-6 text-sm text-text-muted">
-        Six weekly active picks — from pipeline to position.
-      </p>
+      {/* Dark band header */}
+      <div className="-mx-6 -mt-8 mb-8 bg-[var(--canvas-dark)] px-8 py-16 text-[var(--on-dark)]">
+        <p className="eyebrow text-[var(--accent-mint)]">Market Research</p>
+        <h1 className="mt-3 text-4xl font-medium tracking-[-0.02em]">Research</h1>
+        <p className="mt-3 max-w-xl text-[15px] text-white/60">
+          Six weekly active picks — from pipeline to position, with a rigorous checklist
+          gating every buy decision.
+        </p>
+      </div>
 
       {/* Timeline */}
-      <div className="mb-6 rounded-xl border border-hairline bg-surface p-5">
-        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-muted">
-          6-week timeline
-        </h3>
+      <Card className="mb-6 p-5">
+        <h3 className="eyebrow mb-3 text-text-muted">6-week timeline</h3>
         {picks.length === 0 ? (
           <p className="text-sm text-text-muted">No research picks yet.</p>
         ) : (
@@ -115,7 +137,7 @@ function ResearchPage() {
                 <div className="mt-2 flex items-center gap-1.5 text-[11px]">
                   <span
                     className="size-1.5 rounded-full"
-                    style={{ background: STATUS_COLORS[p.status] ?? "#929aa5" }}
+                    style={{ background: STATUS_COLORS[p.status] ?? "var(--text-muted)" }}
                   />
                   <span className="text-text-muted">{p.status}</span>
                 </div>
@@ -123,79 +145,88 @@ function ResearchPage() {
             ))}
           </div>
         )}
-      </div>
+      </Card>
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="overflow-x-auto rounded-xl border border-hairline bg-surface">
-          <table className="w-full min-w-[1000px] border-collapse text-sm">
-            <thead>
-              <tr className="text-[11px] uppercase tracking-wider text-text-muted">
-                <Th className="text-left pl-6">#</Th>
-                <Th className="text-left">Company</Th>
-                <Th className="text-left">Ticker</Th>
-                <Th className="text-left">Sector</Th>
-                <Th className="text-left">Moat</Th>
-                <Th>ROIC</Th>
-                <Th>P/E</Th>
-                <Th>FCF+</Th>
-                <Th>Debt&lt;2x</Th>
-                <Th className="text-left">Status</Th>
-                <Th className="pr-6">Added</Th>
-              </tr>
-            </thead>
-            <tbody>
+        <Card className="overflow-x-auto">
+          <Table className="min-w-[1000px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="pl-6">#</TableHead>
+                <TableHead>Company</TableHead>
+                <TableHead>Ticker</TableHead>
+                <TableHead>Sector</TableHead>
+                <TableHead>Moat</TableHead>
+                <TableHead className="text-right">ROIC</TableHead>
+                <TableHead className="text-right">P/E</TableHead>
+                <TableHead className="text-right">FCF+</TableHead>
+                <TableHead className="text-right">Debt&lt;2x</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="pr-6 text-right">Added</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {picks.length === 0 && (
-                <tr>
-                  <td colSpan={11} className="px-6 py-10 text-center text-sm text-text-muted">
+                <TableRow>
+                  <TableCell colSpan={11} className="px-6 py-10 text-center text-text-muted">
                     No research picks yet.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
               {picks.map((p) => (
-                <>
-                  <tr
-                    key={p.id}
-                    className="cursor-pointer border-t border-hairline transition-colors hover:bg-[var(--surface-elevated)]/40"
+                <Fragment key={p.id}>
+                  <TableRow
+                    className="cursor-pointer"
                     onClick={() => setOpenRow(openRow === p.id ? null : p.id)}
                   >
-                    <Td className="pl-6 text-text-muted num">{p.week}</Td>
-                    <Td className="text-text-strong">{p.company}</Td>
-                    <Td className="num text-text-muted-strong">{p.ticker}</Td>
-                    <Td className="text-text-muted-strong">{p.sector}</Td>
-                    <Td className="max-w-[200px] truncate text-text-muted-strong">{p.moat}</Td>
-                    <TdNum>{p.roic}%</TdNum>
-                    <TdNum>{p.pe.toFixed(1)}</TdNum>
-                    <TdNum className={p.fcfPositive ? "text-[var(--up)]" : "text-[var(--down)]"}>
+                    <TableNumericCell className="pl-6 text-left text-text-muted">
+                      {p.week}
+                    </TableNumericCell>
+                    <TableCell className="text-text-strong">{p.company}</TableCell>
+                    <TableCell className="font-mono uppercase text-text-muted-strong">
+                      {p.ticker}
+                    </TableCell>
+                    <TableCell className="text-text-muted-strong">{p.sector}</TableCell>
+                    <TableCell className="max-w-[200px] truncate text-text-muted-strong">
+                      {p.moat}
+                    </TableCell>
+                    <TableNumericCell>{p.roic}%</TableNumericCell>
+                    <TableNumericCell>{p.pe.toFixed(1)}</TableNumericCell>
+                    <TableNumericCell
+                      className={p.fcfPositive ? "text-[var(--up)]" : "text-[var(--down)]"}
+                    >
                       {p.fcfPositive ? "✓" : "✗"}
-                    </TdNum>
-                    <TdNum className={p.lowDebt ? "text-[var(--up)]" : "text-[var(--down)]"}>
+                    </TableNumericCell>
+                    <TableNumericCell
+                      className={p.lowDebt ? "text-[var(--up)]" : "text-[var(--down)]"}
+                    >
                       {p.lowDebt ? "✓" : "✗"}
-                    </TdNum>
-                    <Td>
+                    </TableNumericCell>
+                    <TableCell>
                       <span
-                        className="inline-flex items-center gap-1.5 rounded-sm px-2 py-0.5 text-[11px] font-medium"
+                        className="inline-flex items-center gap-1.5 rounded-sm px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.06em]"
                         style={{
-                          background: `${STATUS_COLORS[p.status] ?? "#929aa5"}22`,
-                          color: STATUS_COLORS[p.status] ?? "#929aa5",
+                          background: `color-mix(in srgb, ${STATUS_COLORS[p.status] ?? "var(--text-muted)"} 14%, transparent)`,
+                          color: STATUS_COLORS[p.status] ?? "var(--text-muted)",
                         }}
                       >
                         <span
                           className="size-1.5 rounded-full"
-                          style={{ background: STATUS_COLORS[p.status] ?? "#929aa5" }}
+                          style={{ background: STATUS_COLORS[p.status] ?? "var(--text-muted)" }}
                         />
                         {p.status}
                       </span>
-                    </Td>
-                    <Td className="num pr-6 text-text-muted">{p.addedDate}</Td>
-                  </tr>
+                    </TableCell>
+                    <TableNumericCell className="pr-6 text-text-muted">
+                      {p.addedDate}
+                    </TableNumericCell>
+                  </TableRow>
                   {openRow === p.id && (
-                    <tr className="border-t border-hairline bg-canvas">
-                      <td colSpan={11} className="px-6 py-5">
+                    <TableRow className="bg-[var(--surface-elevated)] hover:bg-[var(--surface-elevated)]">
+                      <TableCell colSpan={11} className="px-6 py-5">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_360px]">
                           <div>
-                            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-muted">
-                              Research checklist
-                            </h4>
+                            <h4 className="eyebrow mb-3 text-text-muted">Research checklist</h4>
                             <ul className="space-y-2">
                               {CHECKLIST.map((item, i) => (
                                 <li key={i}>
@@ -204,7 +235,7 @@ function ResearchPage() {
                                       type="checkbox"
                                       checked={checks[p.id]?.[i] ?? false}
                                       onChange={(e) => handleCheck(p.id, i, e.target.checked)}
-                                      className="size-4 rounded border-hairline bg-[var(--surface-elevated)] accent-[var(--primary)]"
+                                      className="size-4 rounded-xs border-hairline bg-[var(--surface-elevated)] accent-[var(--primary)]"
                                     />
                                     <span
                                       className={
@@ -221,24 +252,22 @@ function ResearchPage() {
                             </ul>
                           </div>
                           <div>
-                            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-muted">
-                              Thesis
-                            </h4>
+                            <h4 className="eyebrow mb-3 text-text-muted">Thesis</h4>
                             <p className="text-sm text-text-body">{p.thesis}</p>
                           </div>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )}
-                </>
+                </Fragment>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
 
-        <div className="rounded-xl border border-hairline bg-surface p-5">
-          <h3 className="mb-1 text-sm font-semibold text-text-strong">Sector coverage</h3>
-          <p className="text-[11px] text-text-muted">Suggested spread vs your 6 picks.</p>
+        <Card className="p-5">
+          <h3 className="eyebrow text-text-muted">Sector coverage</h3>
+          <p className="mt-1 text-[11px] text-text-muted">Suggested spread vs your 6 picks.</p>
           <div className="mt-3 h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -249,28 +278,23 @@ function ResearchPage() {
                   innerRadius={42}
                   outerRadius={78}
                   paddingAngle={2}
-                  stroke="#0b0e11"
+                  stroke="var(--canvas-dark)"
                   strokeWidth={2}
                 >
                   {sectorCoverage.map((s, i) => (
                     <Cell
                       key={s.name}
-                      fill={
-                        s.value > 0
-                          ? ["#fcd535", "#2dbdb6", "#3b82f6", "#0ecb81", "#f6465d", "#8b5cf6"][
-                              i % 6
-                            ]
-                          : "#2b3139"
-                      }
+                      fill={s.value > 0 ? SECTOR_PALETTE[i % 6] : "var(--surface-elevated)"}
                     />
                   ))}
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    background: "#2b3139",
-                    border: "1px solid #3a4049",
-                    borderRadius: 6,
+                    background: "var(--canvas-dark)",
+                    border: "1px solid var(--hairline)",
+                    borderRadius: 4,
                     fontSize: 12,
+                    color: "var(--on-dark)",
                   }}
                   formatter={(v: number, _n, item) => [
                     `${Math.round(v)} pick${v === 1 ? "" : "s"}`,
@@ -286,9 +310,7 @@ function ResearchPage() {
                 <span
                   className="size-2 rounded-sm"
                   style={{
-                    background: ["#fcd535", "#2dbdb6", "#3b82f6", "#0ecb81", "#f6465d", "#8b5cf6"][
-                      i % 6
-                    ],
+                    background: SECTOR_PALETTE[i % 6],
                     opacity: s.value > 0 ? 1 : 0.25,
                   }}
                 />
@@ -297,42 +319,9 @@ function ResearchPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </Card>
       </section>
     </AppShell>
   );
 }
 
-function Th({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <th className={`px-3 py-3 text-right font-medium ${className}`}>{children}</th>;
-}
-function Td({
-  children,
-  className = "",
-  colSpan,
-}: {
-  children?: React.ReactNode;
-  className?: string;
-  colSpan?: number;
-}) {
-  return (
-    <td colSpan={colSpan} className={`px-3 py-3 text-left ${className}`}>
-      {children}
-    </td>
-  );
-}
-function TdNum({
-  children,
-  className = "",
-  colSpan,
-}: {
-  children?: React.ReactNode;
-  className?: string;
-  colSpan?: number;
-}) {
-  return (
-    <td colSpan={colSpan} className={`num px-3 py-3 text-right ${className}`}>
-      {children}
-    </td>
-  );
-}

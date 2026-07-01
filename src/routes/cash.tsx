@@ -7,6 +7,16 @@ import { addCashFlow, deleteCashFlow, getCashFlows, setCashBalance } from "@/fns
 import { fmtGBP } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableNumericCell,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -70,149 +80,135 @@ function CashPage() {
 
   return (
     <AppShell>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-text-strong">Cash Flow</h1>
-        <p className="mt-1 text-sm text-text-muted">
+      {/* Page header */}
+      <div className="mb-8">
+        <p className="eyebrow text-text-muted">Cash Account</p>
+        <h1 className="mt-2 text-4xl font-medium tracking-[-0.02em] text-text-strong">Cash</h1>
+        <p className="mt-2 text-[15px] text-text-muted">
           Track deposits and withdrawals; balance feeds into portfolio totals.
         </p>
       </div>
 
-      {/* Balance + summary strip */}
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {/* Cash balance hero */}
-        <div
-          className="rounded-xl border bg-surface p-6"
-          style={{ borderColor: cashGBP >= 0 ? "#0ecb81" : "#f6465d" }}
-        >
-          <div className="text-[11px] uppercase tracking-wider text-text-muted">Available cash</div>
+      {/* Balance stat block — dark band */}
+      <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <div className="rounded-sm bg-[var(--canvas-dark)] px-8 py-8 text-[var(--on-dark)]">
+          <p className="eyebrow text-[var(--accent-mint)]">Available Balance</p>
           <div
-            className={`num mt-2 text-4xl font-bold ${cashGBP >= 0 ? "text-[#0ecb81]" : "text-[#f6465d]"}`}
+            className={`num mt-3 text-5xl font-medium tracking-[-0.02em] ${
+              cashGBP >= 0 ? "text-[var(--on-dark)]" : "text-[var(--down)]"
+            }`}
           >
             {fmtGBP(cashGBP)}
           </div>
-          <div className="mt-4 flex gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="flex-1 border border-[#0ecb81]/30 bg-[#0ecb81]/10 text-[#0ecb81] hover:bg-[#0ecb81]/20"
-              onClick={() => setDepositOpen(true)}
-            >
+          <div className="mt-6 flex flex-wrap items-center gap-2">
+            <Button variant="default" onClick={() => setDepositOpen(true)}>
               <ArrowDownCircle className="mr-1.5 h-4 w-4" />
               Deposit
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="flex-1 border border-[#f6465d]/30 bg-[#f6465d]/10 text-[#f6465d] hover:bg-[#f6465d]/20"
-              onClick={() => setWithdrawOpen(true)}
-            >
+            <Button variant="ghost-line" className="border-white/25 text-white/80 hover:bg-white/10" onClick={() => setWithdrawOpen(true)}>
               <ArrowUpCircle className="mr-1.5 h-4 w-4" />
               Withdraw
             </Button>
-          </div>
-          <button
-            onClick={() => setSetBalanceOpen(true)}
-            className="mt-2 w-full text-center text-[11px] text-text-muted underline-offset-2 hover:text-text-body hover:underline"
-          >
-            Set balance manually
-          </button>
-        </div>
-
-        {/* Total deposited */}
-        <div className="rounded-xl border border-hairline bg-surface p-6">
-          <div className="text-[11px] uppercase tracking-wider text-text-muted">
-            Total deposited
-          </div>
-          <div className="num mt-2 text-2xl font-semibold text-[#0ecb81]">
-            {fmtGBP(totalDeposited)}
-          </div>
-          <div className="mt-1 text-xs text-text-muted">
-            {flows.filter((f) => f.type === "deposit").length} transaction
-            {flows.filter((f) => f.type === "deposit").length !== 1 ? "s" : ""}
+            <button
+              onClick={() => setSetBalanceOpen(true)}
+              className="ml-1 font-mono text-[11px] uppercase tracking-[0.08em] text-white/45 transition-colors hover:text-white/80"
+            >
+              Set manually
+            </button>
           </div>
         </div>
 
-        {/* Total withdrawn */}
-        <div className="rounded-xl border border-hairline bg-surface p-6">
-          <div className="text-[11px] uppercase tracking-wider text-text-muted">
-            Total withdrawn
-          </div>
-          <div className="num mt-2 text-2xl font-semibold text-[#f6465d]">
-            {fmtGBP(totalWithdrawn)}
-          </div>
-          <div className="mt-1 text-xs text-text-muted">
-            {flows.filter((f) => f.type === "withdrawal").length} transaction
-            {flows.filter((f) => f.type === "withdrawal").length !== 1 ? "s" : ""}
-          </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1">
+          <Card className="flex items-center justify-between p-5">
+            <div>
+              <p className="eyebrow text-text-muted">Total deposited</p>
+              <div className="mt-1 text-xs text-text-muted">
+                {flows.filter((f) => f.type === "deposit").length} transaction
+                {flows.filter((f) => f.type === "deposit").length !== 1 ? "s" : ""}
+              </div>
+            </div>
+            <div className="num text-2xl font-medium text-[var(--up)]">
+              {fmtGBP(totalDeposited)}
+            </div>
+          </Card>
+          <Card className="flex items-center justify-between p-5">
+            <div>
+              <p className="eyebrow text-text-muted">Total withdrawn</p>
+              <div className="mt-1 text-xs text-text-muted">
+                {flows.filter((f) => f.type === "withdrawal").length} transaction
+                {flows.filter((f) => f.type === "withdrawal").length !== 1 ? "s" : ""}
+              </div>
+            </div>
+            <div className="num text-2xl font-medium text-[var(--down)]">
+              {fmtGBP(totalWithdrawn)}
+            </div>
+          </Card>
         </div>
       </div>
 
       {/* Transaction history table */}
-      <section className="overflow-x-auto rounded-xl border border-hairline bg-surface">
+      <Card className="overflow-x-auto">
         <div className="flex items-center justify-between border-b border-hairline px-6 py-3">
-          <span className="text-sm font-semibold text-text-strong">Transaction history</span>
-          <span className="text-xs text-text-muted">{flows.length} entries</span>
+          <span className="eyebrow text-text-muted">Transaction history</span>
+          <span className="num text-xs text-text-muted">{flows.length} entries</span>
         </div>
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="text-[11px] uppercase tracking-wider text-text-muted">
-              <th className="px-6 py-3 text-left font-medium">Date</th>
-              <th className="px-3 py-3 text-left font-medium">Type</th>
-              <th className="px-3 py-3 text-right font-medium">Amount</th>
-              <th className="px-3 py-3 text-left font-medium">Note</th>
-              <th className="px-4 py-3 text-right font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="pl-6">Date</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead>Note</TableHead>
+              <TableHead className="pr-6 text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {flows.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-6 py-10 text-center text-sm text-text-muted">
+              <TableRow>
+                <TableCell colSpan={5} className="px-6 py-10 text-center text-text-muted">
                   No transactions yet. Use Deposit or Withdraw to get started.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
             {flows.map((f) => (
-              <tr
-                key={f.id}
-                className="border-t border-hairline hover:bg-[var(--surface-elevated)]/40"
-              >
-                <td className="px-6 py-3 font-mono text-xs text-text-muted">{f.date}</td>
-                <td className="px-3 py-3">
+              <TableRow key={f.id}>
+                <TableCell className="pl-6 font-mono text-xs text-text-muted">{f.date}</TableCell>
+                <TableCell>
                   <span
-                    className={`inline-block rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                    className={`inline-block rounded-sm px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] ${
                       f.type === "deposit"
-                        ? "bg-[#0ecb81]/15 text-[#0ecb81]"
-                        : "bg-[#f6465d]/15 text-[#f6465d]"
+                        ? "bg-[var(--up)]/10 text-[var(--up)]"
+                        : "bg-[var(--down)]/10 text-[var(--down)]"
                     }`}
                   >
                     {f.type}
                   </span>
-                </td>
-                <td
-                  className={`num px-3 py-3 text-right font-semibold ${
-                    f.type === "deposit" ? "text-[#0ecb81]" : "text-[#f6465d]"
+                </TableCell>
+                <TableNumericCell
+                  className={`font-medium ${
+                    f.type === "deposit" ? "text-[var(--up)]" : "text-[var(--down)]"
                   }`}
                 >
                   {f.type === "deposit" ? "+" : "-"}
                   {fmtGBP(f.amountGBP)}
-                </td>
-                <td className="max-w-[260px] truncate px-3 py-3 text-text-muted">
+                </TableNumericCell>
+                <TableCell className="max-w-[260px] truncate text-text-muted">
                   {f.note || <span className="opacity-40">—</span>}
-                </td>
-                <td className="px-4 py-3 text-right">
+                </TableCell>
+                <TableCell className="pr-6 text-right">
                   <button
                     title="Delete"
-                    className="ml-auto flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-[#f6465d] opacity-60 transition-all hover:bg-[#f6465d]/10 hover:opacity-100"
+                    className="ml-auto flex h-7 w-7 cursor-pointer items-center justify-center rounded-sm text-[var(--down)] opacity-60 transition-all hover:bg-[var(--down)]/10 hover:opacity-100"
                     onClick={() => setDeleteTarget(f)}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </section>
+          </TableBody>
+        </Table>
+      </Card>
 
       <CashFlowDialog
         open={depositOpen}
@@ -300,7 +296,7 @@ function CashFlowDialog({
   };
 
   const isDeposit = type === "deposit";
-  const accent = isDeposit ? "#0ecb81" : "#f6465d";
+  const accent = isDeposit ? "var(--up)" : "var(--down)";
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
@@ -344,7 +340,7 @@ function CashFlowDialog({
               className="border-hairline bg-canvas text-text-strong"
             />
           </div>
-          {error && <p className="text-xs text-[#f6465d]">{error}</p>}
+          {error && <p className="text-xs text-[var(--down)]">{error}</p>}
         </div>
         <DialogFooter>
           <Button
@@ -358,7 +354,7 @@ function CashFlowDialog({
           <Button
             onClick={handleSubmit}
             disabled={isPending}
-            style={{ backgroundColor: accent, color: "#0b0e11" }}
+            style={{ backgroundColor: accent, color: "var(--canvas-dark)" }}
           >
             {isPending ? "Saving…" : isDeposit ? "Deposit" : "Withdraw"}
           </Button>
@@ -427,7 +423,7 @@ function SetBalanceDialog({
               autoFocus
             />
           </div>
-          {error && <p className="text-xs text-[#f6465d]">{error}</p>}
+          {error && <p className="text-xs text-[var(--down)]">{error}</p>}
         </div>
         <DialogFooter>
           <Button

@@ -30,6 +30,17 @@ import { compute, type Bucket, type Holding } from "@/data/portfolio";
 import { dirClass, fmtGBP, fmtGBPSigned, fmtNum, fmtPct } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableNumericCell,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -88,8 +99,8 @@ function ScatterTooltip({ active, payload }: { active?: boolean; payload?: any[]
   return (
     <div
       style={{
-        background: "#0f1923",
-        border: "1px solid #38bdf8",
+        background: "var(--canvas-dark)",
+        border: "1px solid var(--brand-periwinkle)",
         borderRadius: 8,
         fontSize: 12,
         fontFamily: "JetBrains Mono",
@@ -98,11 +109,11 @@ function ScatterTooltip({ active, payload }: { active?: boolean; payload?: any[]
         lineHeight: 1.6,
       }}
     >
-      <p style={{ color: "#38bdf8", fontSize: 11, fontWeight: 600, marginBottom: 2 }}>{d.name}</p>
+      <p style={{ color: "var(--brand-periwinkle)", fontSize: 11, fontWeight: 600, marginBottom: 2 }}>{d.name}</p>
       <p style={{ color: "#929aa5", fontSize: 10, marginBottom: 6 }}>{d.sector}</p>
       <p style={{ color: "#e2e8f0" }}>
         Gain:{" "}
-        <span style={{ color: d.y >= 0 ? "#0ecb81" : "#f6465d" }}>
+        <span style={{ color: d.y >= 0 ? "var(--up)" : "var(--down)" }}>
           {d.y >= 0 ? "+" : ""}
           {d.y.toFixed(2)}%
         </span>
@@ -156,51 +167,54 @@ function HoldingsPage() {
 
   return (
     <AppShell>
-      <h1 className="mb-1 text-2xl font-semibold text-text-strong">Holdings</h1>
-      <p className="mb-6 text-sm text-text-muted">
-        Position-level P&amp;L. Subtotals per bucket, grand total at bottom.
-      </p>
+      {/* Page header */}
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow text-text-muted">Your Holdings</p>
+          <h1 className="mt-2 text-4xl font-medium tracking-[-0.02em] text-text-strong">Holdings</h1>
+          <p className="mt-2 text-[15px] text-text-muted">
+            Position-level P&amp;L. Subtotals per bucket, grand total at bottom.
+          </p>
+        </div>
+        <AddHoldingDialog onSuccess={refreshPortfolio} />
+      </div>
 
-      <section className="rounded-xl border border-hairline bg-surface">
+      <Card>
         <div className="flex items-center justify-between gap-3 border-b border-hairline px-6 py-4">
-          <span className="text-sm font-semibold text-text-strong">
+          <span className="eyebrow text-text-muted">
             {p.rows.length} position{p.rows.length !== 1 ? "s" : ""}
           </span>
-          <AddHoldingDialog onSuccess={refreshPortfolio} />
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1080px] border-collapse text-sm">
-            <thead>
-              <tr className="text-[11px] uppercase tracking-wider text-text-muted border-b border-hairline">
-                <th
-                  className="text-left pl-6 py-3 font-semibold text-[#fcd535]"
-                  style={{ borderLeft: "3px solid #fcd535" }}
+          <Table className="min-w-[1080px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead
+                  className="pl-6 text-[var(--brand-periwinkle)]"
+                  style={{ borderLeft: "3px solid var(--brand-periwinkle)" }}
                   rowSpan={2}
                 >
                   Positions
-                </th>
-                <th className="whitespace-nowrap text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="whitespace-nowrap text-right" rowSpan={2}>
                   Units
-                </th>
-                <th className="whitespace-nowrap text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="whitespace-nowrap text-right" rowSpan={2}>
                   Avg buy (p)
-                </th>
-                <th className="whitespace-nowrap text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="whitespace-nowrap text-right" rowSpan={2}>
                   Cost (£)
-                </th>
-                <th className="whitespace-nowrap text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="whitespace-nowrap text-right" rowSpan={2}>
                   Price (p)
-                </th>
-                <th className="whitespace-nowrap text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="whitespace-nowrap text-right" rowSpan={2}>
                   Value (£)
-                </th>
-                <th
-                  className="text-center px-3 py-2 font-semibold border-l border-hairline"
-                  colSpan={2}
-                >
+                </TableHead>
+                <TableHead className="text-center border-l border-[var(--hairline)]" colSpan={2}>
                   Gain / loss
-                </th>
-                <th className="whitespace-nowrap text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="whitespace-nowrap text-right" rowSpan={2}>
                   <span className="inline-flex items-center justify-end gap-1">
                     Target (p)
                     <span
@@ -210,8 +224,8 @@ function HoldingsPage() {
                       ?
                     </span>
                   </span>
-                </th>
-                <th className="whitespace-nowrap text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="whitespace-nowrap text-right" rowSpan={2}>
                   <span className="inline-flex items-center justify-end gap-1">
                     Upside
                     <span
@@ -221,100 +235,101 @@ function HoldingsPage() {
                       ?
                     </span>
                   </span>
-                </th>
-                <th className="whitespace-nowrap text-right px-3 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="whitespace-nowrap text-right" rowSpan={2}>
                   Hold
-                </th>
-                <th className="text-right px-3 pr-6 py-3 font-semibold" rowSpan={2}>
+                </TableHead>
+                <TableHead className="text-right pr-6" rowSpan={2}>
                   Actions
-                </th>
-              </tr>
-              <tr className="text-[11px] uppercase tracking-wider text-text-muted border-b border-hairline">
-                <th className="text-center px-3 py-2 font-medium border-l border-hairline">£</th>
-                <th className="text-center px-3 py-2 font-medium">%</th>
-              </tr>
-            </thead>
-            <tbody>
+                </TableHead>
+              </TableRow>
+              <TableRow>
+                <TableHead className="text-center border-l border-[var(--hairline)]">£</TableHead>
+                <TableHead className="text-center">%</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {p.rows.length === 0 && (
-                <tr>
-                  <td colSpan={12} className="px-6 py-10 text-center text-sm text-text-muted">
+                <TableRow>
+                  <TableCell colSpan={12} className="px-6 py-10 text-center text-text-muted">
                     No holdings yet.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
               {groups.map((g) => {
                 if (g.rows.length === 0) return null;
                 const subCost = g.rows.reduce((s, r) => s + r.costGBP, 0);
                 const subVal = g.rows.reduce((s, r) => s + r.marketValueGBP, 0);
                 const subGain = subVal - subCost;
-                const bucketColor = g.bucket === "Fund" ? "#38bdf8" : "#818cf8";
+                const isFund = g.bucket === "Fund";
+                const bucketColor = isFund ? "var(--brand-periwinkle)" : "var(--text-muted)";
+                const bucketText = isFund
+                  ? "text-[var(--brand-periwinkle)]"
+                  : "text-[var(--text-muted)]";
                 return (
                   <Fragment key={g.bucket}>
-                    <tr
+                    <TableRow
                       style={{ borderLeft: `3px solid ${bucketColor}` }}
                       className={
-                        g.bucket === "Fund" ? "bg-[#38bdf8]/[0.08]" : "bg-[#818cf8]/[0.08]"
+                        isFund
+                          ? "bg-[var(--brand-periwinkle)]/[0.08] hover:bg-[var(--brand-periwinkle)]/[0.08]"
+                          : "bg-[var(--surface-elevated)] hover:bg-[var(--surface-elevated)]"
                       }
                     >
-                      <td
+                      <TableCell
                         colSpan={12}
-                        className={`px-6 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] ${g.bucket === "Fund" ? "text-[#38bdf8]" : "text-[#818cf8]"}`}
+                        className={`px-6 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] ${bucketText}`}
                       >
-                        {g.bucket === "Stock" ? "Stocks" : g.bucket}
-                      </td>
-                    </tr>
+                        {isFund ? g.bucket : "Stocks"}
+                      </TableCell>
+                    </TableRow>
                     {g.rows.map((r) => (
-                      <tr
-                        key={r.ticker}
-                        className="border-t border-hairline hover:bg-[var(--surface-elevated)]/40"
-                      >
-                        <td className="pl-6 pr-3 py-3 max-w-[220px]">
-                          <div className="truncate font-semibold leading-tight text-text-strong">
+                      <TableRow key={r.ticker}>
+                        <TableCell className="pl-6 max-w-[220px]">
+                          <div className="truncate font-medium leading-tight text-text-strong">
                             {r.name}
                           </div>
-                          <div className="font-mono text-[11px] text-text-muted">{r.ticker}</div>
-                        </td>
-                        <td className="num whitespace-nowrap px-3 py-3 text-right text-text-body">
+                          <div className="font-mono text-[11px] uppercase text-text-muted">
+                            {r.ticker}
+                          </div>
+                        </TableCell>
+                        <TableNumericCell className="whitespace-nowrap text-text-body">
                           {fmtNum(r.units, 2)}
-                        </td>
-                        <td className="num whitespace-nowrap px-3 py-3 text-right text-text-body">
+                        </TableNumericCell>
+                        <TableNumericCell className="whitespace-nowrap text-text-body">
                           {fmtNum(r.avgBuyP, 1)}
-                        </td>
-                        <td className="num whitespace-nowrap px-3 py-3 text-right text-text-body">
+                        </TableNumericCell>
+                        <TableNumericCell className="whitespace-nowrap text-text-body">
                           {fmtGBP(r.costGBP)}
-                        </td>
-                        <td className="num whitespace-nowrap px-3 py-3 text-right text-text-body">
+                        </TableNumericCell>
+                        <TableNumericCell className="whitespace-nowrap text-text-body">
                           {fmtNum(r.lastPrice, 1)}
-                        </td>
-                        <td className="num whitespace-nowrap px-3 py-3 text-right font-medium text-text-strong">
+                        </TableNumericCell>
+                        <TableNumericCell className="whitespace-nowrap font-medium text-text-strong">
                           {fmtGBP(r.marketValueGBP)}
-                        </td>
-                        <td
-                          className={`num whitespace-nowrap px-3 py-3 text-right border-l border-hairline ${dirClass(r.unrealisedGL)}`}
+                        </TableNumericCell>
+                        <TableNumericCell
+                          className={`whitespace-nowrap border-l border-[var(--hairline)] ${dirClass(r.unrealisedGL)}`}
                         >
                           {fmtGBPSigned(r.unrealisedGL)}
-                        </td>
-                        <td
-                          className={`num whitespace-nowrap px-3 py-3 text-right ${dirClass(r.unrealisedPct)}`}
-                        >
+                        </TableNumericCell>
+                        <TableNumericCell className={`whitespace-nowrap ${dirClass(r.unrealisedPct)}`}>
                           {fmtPct(r.unrealisedPct)}
-                        </td>
-                        <td className="num whitespace-nowrap px-3 py-3 text-right text-text-body">
+                        </TableNumericCell>
+                        <TableNumericCell className="whitespace-nowrap text-text-body">
                           {fmtNum(r.targetP, 0)}
-                        </td>
-                        <td
-                          className={`num whitespace-nowrap px-3 py-3 text-right ${dirClass(r.upsidePct)}`}
-                        >
+                        </TableNumericCell>
+                        <TableNumericCell className={`whitespace-nowrap ${dirClass(r.upsidePct)}`}>
                           {fmtPct(r.upsidePct, 1)}
-                        </td>
-                        <td className="num whitespace-nowrap px-3 py-3 text-right text-text-muted">
+                        </TableNumericCell>
+                        <TableNumericCell className="whitespace-nowrap text-text-muted">
                           {r.holdPeriodDays}d
-                        </td>
-                        <td className="px-2 py-2 pr-4">
+                        </TableNumericCell>
+                        <TableCell className="pr-4">
                           <div className="flex items-center justify-end gap-1">
                             <button
                               title="Trade"
-                              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-[#0ecb81] opacity-60 transition-all hover:bg-[#0ecb81]/10 hover:opacity-100"
+                              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-sm text-[var(--up)] opacity-60 transition-all hover:bg-[var(--up)]/10 hover:opacity-100"
                               onClick={() =>
                                 setTradeTarget({
                                   ticker: r.ticker,
@@ -329,7 +344,7 @@ function HoldingsPage() {
                             </button>
                             <button
                               title="Delete holding"
-                              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-[#f6465d] opacity-60 transition-all hover:bg-[#f6465d]/10 hover:opacity-100"
+                              className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-sm text-[var(--down)] opacity-60 transition-all hover:bg-[var(--down)]/10 hover:opacity-100"
                               onClick={() =>
                                 setDeleteTarget({
                                   ticker: r.ticker,
@@ -342,75 +357,77 @@ function HoldingsPage() {
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
                           </div>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                    <tr
+                    <TableRow
                       style={{ borderLeft: `3px solid ${bucketColor}` }}
-                      className={`border-t border-hairline text-text-muted-strong ${g.bucket === "Fund" ? "bg-[#38bdf8]/[0.05]" : "bg-[#818cf8]/[0.05]"}`}
+                      className={`text-text-muted-strong ${
+                        isFund
+                          ? "bg-[var(--brand-periwinkle)]/[0.05] hover:bg-[var(--brand-periwinkle)]/[0.05]"
+                          : "bg-[var(--surface-elevated)]/60 hover:bg-[var(--surface-elevated)]/60"
+                      }`}
                     >
-                      <td
-                        className={`pl-6 pr-3 py-3 text-[11px] font-semibold uppercase tracking-wider ${g.bucket === "Fund" ? "text-[#38bdf8]" : "text-[#818cf8]"}`}
+                      <TableCell
+                        className={`pl-6 font-mono text-[11px] font-semibold uppercase tracking-wider ${bucketText}`}
                       >
                         Subtotal
-                      </td>
-                      <td className="px-3 py-3" colSpan={2} />
-                      <td className="num whitespace-nowrap px-3 py-3 text-right">
+                      </TableCell>
+                      <TableCell colSpan={2} />
+                      <TableNumericCell className="whitespace-nowrap">
                         {fmtGBP(subCost)}
-                      </td>
-                      <td className="px-3 py-3" />
-                      <td className="num whitespace-nowrap px-3 py-3 text-right text-text-strong">
+                      </TableNumericCell>
+                      <TableCell />
+                      <TableNumericCell className="whitespace-nowrap text-text-strong">
                         {fmtGBP(subVal)}
-                      </td>
-                      <td
-                        className={`num whitespace-nowrap px-3 py-3 text-right border-l border-hairline ${dirClass(subGain)}`}
+                      </TableNumericCell>
+                      <TableNumericCell
+                        className={`whitespace-nowrap border-l border-[var(--hairline)] ${dirClass(subGain)}`}
                       >
                         {fmtGBPSigned(subGain)}
-                      </td>
-                      <td
-                        className={`num whitespace-nowrap px-3 py-3 text-right ${dirClass(subGain)}`}
-                      >
+                      </TableNumericCell>
+                      <TableNumericCell className={`whitespace-nowrap ${dirClass(subGain)}`}>
                         {fmtPct((subGain / subCost) * 100)}
-                      </td>
-                      <td className="px-3 py-3" colSpan={4} />
-                    </tr>
+                      </TableNumericCell>
+                      <TableCell colSpan={4} />
+                    </TableRow>
                   </Fragment>
                 );
               })}
-              {p.rows.length > 0 && (
-                <tr className="border-t-2 border-[#fcd535]/40 bg-[#fcd535]/[0.07]">
-                  <td className="pl-6 pr-3 py-3 text-xs font-bold uppercase tracking-wider text-[#fcd535]">
+            </TableBody>
+            {p.rows.length > 0 && (
+              <TableFooter>
+                <TableRow className="border-t-2 border-[var(--brand-periwinkle)]/40">
+                  <TableCell className="pl-6 font-mono text-xs font-semibold uppercase tracking-wider text-[var(--brand-periwinkle)]">
                     Total
-                  </td>
-                  <td className="px-3 py-3" colSpan={2} />
-                  <td className="num whitespace-nowrap px-3 py-3 text-right font-semibold">
+                  </TableCell>
+                  <TableCell colSpan={2} />
+                  <TableNumericCell className="whitespace-nowrap font-medium">
                     {fmtGBP(p.cost)}
-                  </td>
-                  <td className="px-3 py-3" />
-                  <td className="num whitespace-nowrap px-3 py-3 text-right font-semibold text-text-strong">
+                  </TableNumericCell>
+                  <TableCell />
+                  <TableNumericCell className="whitespace-nowrap font-medium text-text-strong">
                     {fmtGBP(p.marketValue)}
-                  </td>
-                  <td
-                    className={`num whitespace-nowrap px-3 py-3 text-right font-semibold border-l border-hairline ${dirClass(p.unrealisedGL)}`}
+                  </TableNumericCell>
+                  <TableNumericCell
+                    className={`whitespace-nowrap border-l border-[var(--hairline)] font-medium ${dirClass(p.unrealisedGL)}`}
                   >
                     {fmtGBPSigned(p.unrealisedGL)}
-                  </td>
-                  <td
-                    className={`num whitespace-nowrap px-3 py-3 text-right font-semibold ${dirClass(p.unrealisedPct)}`}
-                  >
+                  </TableNumericCell>
+                  <TableNumericCell className={`whitespace-nowrap font-medium ${dirClass(p.unrealisedPct)}`}>
                     {fmtPct(p.unrealisedPct)}
-                  </td>
-                  <td className="px-3 py-3" colSpan={4} />
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  </TableNumericCell>
+                  <TableCell colSpan={4} />
+                </TableRow>
+              </TableFooter>
+            )}
+          </Table>
         </div>
-      </section>
+      </Card>
 
       <section className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-hairline bg-surface p-5">
-          <h3 className="text-sm font-semibold text-text-strong">
+        <div className="rounded-sm border border-hairline bg-surface p-5">
+          <h3 className="text-sm font-medium text-text-strong">
             Contribution to unrealised gain
           </h3>
           <p className="text-[11px] text-text-muted">
@@ -437,15 +454,15 @@ function HoldingsPage() {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "#0f1923",
-                    border: "1px solid #38bdf8",
+                    background: "var(--canvas-dark)",
+                    border: "1px solid var(--brand-periwinkle)",
                     borderRadius: 8,
                     fontSize: 12,
                     fontFamily: "JetBrains Mono",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
                   }}
                   itemStyle={{ color: "#e2e8f0" }}
-                  labelStyle={{ color: "#38bdf8", fontSize: 11 }}
+                  labelStyle={{ color: "var(--brand-periwinkle)", fontSize: 11 }}
                   formatter={(v: number) => [fmtGBPSigned(v), "Gain"]}
                   cursor={{ fill: "rgba(255,255,255,0.03)" }}
                 />
@@ -454,7 +471,13 @@ function HoldingsPage() {
                   {[...waterfall, { name: "TOTAL", gain: total }].map((d) => (
                     <Cell
                       key={d.name}
-                      fill={d.name === "TOTAL" ? "#fcd535" : d.gain >= 0 ? "#0ecb81" : "#f6465d"}
+                      fill={
+                        d.name === "TOTAL"
+                          ? "var(--brand-periwinkle)"
+                          : d.gain >= 0
+                            ? "var(--up)"
+                            : "var(--down)"
+                      }
                     />
                   ))}
                 </Bar>
@@ -463,8 +486,8 @@ function HoldingsPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-hairline bg-surface p-5">
-          <h3 className="text-sm font-semibold text-text-strong">Gain % vs hold period</h3>
+        <div className="rounded-sm border border-hairline bg-surface p-5">
+          <h3 className="text-sm font-medium text-text-strong">Gain % vs hold period</h3>
           <p className="text-[11px] text-text-muted">
             Dot size = position value. Do longer holds compound better?
           </p>
@@ -494,11 +517,11 @@ function HoldingsPage() {
                 <ReferenceLine y={0} stroke="#2b3139" />
                 <Tooltip
                   content={ScatterTooltip}
-                  cursor={{ strokeDasharray: "3 3", stroke: "#38bdf8" }}
+                  cursor={{ strokeDasharray: "3 3", stroke: "var(--brand-periwinkle)" }}
                 />
                 <Scatter data={scatter}>
                   {scatter.map((s) => (
-                    <Cell key={s.ticker} fill={s.y >= 0 ? "#0ecb81" : "#f6465d"} />
+                    <Cell key={s.ticker} fill={s.y >= 0 ? "var(--up)" : "var(--down)"} />
                   ))}
                 </Scatter>
               </ScatterChart>
@@ -673,10 +696,10 @@ function AddHoldingDialog({ onSuccess }: { onSuccess: () => void }) {
       }}
     >
       <DialogTrigger asChild>
-        <button className="flex items-center gap-1.5 rounded-md bg-[var(--primary)] px-3 py-1.5 text-xs font-semibold text-[#181a20] transition-colors hover:bg-[var(--primary-active)]">
-          <Plus className="size-3.5" />
+        <Button variant="default">
+          <Plus className="mr-1.5 size-3.5" />
           Add holding
-        </button>
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-sm border-hairline bg-[var(--surface)] text-text-strong">
         <DialogHeader>
@@ -703,7 +726,7 @@ function AddHoldingDialog({ onSuccess }: { onSuccess: () => void }) {
                   autoComplete="off"
                 />
                 {showSuggestions && suggestions.length > 0 && (
-                  <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-52 overflow-auto rounded-lg border border-hairline bg-[var(--surface-elevated)] py-1 shadow-lg">
+                  <ul className="absolute left-0 right-0 top-full z-50 mt-1 max-h-52 overflow-auto rounded-sm border border-[var(--hairline)] bg-[var(--surface-elevated)] py-1">
                     {suggestions.slice(0, 8).map((s) => (
                       <li
                         key={s.ticker}
@@ -768,7 +791,7 @@ function AddHoldingDialog({ onSuccess }: { onSuccess: () => void }) {
                     priceFetching && !priceLocked
                       ? "border-[var(--primary)]/60"
                       : !priceLocked && autoPrice?.price && autoPrice.price > 0
-                        ? "border-[#0ecb81]/60"
+                        ? "border-[var(--up)]/60"
                         : "border-hairline"
                   }`}
                 />
@@ -781,7 +804,7 @@ function AddHoldingDialog({ onSuccess }: { onSuccess: () => void }) {
                   {priceFetching && !priceLocked ? (
                     <Loader2 className="h-4 w-4 animate-spin text-[var(--primary)]" />
                   ) : priceLocked ? (
-                    <Unlock className="h-4 w-4 text-[#f0b90b]" />
+                    <Unlock className="h-4 w-4 text-[#ff7a45]" />
                   ) : (
                     <Lock className="h-4 w-4" />
                   )}
@@ -798,7 +821,7 @@ function AddHoldingDialog({ onSuccess }: { onSuccess: () => void }) {
               </p>
             </div>
 
-            {error && <p className="text-xs text-[#f6465d]">{error}</p>}
+            {error && <p className="text-xs text-[var(--down)]">{error}</p>}
           </div>
           <DialogFooter className="mt-4">
             <Button
@@ -812,8 +835,9 @@ function AddHoldingDialog({ onSuccess }: { onSuccess: () => void }) {
             </Button>
             <Button
               type="submit"
+              variant="default"
               disabled={isPending}
-              className="!bg-[#F0B90B] !text-gray-600 font-semibold shadow-sm hover:!bg-[#d4a00b] hover:shadow-md active:scale-[0.98]"
+              className="active:scale-[0.98]"
             >
               {isPending ? "Adding…" : "Add holding"}
             </Button>
@@ -904,8 +928,8 @@ function TradeDialog({
               className={`flex-1 cursor-pointer rounded-md py-1.5 text-sm font-semibold transition-all ${
                 mode === m
                   ? m === "buy"
-                    ? "bg-[#0ecb81] text-[#0b0e11]"
-                    : "bg-[#f6465d] text-white"
+                    ? "bg-[var(--up)] text-[var(--canvas-dark)]"
+                    : "bg-[var(--down)] text-white"
                   : "text-text-muted hover:text-text-strong"
               }`}
               onClick={() => {
@@ -934,7 +958,7 @@ function TradeDialog({
               {mode === "sell" && target && (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost-line"
                   size="sm"
                   className="shrink-0 border-hairline text-xs text-text-muted hover:text-text-strong"
                   onClick={() => setTradeUnits(String(target.units))}
@@ -977,10 +1001,10 @@ function TradeDialog({
           )}
 
           {mode === "sell" && target && parseFloat(tradeUnits) >= target.units && (
-            <p className="text-xs text-[#f6465d]">— will close position</p>
+            <p className="text-xs text-[var(--down)]">— will close position</p>
           )}
 
-          {error && <p className="text-xs text-[#f6465d]">{error}</p>}
+          {error && <p className="text-xs text-[var(--down)]">{error}</p>}
         </div>
 
         <DialogFooter>
@@ -990,8 +1014,8 @@ function TradeDialog({
           <Button
             className={
               mode === "buy"
-                ? "bg-[#0ecb81] text-[#0b0e11] hover:bg-[#0ecb81]/90"
-                : "bg-[#f6465d] text-white hover:bg-[#f6465d]/90"
+                ? "bg-[var(--up)] text-[var(--canvas-dark)] hover:bg-[var(--up)]/90"
+                : "bg-[var(--down)] text-white hover:bg-[var(--down)]/90"
             }
             onClick={handleSubmit}
             disabled={loading}
@@ -1052,8 +1076,8 @@ function DeleteConfirmDialog({
             Cancel
           </AlertDialogCancel>
           <Button
-            variant="outline"
-            className="border-[#0ecb81]/40 text-[#0ecb81] hover:bg-[#0ecb81]/10 hover:text-[#0ecb81]"
+            variant="ghost-line"
+            className="border-[var(--up)]/40 text-[var(--up)] hover:bg-[var(--up)]/10 hover:text-[var(--up)]"
             onClick={() => {
               onSellInstead();
               onClose();

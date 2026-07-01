@@ -176,8 +176,8 @@ export function StockChart({
             >
               <defs>
                 <linearGradient id={`sg_${ticker}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fcd535" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#fcd535" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#8b8bff" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#8b8bff" stopOpacity={0} />
                 </linearGradient>
               </defs>
 
@@ -219,7 +219,7 @@ export function StockChart({
               <Area
                 type="monotone"
                 dataKey="close"
-                stroke="#fcd535"
+                stroke="#8b8bff"
                 fill={`url(#sg_${ticker})`}
                 strokeWidth={2}
                 dot={false}
@@ -241,11 +241,11 @@ export function StockChart({
               {avgBuyP != null && avgBuyP > 0 && (
                 <ReferenceLine
                   y={avgBuyP}
-                  stroke="#f0b90b"
+                  stroke="#ff7a45"
                   strokeDasharray="4 4"
                   label={{
                     value: `Buy ${avgBuyP.toFixed(dp)}`,
-                    fill: "#fcd535",
+                    fill: "#8b8bff",
                     fontSize: 10,
                     position: "insideTopRight",
                   }}
