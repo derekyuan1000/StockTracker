@@ -119,7 +119,7 @@ function ProfilePage() {
 
         {/* Profile header */}
         <div className="mb-6 flex items-center gap-4">
-          <span className="grid size-12 place-items-center rounded-full bg-[var(--primary)] text-lg font-bold text-[#181a20]">
+          <span className="grid size-12 place-items-center rounded-full bg-[var(--primary)] text-lg font-bold text-[var(--on-primary)]">
             {profile.displayName.charAt(0).toUpperCase()}
           </span>
           <div>

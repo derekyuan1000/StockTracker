@@ -1,12 +1,24 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Settings } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { authClient, useSession } from "@/lib/auth-client";
+import { Button } from "./ui/button";
 import { Logo } from "./Logo";
 import { SiteFooter } from "./SiteFooter";
 import { TickerTape } from "./TickerTape";
 
-function PublicNav() {
+function useScrolled(threshold = 60) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > threshold);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [threshold]);
+  return scrolled;
+}
+
+function PublicNav({ onDark }: { onDark: boolean }) {
   const { data: session } = useSession();
   const navigate = useNavigate();
   const user = session?.user;
@@ -16,6 +28,10 @@ function PublicNav() {
     navigate({ to: "/login" });
   }
 
+  const link = `font-mono text-[11px] uppercase tracking-[0.08em] transition-colors ${
+    onDark ? "text-white/55 hover:text-white" : "text-text-muted hover:text-text-body"
+  }`;
+
   return (
     <div className="flex items-center gap-3">
       {user ? (
@@ -23,7 +39,11 @@ function PublicNav() {
           <Link
             to="/settings"
             aria-label="Settings"
-            className="grid size-8 place-items-center rounded-md text-text-muted transition-colors hover:bg-[var(--surface-elevated)] hover:text-text-body"
+            className={`grid size-8 place-items-center rounded-sm transition-colors ${
+              onDark
+                ? "text-white/60 hover:bg-white/10 hover:text-white"
+                : "text-text-muted hover:bg-[var(--surface-elevated)] hover:text-text-body"
+            }`}
           >
             <Settings className="size-4" />
           </Link>
@@ -35,70 +55,91 @@ function PublicNav() {
               className="size-7 rounded-full"
             />
           ) : (
-            <span className="grid size-7 place-items-center rounded-full bg-[var(--primary)] text-[11px] font-semibold text-[#181a20]">
+            <span className="grid size-7 place-items-center rounded-full bg-[var(--accent-mint)] text-[11px] font-semibold text-[var(--text-strong)]">
               {(user.name || user.email || "?").charAt(0).toUpperCase()}
             </span>
           )}
-          <Link
-            to="/dashboard"
-            className="text-[12px] font-medium text-text-muted transition-colors hover:text-text-body"
-          >
+          <Link to="/dashboard" className={link}>
             Dashboard
           </Link>
-          <button
-            onClick={handleSignOut}
-            className="text-[12px] font-medium text-text-muted transition-colors hover:text-text-body"
-          >
+          <button onClick={handleSignOut} className={link}>
             Sign out
           </button>
         </>
       ) : (
-        <Link
-          to="/login"
-          className="inline-flex items-center justify-center rounded-md bg-[var(--primary)] px-3 py-1.5 text-[12px] font-semibold text-[#181a20] transition-colors hover:opacity-90"
+        <Button
+          asChild
+          size="sm"
+          variant={onDark ? "mint" : "default"}
         >
-          Sign in
-        </Link>
+          <Link to="/login">Sign in</Link>
+        </Button>
       )}
     </div>
   );
 }
 
-export function PublicShell({ children }: { children: ReactNode }) {
+export function PublicShell({
+  children,
+  fullBleed = false,
+}: {
+  children: ReactNode;
+  fullBleed?: boolean;
+}) {
+  const scrolled = useScrolled(60);
+  const onDark = !scrolled;
+
+  const bandClass = scrolled
+    ? "bg-[var(--canvas)] text-[var(--text-strong)] border-b border-[var(--hairline)]"
+    : "bg-[var(--canvas-dark)] text-[var(--on-dark)] border-b border-white/10";
+
+  const navLink = (active = false) =>
+    `px-3 py-1 font-mono text-xs uppercase tracking-[0.08em] transition-colors ${
+      active
+        ? onDark
+          ? "text-[var(--on-dark)]"
+          : "text-text-strong"
+        : onDark
+          ? "text-white/45 hover:text-white/80"
+          : "text-text-muted hover:text-text-body"
+    }`;
+
   return (
     <div className="min-h-screen bg-canvas text-text-body">
-      <header className="sticky top-0 z-50 border-b border-hairline bg-canvas">
-        <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between px-6">
+      <header className={`sticky top-0 z-50 transition-colors duration-150 ${bandClass}`}>
+        <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-6">
           <div className="flex items-center gap-6">
             <Link to="/">
-              <Logo size={20} showWordmark />
+              <Logo size={20} showWordmark onDark={onDark} />
             </Link>
-            <span className="h-5 w-px bg-hairline" />
+            <span className={`h-5 w-px ${onDark ? "bg-white/15" : "bg-hairline"}`} />
             <nav className="flex items-center gap-1">
               <Link
                 to="/"
-                activeProps={{ className: "text-text-strong" }}
-                inactiveProps={{ className: "text-text-muted hover:text-text-body" }}
-                className="px-3 py-1 text-sm font-medium transition-colors"
+                activeProps={{ className: navLink(true) }}
+                inactiveProps={{ className: navLink(false) }}
               >
                 Home
               </Link>
               <Link
                 to="/community"
-                activeProps={{ className: "text-text-strong" }}
-                inactiveProps={{ className: "text-text-muted hover:text-text-body" }}
-                className="px-3 py-1 text-sm font-medium transition-colors"
+                activeProps={{ className: navLink(true) }}
+                inactiveProps={{ className: navLink(false) }}
               >
                 Community
               </Link>
             </nav>
           </div>
-          <PublicNav />
+          <PublicNav onDark={onDark} />
         </div>
         <TickerTape />
       </header>
 
-      <main className="mx-auto max-w-[1440px] px-6 py-8">{children}</main>
+      {fullBleed ? (
+        <main>{children}</main>
+      ) : (
+        <main className="mx-auto max-w-[1200px] px-6 py-8">{children}</main>
+      )}
 
       <SiteFooter />
     </div>

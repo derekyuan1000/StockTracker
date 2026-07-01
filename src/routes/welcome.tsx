@@ -50,7 +50,7 @@ function WelcomePage() {
           <Logo size={28} showWordmark />
         </div>
 
-        <div className="rounded-xl border border-hairline bg-[var(--surface-card)] p-8">
+        <div className="rounded-sm border border-hairline bg-[var(--surface-card)] p-8">
           <h1 className="text-xl font-bold tracking-tight text-text-strong">Welcome!</h1>
           <p className="mt-2 text-sm text-text-muted">
             Take a moment to set your preferences. You can change these any time in Settings.
@@ -108,7 +108,7 @@ function WelcomePage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 rounded-md bg-[var(--primary)] py-2.5 text-sm font-semibold text-[#181a20] transition-colors hover:opacity-90 disabled:opacity-60"
+              className="flex-1 rounded-md bg-[var(--primary)] py-2.5 text-sm font-semibold text-[var(--on-primary)] transition-colors hover:opacity-90 disabled:opacity-60"
             >
               {saving ? "Saving…" : "Get started"}
             </button>
