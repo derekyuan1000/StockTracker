@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as ResearchRouteImport } from './routes/research'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HoldingsRouteImport } from './routes/holdings'
 import { Route as FundamentalsRouteImport } from './routes/fundamentals'
@@ -36,11 +35,6 @@ const TransactionsRoute = TransactionsRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResearchRoute = ResearchRouteImport.update({
-  id: '/research',
-  path: '/research',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -97,7 +91,6 @@ export interface FileRoutesByFullPath {
   '/fundamentals': typeof FundamentalsRoute
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
-  '/research': typeof ResearchRoute
   '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
@@ -112,7 +105,6 @@ export interface FileRoutesByTo {
   '/fundamentals': typeof FundamentalsRoute
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
-  '/research': typeof ResearchRoute
   '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
@@ -128,7 +120,6 @@ export interface FileRoutesById {
   '/fundamentals': typeof FundamentalsRoute
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
-  '/research': typeof ResearchRoute
   '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
@@ -145,7 +136,6 @@ export interface FileRouteTypes {
     | '/fundamentals'
     | '/holdings'
     | '/login'
-    | '/research'
     | '/settings'
     | '/transactions'
     | '/welcome'
@@ -160,7 +150,6 @@ export interface FileRouteTypes {
     | '/fundamentals'
     | '/holdings'
     | '/login'
-    | '/research'
     | '/settings'
     | '/transactions'
     | '/welcome'
@@ -175,7 +164,6 @@ export interface FileRouteTypes {
     | '/fundamentals'
     | '/holdings'
     | '/login'
-    | '/research'
     | '/settings'
     | '/transactions'
     | '/welcome'
@@ -191,7 +179,6 @@ export interface RootRouteChildren {
   FundamentalsRoute: typeof FundamentalsRoute
   HoldingsRoute: typeof HoldingsRoute
   LoginRoute: typeof LoginRoute
-  ResearchRoute: typeof ResearchRoute
   SettingsRoute: typeof SettingsRoute
   TransactionsRoute: typeof TransactionsRoute
   WelcomeRoute: typeof WelcomeRoute
@@ -220,13 +207,6 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/research': {
-      id: '/research'
-      path: '/research'
-      fullPath: '/research'
-      preLoaderRoute: typeof ResearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -303,7 +283,6 @@ const rootRouteChildren: RootRouteChildren = {
   FundamentalsRoute: FundamentalsRoute,
   HoldingsRoute: HoldingsRoute,
   LoginRoute: LoginRoute,
-  ResearchRoute: ResearchRoute,
   SettingsRoute: SettingsRoute,
   TransactionsRoute: TransactionsRoute,
   WelcomeRoute: WelcomeRoute,

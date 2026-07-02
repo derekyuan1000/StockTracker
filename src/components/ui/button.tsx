@@ -10,10 +10,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-[var(--primary)] text-[var(--on-primary)] hover:opacity-90 h-11 px-6",
-        mint: "bg-[var(--accent-mint)] text-[var(--text-strong)] hover:opacity-90 h-11 px-6",
+        mint: "bg-[var(--accent-mint)] text-[#010120] hover:opacity-90 h-11 px-6",
         "ghost-line":
           "bg-transparent text-[var(--text-body)] border border-[var(--hairline)] hover:bg-[var(--surface-elevated)] h-11 px-6",
-        ghost: "bg-transparent text-[var(--text-body)] hover:bg-[var(--surface-elevated)] h-11 px-6",
+        ghost:
+          "bg-transparent text-[var(--text-body)] hover:bg-[var(--surface-elevated)] h-11 px-6",
         link: "text-[var(--text-body)] underline-offset-4 hover:underline normal-case tracking-normal font-sans text-sm h-auto p-0",
         destructive: "bg-[var(--down)] text-white hover:opacity-90 h-11 px-6",
       },

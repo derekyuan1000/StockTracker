@@ -10,7 +10,8 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
-    defaultPreloadStaleTime: 0,
+    defaultPreload: "intent",
+    defaultPreloadStaleTime: 30_000,
     // Loaders block on slow upstream APIs (Yahoo Finance), so surface a
     // skeleton instead of freezing the previous page. The top progress bar
     // (mounted in __root) covers sub-threshold transitions.

@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "reason": "DESIGN.md documents Inter as intentional open-source substitute for The Future display sans",
+        "createdAt": "2026-07-02T16:17:37.615Z"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "jetbrains mono",
+        "reason": "DESIGN.md documents JetBrains Mono as intentional open-source substitute for PP Neue Montreal Mono",
+        "createdAt": "2026-07-02T16:17:37.694Z"
+      }
+    ]
+  }
+}

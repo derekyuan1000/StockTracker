@@ -26,9 +26,7 @@ function TickerCell({ item, onDark }: { item: TickerItem; onDark: boolean }) {
       >
         {pct}
       </span>
-      <span
-        className={`mx-4 ${onDark ? "text-white/40" : "text-[var(--text-muted)] opacity-40"}`}
-      >
+      <span className={`mx-4 ${onDark ? "text-white/40" : "text-[var(--text-muted)] opacity-40"}`}>
         ·
       </span>
     </span>
@@ -44,7 +42,7 @@ const FALLBACK: TickerItem[] = [
 ];
 
 export function TickerTape({ onDark = false }: { onDark?: boolean }) {
-  const { data = FALLBACK } = useQuery({
+  const { data = FALLBACK, isLoading } = useQuery({
     queryKey: ["public-ticker"],
     queryFn: () => getPublicTicker(),
     staleTime: 60_000,
@@ -59,14 +57,26 @@ export function TickerTape({ onDark = false }: { onDark?: boolean }) {
         onDark ? "border-b border-white/10" : "border-b border-hairline"
       }`}
     >
-      <div
-        className="flex w-max"
-        style={{ animation: "ticker-scroll 25s linear infinite", willChange: "transform" }}
-      >
-        {[...items, ...items, ...items].map((item, i) => (
-          <TickerCell key={`${item.ticker}-${i}`} item={item} onDark={onDark} />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="flex items-center gap-6 px-4">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div
+              key={i}
+              className={`h-3 animate-pulse rounded ${onDark ? "bg-white/15" : "bg-[var(--surface-elevated)]"}`}
+              style={{ width: `${56 + (i % 3) * 18}px` }}
+            />
+          ))}
+        </div>
+      ) : (
+        <div
+          className="flex w-max"
+          style={{ animation: "ticker-scroll var(--ticker-speed, 25s) linear infinite", willChange: "transform" }}
+        >
+          {[...items, ...items, ...items].map((item, i) => (
+            <TickerCell key={`${item.ticker}-${i}`} item={item} onDark={onDark} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

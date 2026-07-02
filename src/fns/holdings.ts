@@ -253,7 +253,7 @@ export const addLot = createServerFn({ method: "POST" })
   .validator((raw: unknown) =>
     z
       .object({
-        ticker: z.string(),
+        ticker: z.string().min(1).max(20),
         units: z.number().positive(),
         price: z.number().positive(),
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -288,7 +288,7 @@ export const sellUnits = createServerFn({ method: "POST" })
   .validator((raw: unknown) =>
     z
       .object({
-        ticker: z.string(),
+        ticker: z.string().min(1).max(20),
         units: z.number().positive(),
         price: z.number().positive(), // sell price in pence (GBp) or GBP
       })
@@ -345,7 +345,7 @@ export const sellUnits = createServerFn({ method: "POST" })
 
 export const deleteHolding = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((raw: unknown) => z.object({ ticker: z.string() }).parse(raw))
+  .validator((raw: unknown) => z.object({ ticker: z.string().min(1).max(20) }).parse(raw))
   .handler(async ({ data, context }) => {
     const { userId } = context;
     // lots cascade-delete via FK onDelete:'cascade'
@@ -460,7 +460,13 @@ export const updateCash = createServerFn({ method: "POST" })
 export const saveNotes = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator((raw: unknown) =>
-    z.object({ ticker: z.string(), thesis: z.string(), bearCase: z.string() }).parse(raw),
+    z
+      .object({
+        ticker: z.string().min(1).max(20),
+        thesis: z.string().max(5000),
+        bearCase: z.string().max(5000),
+      })
+      .parse(raw),
   )
   .handler(async ({ data, context }) => {
     const { userId } = context;
@@ -472,10 +478,12 @@ export const saveNotes = createServerFn({ method: "POST" })
 
 // ─── getBenchmarkHistory ─────────────────────────────────────────────────────
 
+const BENCHMARK_RANGES = ["1D", "5D", "1M", "6M", "YTD", "1Y", "5Y", "All"] as const;
+
 export const getBenchmarkHistory = createServerFn()
   .middleware([authMiddleware])
   .validator((raw: unknown) =>
-    z.object({ ticker: z.string().min(1).max(20), range: z.string() }).parse(raw),
+    z.object({ ticker: z.string().min(1).max(20), range: z.enum(BENCHMARK_RANGES) }).parse(raw),
   )
   .handler(async ({ data, context }) => {
     const { userId } = context;
@@ -542,7 +550,7 @@ export const getBenchmarkHistory = createServerFn()
 
 // ─── getPortfolioHistory ─────────────────────────────────────────────────────
 
-const RANGES = ["1D", "5D", "1M", "6M", "YTD", "1Y", "All"] as const;
+const RANGES = ["1D", "5D", "15D", "1M", "6M", "YTD", "1Y", "All"] as const;
 
 export const getPortfolioHistory = createServerFn()
   .middleware([authMiddleware])
@@ -729,8 +737,8 @@ export const addTrade = createServerFn({ method: "POST" })
     z
       .object({
         type: z.enum(["buy", "sell", "deposit", "fee"]),
-        ticker: z.string().default(""),
-        name: z.string().default(""),
+        ticker: z.string().max(20).default(""),
+        name: z.string().max(200).default(""),
         units: z.number().default(0),
         price: z.number().default(0),
         amountGBP: z.number(),
@@ -793,7 +801,7 @@ export const getPriceForDate = createServerFn()
 
 export const clearFundamentalsCache = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator((raw: unknown) => z.object({ ticker: z.string() }).parse(raw))
+  .validator((raw: unknown) => z.object({ ticker: z.string().min(1).max(20) }).parse(raw))
   .handler(async ({ data }) => {
     await db.delete(quoteCache).where(eq(quoteCache.ticker, data.ticker));
   });

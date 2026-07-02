@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Github, Linkedin, Mail, Coffee, Globe } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
 
 const social = [
   {
@@ -38,7 +39,6 @@ const navColumns: {
     heading: "Research",
     links: [
       { label: "Fundamentals", to: "/fundamentals" },
-      { label: "Research", to: "/research" },
       { label: "Community", to: "/community" },
     ],
   },
@@ -52,12 +52,20 @@ const navColumns: {
 ];
 
 export function SiteFooter() {
+  const { data: session } = useSession();
+
+  const columns = navColumns.map((col) =>
+    col.heading === "Account"
+      ? { ...col, links: col.links.filter((l) => !(l.label === "Sign in" && !!session)) }
+      : col,
+  );
+
   return (
     <footer className="bg-[var(--canvas-dark)] text-[var(--on-dark)]">
       <div className="mx-auto max-w-[1200px] px-6 py-20">
         {/* Upper: nav columns */}
         <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-4">
-          {navColumns.map((col) => (
+          {columns.map((col) => (
             <div key={col.heading}>
               <p className="eyebrow text-white/40">{col.heading}</p>
               <ul className="mt-4 space-y-2.5">
@@ -95,29 +103,10 @@ export function SiteFooter() {
           </div>
         </div>
 
-        {/* Massive gradient-hairline wordmark banner */}
-        <div className="mt-16 overflow-hidden border-t border-white/10 pt-8">
-          <p
-            className="select-none pointer-events-none text-[clamp(4rem,15vw,12rem)] font-medium leading-none tracking-[-0.03em]"
-            style={{
-              background: "var(--gradient-brand)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              opacity: 0.15,
-            }}
-          >
-            STOCKTRACKER
-          </p>
-        </div>
-
         {/* Legal / copyright */}
-        <div className="mt-8 flex flex-col gap-2 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-16 flex flex-col gap-2 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-white/40">
             &copy; 2026 Derek Yuan · All rights reserved
-          </p>
-          <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-white/30">
-            Prices delayed up to 15 min · Demonstration data · Not investment advice
           </p>
         </div>
       </div>

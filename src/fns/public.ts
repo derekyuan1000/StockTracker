@@ -2,9 +2,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/server/db/client";
-import { portfolioMeta, trades, userSettings } from "@/server/db/schema";
+import {
+  holdings,
+  lots,
+  portfolioMeta,
+  quoteCache,
+  trades,
+  userSettings,
+} from "@/server/db/schema";
 import { user } from "@/server/db/auth-schema";
-import { fetchTickerTape } from "@/server/market/yahoo";
+import { fetchHistory, fetchTickerTape } from "@/server/market/yahoo";
 
 export type PublicTrade = {
   displayName: string;
@@ -23,6 +30,8 @@ export type LeaderboardEntry = {
   costGBP: number;
   gainGBP: number;
   gainPct: number;
+  monthGainPct: number | null;
+  yearGainPct: number | null;
 };
 
 export type TickerItem = {
@@ -70,8 +79,7 @@ export const getPublicFeed = createServerFn()
     return rows as PublicTrade[];
   });
 
-// Leaderboard: all public users ranked by realised G/L % — uses trade history
-// for cost basis so users with no open lots still appear.
+// Leaderboard: public users ranked by total G/L % (realised + unrealised from cache).
 export const getPublicLeaderboard = createServerFn().handler(
   async (): Promise<LeaderboardEntry[]> => {
     const publicUsers = await db
@@ -84,24 +92,82 @@ export const getPublicLeaderboard = createServerFn().handler(
 
     const entries = await Promise.all(
       publicUsers.map(async ({ userId, displayName }) => {
-        const [buyRows, [meta]] = await Promise.all([
+        const [buyRows, [meta], holdingRows, lotRows] = await Promise.all([
           db
             .select({ amountGBP: trades.amountGBP })
             .from(trades)
             .where(and(eq(trades.userId, userId), eq(trades.type, "buy"))),
           db.select().from(portfolioMeta).where(eq(portfolioMeta.userId, userId)).limit(1),
+          db
+            .select({ ticker: holdings.ticker, currency: holdings.currency })
+            .from(holdings)
+            .where(eq(holdings.userId, userId)),
+          db
+            .select({ ticker: lots.ticker, units: lots.units, buyPrice: lots.buyPrice })
+            .from(lots)
+            .where(eq(lots.userId, userId)),
         ]);
 
         const totalInvestedGBP = buyRows.reduce((sum, t) => sum + t.amountGBP, 0);
         const realisedGL = meta?.realisedGL ?? 0;
-        const gainPct = totalInvestedGBP > 0 ? (realisedGL / totalInvestedGBP) * 100 : 0;
+
+        const lotsByTicker = new Map<string, { units: number; buyPrice: number }[]>();
+        for (const lot of lotRows) {
+          const arr = lotsByTicker.get(lot.ticker) ?? [];
+          arr.push({ units: lot.units, buyPrice: lot.buyPrice });
+          lotsByTicker.set(lot.ticker, arr);
+        }
+
+        let unrealisedGL = 0;
+        let valueNow = 0,
+          value1M = 0,
+          value1Y = 0;
+
+        await Promise.all(
+          holdingRows.map(async (h) => {
+            const tickerLots = lotsByTicker.get(h.ticker) ?? [];
+            const totalUnits = tickerLots.reduce((s, l) => s + l.units, 0);
+            if (totalUnits <= 0) return;
+            const avgBuyP = tickerLots.reduce((s, l) => s + l.buyPrice * l.units, 0) / totalUnits;
+
+            const [cachedQuote, hist1M, hist1Y] = await Promise.all([
+              db
+                .select({ payload: quoteCache.payload })
+                .from(quoteCache)
+                .where(and(eq(quoteCache.ticker, h.ticker), eq(quoteCache.kind, "quote")))
+                .limit(1)
+                .then(([r]) => r),
+              fetchHistory(h.ticker, "1M"),
+              fetchHistory(h.ticker, "1Y"),
+            ]);
+
+            let lastPrice = avgBuyP;
+            if (cachedQuote?.payload) {
+              const q = cachedQuote.payload as Record<string, unknown>;
+              if (typeof q.lastPrice === "number" && q.lastPrice > 0) lastPrice = q.lastPrice;
+            }
+
+            const divisor = h.currency === "GBp" ? 100 : 1;
+            unrealisedGL += (lastPrice * totalUnits) / divisor - (avgBuyP * totalUnits) / divisor;
+            valueNow += (lastPrice * totalUnits) / divisor;
+            value1M += ((hist1M[0]?.close ?? lastPrice) * totalUnits) / divisor;
+            value1Y += ((hist1Y[0]?.close ?? lastPrice) * totalUnits) / divisor;
+          }),
+        );
+
+        const totalGainGBP = realisedGL + unrealisedGL;
+        const gainPct = totalInvestedGBP > 0 ? (totalGainGBP / totalInvestedGBP) * 100 : 0;
+        const monthGainPct = value1M > 0 ? ((valueNow - value1M) / value1M) * 100 : null;
+        const yearGainPct = value1Y > 0 ? ((valueNow - value1Y) / value1Y) * 100 : null;
 
         return {
           displayName: displayName ?? "Anonymous",
           userId,
           costGBP: totalInvestedGBP,
-          gainGBP: realisedGL,
+          gainGBP: totalGainGBP,
           gainPct,
+          monthGainPct,
+          yearGainPct,
         };
       }),
     );

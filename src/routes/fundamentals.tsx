@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { AppShell } from "@/components/AppShell";
+import { useTheme } from "@/components/ThemeProvider";
 import { StockChart } from "@/components/StockChart";
 import {
   clearFundamentalsCache,
@@ -64,6 +65,8 @@ export const Route = createFileRoute("/fundamentals")({
 });
 
 function FundamentalsPage() {
+  const { resolvedTheme } = useTheme();
+  const onDark = resolvedTheme === "dark";
   const { data: portfolio } = useQuery({
     queryKey: ["portfolio"],
     queryFn: () => getPortfolio(),
@@ -161,10 +164,16 @@ function FundamentalsPage() {
   if (!h) {
     return (
       <AppShell>
-        <div className="-mx-6 -mt-8 mb-8 bg-[var(--canvas-dark)] px-8 py-16 text-[var(--on-dark)]">
-          <p className="eyebrow text-[var(--accent-mint)]">Fundamentals</p>
+        <div
+          className={`-mx-6 -mt-8 mb-8 px-8 py-16 ${onDark ? "bg-[var(--canvas-dark)] text-[var(--on-dark)]" : "bg-canvas text-text-strong"}`}
+        >
+          <p className={`eyebrow ${onDark ? "text-[var(--accent-mint)]" : "text-text-muted"}`}>
+            Fundamentals
+          </p>
           <h1 className="mt-3 text-4xl font-medium tracking-[-0.02em]">Fundamentals</h1>
-          <p className="mt-3 max-w-xl text-[15px] text-white/60">
+          <p
+            className={`mt-3 max-w-xl text-[15px] ${onDark ? "text-white/60" : "text-text-muted"}`}
+          >
             No holdings to display. Add holdings to get started.
           </p>
         </div>
@@ -184,11 +193,15 @@ function FundamentalsPage() {
 
   return (
     <AppShell>
-      {/* ── Dark band header ── */}
-      <div className="-mx-6 -mt-8 mb-8 bg-[var(--canvas-dark)] px-8 py-16 text-[var(--on-dark)]">
-        <p className="eyebrow text-[var(--accent-mint)]">Fundamentals</p>
+      {/* ── Page header ── */}
+      <div
+        className={`-mx-6 -mt-8 mb-8 px-8 py-16 ${onDark ? "bg-[var(--canvas-dark)] text-[var(--on-dark)]" : "bg-canvas text-text-strong"}`}
+      >
+        <p className={`eyebrow ${onDark ? "text-[var(--accent-mint)]" : "text-text-muted"}`}>
+          Fundamentals
+        </p>
         <h1 className="mt-3 text-4xl font-medium tracking-[-0.02em]">Fundamentals</h1>
-        <p className="mt-3 max-w-xl text-[15px] text-white/60">
+        <p className={`mt-3 max-w-xl text-[15px] ${onDark ? "text-white/60" : "text-text-muted"}`}>
           Per-holding deep dive — chart, valuation, growth, financial health and analyst view.
         </p>
       </div>
@@ -586,7 +599,9 @@ function AnalystConsensusCard({
               {fmtPct(upside, 1)} upside
             </span>
           </div>
-          <div className="num mb-3 text-2xl font-medium text-text-strong">{fmtNum(h.targetP, 0)}</div>
+          <div className="num mb-3 text-2xl font-medium text-text-strong">
+            {fmtNum(h.targetP, 0)}
+          </div>
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
               <div className="num text-sm text-text-body">{fmtNum(h.analyst.targetLow, 0)}</div>
@@ -692,7 +707,9 @@ function GrowthStat({ label, v, tone }: { label: string; v?: string; tone?: numb
   return (
     <div className="border-b border-hairline pb-5 last:border-b-0 last:pb-0">
       <div className="mb-1 text-[11px] text-text-muted">{label}</div>
-      <div className={`num text-2xl font-medium ${tone != null ? dirClass(tone) : "text-text-body"}`}>
+      <div
+        className={`num text-2xl font-medium ${tone != null ? dirClass(tone) : "text-text-body"}`}
+      >
         {v ?? "—"}
       </div>
     </div>
@@ -1048,7 +1065,13 @@ function AnalystBar({ buy, hold, sell }: { buy: number; hold: number; sell: numb
     <>
       <div className="flex h-2.5 overflow-hidden rounded-full">
         <div style={{ width: `${(buy / total) * 100}%`, background: "var(--up)", opacity: 0.8 }} />
-        <div style={{ width: `${(hold / total) * 100}%`, background: "var(--text-muted)", opacity: 0.6 }} />
+        <div
+          style={{
+            width: `${(hold / total) * 100}%`,
+            background: "var(--text-muted)",
+            opacity: 0.6,
+          }}
+        />
         <div
           style={{ width: `${(sell / total) * 100}%`, background: "var(--down)", opacity: 0.8 }}
         />

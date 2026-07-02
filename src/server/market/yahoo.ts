@@ -143,16 +143,18 @@ async function rawChart(
 
 // ─── Range → Yahoo params ─────────────────────────────────────────────────────
 
-const RANGE_PARAMS: Record<HistoryRange, { range: string; interval: string }> = {
-  "1D": { range: "1d", interval: "5m" },
-  "5D": { range: "5d", interval: "15m" },
-  "1M": { range: "1mo", interval: "1d" },
-  "6M": { range: "6mo", interval: "1d" },
-  YTD: { range: "ytd", interval: "1d" },
-  "1Y": { range: "1y", interval: "1d" },
-  "5Y": { range: "5y", interval: "1wk" },
-  All: { range: "max", interval: "1d" },
-};
+const RANGE_PARAMS: Record<HistoryRange, { range: string; interval: string; limitDays?: number }> =
+  {
+    "1D": { range: "1d", interval: "5m" },
+    "5D": { range: "5d", interval: "15m" },
+    "15D": { range: "1mo", interval: "1d", limitDays: 15 },
+    "1M": { range: "1mo", interval: "1d" },
+    "6M": { range: "6mo", interval: "1d" },
+    YTD: { range: "ytd", interval: "1d" },
+    "1Y": { range: "1y", interval: "1d" },
+    "5Y": { range: "5y", interval: "1wk" },
+    All: { range: "max", interval: "1d" },
+  };
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
@@ -416,12 +418,12 @@ export async function fetchEarnings(ticker: string): Promise<EarningsData> {
 }
 
 export async function fetchHistory(ticker: string, range: HistoryRange = "6M"): Promise<OHLCBar[]> {
-  const { range: r, interval } = RANGE_PARAMS[range];
+  const { range: r, interval, limitDays } = RANGE_PARAMS[range];
   return cached(`${ticker}:${range}`, "history", 3600, async () => {
     const chart = await rawChart(ticker, r, interval);
     const timestamps: number[] = (chart as any).timestamp ?? [];
     const ohlcv = (chart as any).indicators?.quote?.[0] ?? {};
-    return timestamps
+    const bars = timestamps
       .map((ts, i) => ({
         ts: ts * 1000,
         open: ohlcv.open?.[i] ?? 0,
@@ -431,6 +433,11 @@ export async function fetchHistory(ticker: string, range: HistoryRange = "6M"): 
         volume: ohlcv.volume?.[i] ?? 0,
       }))
       .filter((bar) => bar.close > 0) satisfies OHLCBar[];
+    if (limitDays) {
+      const cutoff = Date.now() - limitDays * 24 * 60 * 60 * 1000;
+      return bars.filter((b) => b.ts >= cutoff);
+    }
+    return bars;
   });
 }
 

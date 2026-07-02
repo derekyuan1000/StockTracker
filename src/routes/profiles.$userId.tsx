@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, ArrowLeft, BarChart2, TrendingUp } from "lucide-react";
+import { Activity, ArrowLeft, BarChart2 } from "lucide-react";
 import { PublicShell } from "@/components/PublicShell";
+import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -69,6 +70,8 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
 
 function ProfilePage() {
   const { userId } = Route.useParams();
+  const { resolvedTheme } = useTheme();
+  const onDark = resolvedTheme === "dark";
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["public-profile", userId],
@@ -87,7 +90,10 @@ function ProfilePage() {
             ))}
           </div>
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="mb-2 h-14 animate-pulse rounded-sm bg-[var(--surface-elevated)]" />
+            <div
+              key={i}
+              className="mb-2 h-14 animate-pulse rounded-sm bg-[var(--surface-elevated)]"
+            />
           ))}
         </div>
       </PublicShell>
@@ -111,30 +117,31 @@ function ProfilePage() {
     );
   }
 
-  const gl = profile.stats.realisedGL;
-  const glUp = gl >= 0;
-
   return (
     <PublicShell>
-      {/* Dark band profile header */}
-      <div className="-mx-6 bg-[var(--canvas-dark)] px-6 text-[var(--on-dark)]">
+      {/* Profile header */}
+      <div
+        className={`-mx-6 px-6 ${onDark ? "bg-[var(--canvas-dark)] text-[var(--on-dark)]" : "bg-canvas text-text-strong"}`}
+      >
         <div className="py-10">
           <Link
             to="/community"
-            className="mb-6 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.08em] text-white/50 transition-colors hover:text-white"
+            className={`mb-6 inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-[0.08em] transition-colors ${onDark ? "text-white/50 hover:text-white" : "text-text-muted hover:text-text-body"}`}
           >
             <ArrowLeft className="size-4" /> Community
           </Link>
-          <p className="eyebrow text-white/50">Portfolio</p>
+          <p className={`eyebrow ${onDark ? "text-white/50" : "text-text-muted"}`}>Portfolio</p>
           <div className="mt-3 flex items-center gap-4">
-            <span className="grid size-14 shrink-0 place-items-center rounded-full bg-[var(--accent-mint)] font-mono text-xl text-[var(--text-strong)]">
+            <span className="grid size-14 shrink-0 place-items-center rounded-full bg-[var(--accent-mint)] font-mono text-xl text-[var(--canvas-dark)]">
               {profile.displayName.charAt(0).toUpperCase()}
             </span>
             <div>
-              <h1 className="text-4xl font-medium leading-[1.05] tracking-[-0.02em] text-[var(--on-dark)] md:text-5xl">
+              <h1 className="text-4xl font-medium leading-[1.05] tracking-[-0.02em] md:text-5xl">
                 {profile.displayName}
               </h1>
-              <p className="mt-1 font-mono text-xs uppercase tracking-[0.08em] text-white/50">
+              <p
+                className={`mt-1 font-mono text-xs uppercase tracking-[0.08em] ${onDark ? "text-white/50" : "text-text-muted"}`}
+              >
                 {profile.stats.tradeCount} trades · Public portfolio
               </p>
             </div>
@@ -144,16 +151,11 @@ function ProfilePage() {
 
       <div className="max-w-3xl pt-8">
         {/* Stats */}
-        <div className="mb-8 grid grid-cols-3 gap-3">
+        <div className="mb-8 grid grid-cols-2 gap-3">
           <StatCard
             icon={<BarChart2 className="size-4" />}
             label="Total invested"
             value={`£${profile.stats.totalInvestedGBP.toFixed(0)}`}
-          />
-          <StatCard
-            icon={<TrendingUp className="size-4" />}
-            label="Realised G/L"
-            value={`${glUp ? "+" : ""}£${gl.toFixed(0)}`}
           />
           <StatCard
             icon={<Activity className="size-4" />}
