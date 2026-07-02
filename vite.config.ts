@@ -36,12 +36,6 @@ export default defineConfig({
   },
   nitro: {
     preset: "vercel",
-    handlers: [
-      {
-        route: "/api/auth/**",
-        handler: "~/src/server/auth-route",
-      },
-    ],
   },
   vite: {
     plugins: [loadDevVars()],
