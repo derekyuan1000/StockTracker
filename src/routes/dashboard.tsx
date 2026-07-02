@@ -84,8 +84,8 @@ export const Route = createFileRoute("/dashboard")({
   component: SummaryPage,
 });
 
-type Range = "1D" | "5D" | "1M" | "6M" | "YTD" | "1Y" | "All";
-const RANGES: Range[] = ["1D", "5D", "1M", "6M", "YTD", "1Y", "All"];
+type Range = "1D" | "5D" | "15D" | "1M" | "6M" | "YTD" | "1Y" | "All";
+const RANGES: Range[] = ["1D", "5D", "15D", "1M", "6M", "YTD", "1Y", "All"];
 
 const BENCHMARKS = [
   { label: "vs Index…", ticker: "" },
@@ -97,21 +97,20 @@ const BENCHMARKS = [
   { label: "Vanguard FTSE All-World", ticker: "VWRL.L" },
 ] as const;
 
-// Brand-aligned chart palette — periwinkle / orange / magenta / mint family,
-// no Binance yellow. Two accent hues (orange #ff7a45, magenta #e5484d,
-// periwinkle #8b8bff) plus cool supporting tones.
+// Brand-aligned chart palette — periwinkle / orange / magenta / mint family.
+// DESIGN.md exact stops: periwinkle #bdbbff, orange #fc4c02, magenta #ef2cc1.
 const SECTOR_COLORS: Record<string, string> = {
-  Fund: "#8b8bff",
+  Fund: "#bdbbff",
   ETF: "#a78bfa",
   MUTUALFUND: "#a78bfa",
-  Bond: "#ff7a45",
-  BOND: "#ff7a45",
-  Gilt: "#ff7a45",
+  Bond: "#fc4c02",
+  BOND: "#fc4c02",
+  Gilt: "#fc4c02",
   Future: "#fb923c",
   FUTURE: "#fb923c",
   Technology: "#f472b6",
   Tech: "#f472b6",
-  Pharma: "#8b8bff",
+  Pharma: "#bdbbff",
   Banking: "#22d3ee",
   Defence: "#818cf8",
   Consumer: "#f87171",
@@ -130,17 +129,17 @@ const SECTOR_COLORS: Record<string, string> = {
 };
 
 const STOCK_PALETTE = [
-  "#8b8bff",
+  "#bdbbff",
   "#60a5fa",
   "#34d399",
-  "#ff7a45",
+  "#fc4c02",
   "#a78bfa",
   "#fb923c",
   "#22d3ee",
   "#4ade80",
   "#f87171",
   "#818cf8",
-  "#e5484d",
+  "#ef2cc1",
   "#38bdf8",
   "#86efac",
   "#c084fc",
@@ -165,7 +164,7 @@ const CHART_DOWN = "var(--down)";
 
 function SummaryPage() {
   const queryClient = useQueryClient();
-  const { data: portfolio } = useQuery({
+  const { data: portfolio, isLoading: portfolioLoading } = useQuery({
     queryKey: ["portfolio"],
     queryFn: () => getPortfolio(),
   });
@@ -175,7 +174,16 @@ function SummaryPage() {
   const realisedGL = portfolio?.realisedGL ?? 0;
 
   const p = useMemo(() => compute(holdings, cashGBP), [holdings, cashGBP]);
-  const [range, setRange] = useState<Range>("1Y");
+  const [range, setRange] = useState<Range>(() => {
+    try {
+      const stored = localStorage.getItem("st-default-range");
+      if (stored) {
+        const r = JSON.parse(stored) as string;
+        if ((RANGES as readonly string[]).includes(r)) return r as Range;
+      }
+    } catch {}
+    return "1Y";
+  });
 
   const { data: history = [], isFetching: historyFetching } = useQuery({
     queryKey: ["portfolio-history", range],
@@ -326,24 +334,6 @@ function SummaryPage() {
 
   return (
     <AppShell>
-      {/* PAGE HEADER — dark editorial band */}
-      <header className="-mx-6 -mt-8 mb-8 bg-[var(--canvas-dark)] px-8 py-16 text-[var(--on-dark)]">
-        <div className="mx-auto max-w-[1200px]">
-          <p className="eyebrow text-white/50">Portfolio Overview</p>
-          <h1 className="mt-3 text-4xl font-medium tracking-[-0.02em] text-[var(--on-dark)]">
-            {fmtGBP(p.totalValue)}
-          </h1>
-          <p
-            className="mt-3 font-mono text-sm tabular-nums"
-            style={{
-              color: p.dayChangeGBP >= 0 ? "var(--up)" : "var(--down)",
-            }}
-          >
-            {fmtGBPSigned(p.dayChangeGBP)} ({fmtPct(p.dayChangePct)}) today
-          </p>
-        </div>
-      </header>
-
       {/* HERO: KPI + performance chart */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
         <div className="rounded-sm border border-hairline bg-surface p-6">
@@ -381,11 +371,17 @@ function SummaryPage() {
               <div className="eyebrow text-text-muted">Performance</div>
               <div className="mt-1 flex items-baseline gap-3">
                 <div className="num text-2xl font-semibold text-text-strong">
-                  {fmtGBP(lastValue)}
+                  {historyFetching && history.length === 0 ? (
+                    <span className="inline-block h-7 w-28 animate-pulse rounded bg-[var(--surface-elevated)] align-middle" />
+                  ) : (
+                    fmtGBP(lastValue)
+                  )}
                 </div>
-                <div className={`num text-sm font-medium ${dirClass(gainPct)}`}>
-                  {fmtPct(gainPct)} vs cost
-                </div>
+                {(!historyFetching || history.length > 0) && (
+                  <div className={`num text-sm font-medium ${dirClass(gainPct)}`}>
+                    {fmtPct(gainPct)} vs cost
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -409,7 +405,7 @@ function SummaryPage() {
                   </option>
                 ))}
               </select>
-              <div className="flex flex-wrap gap-0.5 rounded-sm bg-[var(--surface-elevated)] p-1">
+              <div className="grid grid-cols-4 gap-0.5 rounded-sm bg-[var(--surface-elevated)] p-1">
                 {RANGES.map((r) => (
                   <button
                     key={r}
@@ -417,7 +413,7 @@ function SummaryPage() {
                       setRange(r);
                       setPerfZoomDomain(null);
                     }}
-                    className={`rounded-xs px-2.5 py-1 font-mono text-xs uppercase tracking-[0.04em] tabular-nums transition-colors ${
+                    className={`rounded-xs px-2 py-1 font-mono text-xs uppercase tracking-[0.04em] tabular-nums transition-colors text-center ${
                       range === r
                         ? "bg-[var(--primary)] text-[var(--on-primary)]"
                         : "text-text-muted hover:text-text-body"
@@ -462,8 +458,8 @@ function SummaryPage() {
               >
                 <defs>
                   <linearGradient id="perfGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#8b8bff" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#8b8bff" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#bdbbff" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#bdbbff" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis
@@ -490,7 +486,11 @@ function SummaryPage() {
                   width={56}
                 />
                 <Tooltip
-                  cursor={{ stroke: "var(--brand-periwinkle)", strokeWidth: 1, strokeDasharray: "3 3" }}
+                  cursor={{
+                    stroke: "var(--brand-periwinkle)",
+                    strokeWidth: 1,
+                    strokeDasharray: "3 3",
+                  }}
                   contentStyle={CHART_TOOLTIP_STYLE}
                   labelStyle={CHART_TOOLTIP_LABEL}
                   itemStyle={CHART_TOOLTIP_ITEM}
@@ -518,7 +518,7 @@ function SummaryPage() {
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="#8b8bff"
+                  stroke="#bdbbff"
                   strokeWidth={2}
                   fill="url(#perfGrad)"
                   isAnimationActive={false}
@@ -725,11 +725,7 @@ function SummaryPage() {
           <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead
-                  className="pl-6 text-[var(--brand-periwinkle)]"
-                  style={{ borderLeft: "3px solid var(--brand-periwinkle)" }}
-                  rowSpan={2}
-                >
+                <TableHead className="pl-6 text-[var(--brand-periwinkle)]" rowSpan={2}>
                   Positions
                 </TableHead>
                 <TableHead className="text-right" rowSpan={2}>
@@ -744,10 +740,7 @@ function SummaryPage() {
                 <TableHead className="text-right" rowSpan={2}>
                   Cost (£)
                 </TableHead>
-                <TableHead
-                  className="text-center border-l border-[var(--hairline)]"
-                  colSpan={2}
-                >
+                <TableHead className="text-center border-l border-[var(--hairline)]" colSpan={2}>
                   Gain / loss
                 </TableHead>
                 <TableHead className="text-right pr-6" rowSpan={2}>
@@ -770,11 +763,6 @@ function SummaryPage() {
               {grouped.map((g) => (
                 <Fragment key={g.bucket}>
                   <TableRow
-                    style={{
-                      borderLeft: `3px solid ${
-                        g.bucket === "Fund" ? "var(--brand-periwinkle)" : "var(--text-muted)"
-                      }`,
-                    }}
                     className={
                       g.bucket === "Fund"
                         ? "bg-[var(--brand-periwinkle)]/[0.08] hover:bg-[var(--brand-periwinkle)]/[0.08]"
@@ -984,7 +972,7 @@ function SummaryTradeDialog({
 
   return (
     <Dialog open={!!target} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm border-hairline bg-[var(--surface)] text-text-strong">
+      <DialogContent className="max-w-sm border-hairline bg-[var(--surface-card)] text-text-strong">
         <DialogHeader>
           <DialogTitle className="font-mono">
             {target?.ticker}
@@ -1107,7 +1095,7 @@ function SummaryDeleteDialog({
   };
   return (
     <AlertDialog open={!!target} onOpenChange={(o) => !o && onClose()}>
-      <AlertDialogContent className="border-hairline bg-[var(--surface)] text-text-strong">
+      <AlertDialogContent className="border-hairline bg-[var(--surface-card)] text-text-strong">
         <AlertDialogHeader>
           <AlertDialogTitle>Remove {target?.ticker}?</AlertDialogTitle>
           <AlertDialogDescription className="text-text-muted">
@@ -1293,7 +1281,7 @@ function AddHoldingDialog() {
           Add holding
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm border-hairline bg-[var(--surface)] text-text-strong">
+      <DialogContent className="max-w-sm border-hairline bg-[var(--surface-card)] text-text-strong">
         <DialogHeader>
           <DialogTitle>Add holding</DialogTitle>
         </DialogHeader>
@@ -1329,7 +1317,7 @@ function AddHoldingDialog() {
                           setDebouncedSearch("");
                           setShowSuggestions(false);
                         }}
-                        className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-[var(--surface)]"
+                        className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-[var(--surface-elevated)]"
                       >
                         <span className="num w-24 shrink-0 text-xs font-semibold text-[var(--primary)]">
                           {s.ticker}
@@ -1396,7 +1384,7 @@ function AddHoldingDialog() {
                   {priceFetching && !priceLocked ? (
                     <Loader2 className="h-4 w-4 animate-spin text-[var(--primary)]" />
                   ) : priceLocked ? (
-                    <Unlock className="h-4 w-4 text-[#ff7a45]" />
+                    <Unlock className="h-4 w-4 text-[#fc4c02]" />
                   ) : (
                     <Lock className="h-4 w-4" />
                   )}

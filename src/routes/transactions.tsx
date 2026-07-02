@@ -463,7 +463,9 @@ function TransactionsTab({ refresh }: { refresh: () => void }) {
               const isStockTx = isBuy || isSell;
               return (
                 <TableRow key={row.key}>
-                  <TableCell className="pl-6 font-mono text-xs text-text-muted">{tx.date}</TableCell>
+                  <TableCell className="pl-6 font-mono text-xs text-text-muted">
+                    {tx.date}
+                  </TableCell>
                   <TableCell>
                     <span
                       className={`inline-block rounded-sm px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] ${style.cls}`}
@@ -760,7 +762,7 @@ function AddTransactionDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="max-w-sm border-hairline bg-[var(--surface)] text-text-strong">
+      <DialogContent className="max-w-sm border-hairline bg-[var(--surface-card)] text-text-strong">
         <DialogHeader>
           <DialogTitle>Add holding</DialogTitle>
         </DialogHeader>
@@ -791,7 +793,7 @@ function AddTransactionDialog({
                         setTickerRaw(s.ticker);
                         setShowSuggestions(false);
                       }}
-                      className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-[var(--surface)]"
+                      className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-[var(--surface-elevated)]"
                     >
                       <span className="num w-24 shrink-0 text-xs font-semibold text-[var(--primary)]">
                         {s.ticker}
@@ -995,7 +997,7 @@ function ImportCSVDialog({
 
   return (
     <Dialog open={rows !== null} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="max-w-lg border-hairline bg-[var(--surface)] text-text-strong">
+      <DialogContent className="max-w-lg border-hairline bg-[var(--surface-card)] text-text-strong">
         <DialogHeader>
           <DialogTitle>Import from CSV</DialogTitle>
         </DialogHeader>
@@ -1146,7 +1148,7 @@ function EditLotDialog({
 
   return (
     <Dialog open={!!target} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm border-hairline bg-[var(--surface)] text-text-strong">
+      <DialogContent className="max-w-sm border-hairline bg-[var(--surface-card)] text-text-strong">
         <DialogHeader>
           <DialogTitle>
             <span className="font-mono">{target?.ticker}</span>
@@ -1229,7 +1231,7 @@ function DeleteLotDialog({
 
   return (
     <AlertDialog open={!!target} onOpenChange={(o) => !o && onClose()}>
-      <AlertDialogContent className="border-hairline bg-[var(--surface)] text-text-strong">
+      <AlertDialogContent className="border-hairline bg-[var(--surface-card)] text-text-strong">
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this lot?</AlertDialogTitle>
           <AlertDialogDescription className="leading-relaxed text-text-muted">
@@ -1325,7 +1327,7 @@ function CashFlowDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="max-w-sm border-hairline bg-[var(--surface)] text-text-strong">
+      <DialogContent className="max-w-sm border-hairline bg-[var(--surface-card)] text-text-strong">
         <DialogHeader>
           <DialogTitle>Add Cash</DialogTitle>
         </DialogHeader>
@@ -1450,7 +1452,7 @@ function SetBalanceDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm border-hairline bg-[var(--surface)] text-text-strong">
+      <DialogContent className="max-w-sm border-hairline bg-[var(--surface-card)] text-text-strong">
         <DialogHeader>
           <DialogTitle>Set cash balance</DialogTitle>
         </DialogHeader>
@@ -1513,7 +1515,7 @@ function DeleteFlowDialog({
 
   return (
     <AlertDialog open={!!target} onOpenChange={(o) => !o && onClose()}>
-      <AlertDialogContent className="border-hairline bg-[var(--surface)] text-text-strong">
+      <AlertDialogContent className="border-hairline bg-[var(--surface-card)] text-text-strong">
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this transaction?</AlertDialogTitle>
           <AlertDialogDescription className="text-text-muted">
@@ -1567,7 +1569,7 @@ function DeleteTradeDialog({
 
   return (
     <AlertDialog open={!!target} onOpenChange={(o) => !o && onClose()}>
-      <AlertDialogContent className="border-hairline bg-[var(--surface)] text-text-strong">
+      <AlertDialogContent className="border-hairline bg-[var(--surface-card)] text-text-strong">
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this record?</AlertDialogTitle>
           <AlertDialogDescription className="text-text-muted">

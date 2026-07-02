@@ -16,7 +16,7 @@ export function LoadingScreen({ label = "Loading your portfolio…" }: { label?:
       <div className="relative h-1 w-44 overflow-hidden rounded-full bg-[var(--surface-elevated)]">
         <div
           className="splash-bar absolute inset-y-0 left-0 w-1/3 rounded-full"
-          style={{ background: "var(--gradient-brand)" }}
+          style={{ background: "var(--brand-periwinkle)" }}
         />
       </div>
 

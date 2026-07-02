@@ -105,7 +105,11 @@ function CashPage() {
               <ArrowDownCircle className="mr-1.5 h-4 w-4" />
               Deposit
             </Button>
-            <Button variant="ghost-line" className="border-white/25 text-white/80 hover:bg-white/10" onClick={() => setWithdrawOpen(true)}>
+            <Button
+              variant="ghost-line"
+              className="border-white/25 text-white/80 hover:bg-white/10"
+              onClick={() => setWithdrawOpen(true)}
+            >
               <ArrowUpCircle className="mr-1.5 h-4 w-4" />
               Withdraw
             </Button>
@@ -300,7 +304,7 @@ function CashFlowDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="max-w-sm border-hairline bg-[var(--surface)] text-text-strong">
+      <DialogContent className="max-w-sm border-hairline bg-[var(--surface-card)] text-text-strong">
         <DialogHeader>
           <DialogTitle style={{ color: accent }}>
             {isDeposit ? "Deposit cash" : "Withdraw cash"}
@@ -401,7 +405,7 @@ function SetBalanceDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm border-hairline bg-[var(--surface)] text-text-strong">
+      <DialogContent className="max-w-sm border-hairline bg-[var(--surface-card)] text-text-strong">
         <DialogHeader>
           <DialogTitle>Set cash balance</DialogTitle>
         </DialogHeader>
@@ -464,7 +468,7 @@ function DeleteFlowDialog({
 
   return (
     <AlertDialog open={!!target} onOpenChange={(o) => !o && onClose()}>
-      <AlertDialogContent className="border-hairline bg-[var(--surface)] text-text-strong">
+      <AlertDialogContent className="border-hairline bg-[var(--surface-card)] text-text-strong">
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this transaction?</AlertDialogTitle>
           <AlertDialogDescription className="text-text-muted">

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { TrendingUp, Users } from "lucide-react";
-import { PublicShell } from "@/components/PublicShell";
+import { AppShell } from "@/components/AppShell";
 import { getPublicFeed, getPublicLeaderboard } from "@/fns/public";
 import type { PublicTrade, LeaderboardEntry } from "@/fns/public";
 
@@ -33,7 +33,12 @@ function FeedRow({ trade }: { trade: PublicTrade }) {
           <span className="font-mono text-xs uppercase tracking-[0.05em] text-text-strong">
             {trade.ticker}
           </span>
-          <span className="text-sm text-text-muted">{trade.name}</span>
+          {trade.name ? (
+            <>
+              <span className="text-text-muted opacity-40">·</span>
+              <span className="truncate text-sm text-text-muted">{trade.name}</span>
+            </>
+          ) : null}
         </div>
         <div className="mt-0.5 flex items-center gap-3 font-mono text-[11px] tabular-nums text-text-muted">
           <span>{trade.units.toFixed(3)} units</span>
@@ -51,26 +56,44 @@ function FeedRow({ trade }: { trade: PublicTrade }) {
   );
 }
 
+type SortKey = "gl" | "return" | "1m" | "1y";
+
+function PctCell({ value }: { value: number | null }) {
+  if (value == null)
+    return <span className="font-mono text-sm tabular-nums text-text-muted">—</span>;
+  const up = value >= 0;
+  return (
+    <span
+      className={`font-mono text-sm tabular-nums ${up ? "text-[var(--up)]" : "text-[var(--down)]"}`}
+    >
+      {up ? "+" : ""}
+      {value.toFixed(1)}%
+    </span>
+  );
+}
+
+const ROW_COLS = "grid-cols-[2rem_1fr_5.5rem_5.5rem_4rem_4rem]";
+
 function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number }) {
-  const up = entry.gainPct >= 0;
   return (
     <Link
       to="/profiles/$userId"
       params={{ userId: entry.userId }}
-      className="grid grid-cols-[2rem_1fr_auto_auto] items-center gap-4 border-b border-hairline py-3.5 last:border-0 transition-colors hover:bg-[var(--surface-elevated)]"
+      className={`grid ${ROW_COLS} items-center gap-4 border-b border-hairline py-3.5 last:border-0 transition-colors hover:bg-[var(--surface-elevated)]`}
     >
-      <span className="text-center font-mono text-sm tabular-nums text-[var(--text-muted)]">
-        {rank}
-      </span>
+      <span className="text-center font-mono text-sm tabular-nums text-text-muted">{rank}</span>
       <span className="text-sm font-medium text-text-strong">{entry.displayName}</span>
-      <span className="font-mono text-sm tabular-nums text-text-muted">
+      <span className="text-right font-mono text-sm tabular-nums text-text-muted">
         {entry.gainGBP >= 0 ? "+" : ""}£{Math.abs(entry.gainGBP).toFixed(0)}
       </span>
-      <span
-        className={`font-mono text-sm tabular-nums ${up ? "text-[var(--up)]" : "text-[var(--down)]"}`}
-      >
-        {up ? "+" : ""}
-        {entry.gainPct.toFixed(1)}%
+      <span className="text-right">
+        <PctCell value={entry.gainPct} />
+      </span>
+      <span className="text-right">
+        <PctCell value={entry.monthGainPct} />
+      </span>
+      <span className="text-right">
+        <PctCell value={entry.yearGainPct} />
       </span>
     </Link>
   );
@@ -116,11 +139,20 @@ function FeedTab() {
 }
 
 function LeaderboardTab() {
+  const [sortKey, setSortKey] = useState<SortKey>("return");
+
   const { data: leaderboard = [], isLoading } = useQuery({
     queryKey: ["public-leaderboard"],
     queryFn: () => getPublicLeaderboard(),
     staleTime: 60_000,
     refetchInterval: 300_000,
+  });
+
+  const sorted = [...leaderboard].sort((a, b) => {
+    if (sortKey === "gl") return b.gainGBP - a.gainGBP;
+    if (sortKey === "1m") return (b.monthGainPct ?? -Infinity) - (a.monthGainPct ?? -Infinity);
+    if (sortKey === "1y") return (b.yearGainPct ?? -Infinity) - (a.yearGainPct ?? -Infinity);
+    return b.gainPct - a.gainPct;
   });
 
   if (isLoading) {
@@ -145,15 +177,31 @@ function LeaderboardTab() {
     );
   }
 
+  const colHeader = (label: string, key: SortKey) => (
+    <button
+      onClick={() => setSortKey(key)}
+      className={`transition-colors ${sortKey === key ? "text-text-strong" : "text-text-muted hover:text-text-body"}`}
+    >
+      {label}
+      {sortKey === key && " ↓"}
+    </button>
+  );
+
   return (
     <div className="pt-2">
-      <div className="mb-2 grid grid-cols-[2rem_1fr_auto_auto] gap-4 font-mono text-[10px] uppercase tracking-[0.08em] text-text-muted">
-        <span className="text-center">#</span>
-        <span>Trader</span>
-        <span>G/L</span>
-        <span>Return</span>
+      {/* Column headers */}
+      <div
+        className={`mb-2 grid ${ROW_COLS} gap-4 font-mono text-[10px] uppercase tracking-[0.08em]`}
+      >
+        <span className="text-center text-text-muted">#</span>
+        <span className="text-text-muted">Trader</span>
+        <span className="text-right">{colHeader("G/L", "gl")}</span>
+        <span className="text-right">{colHeader("Return", "return")}</span>
+        <span className="text-right">{colHeader("1M", "1m")}</span>
+        <span className="text-right">{colHeader("1Y", "1y")}</span>
       </div>
-      {leaderboard.map((e, i) => (
+
+      {sorted.map((e, i) => (
         <LeaderboardRow key={i} entry={e} rank={i + 1} />
       ))}
     </div>
@@ -164,7 +212,7 @@ function CommunityPage() {
   const [tab, setTab] = useState<"feed" | "leaderboard">("feed");
 
   return (
-    <PublicShell>
+    <AppShell>
       {/* Page-header band */}
       <div className="border-b border-hairline">
         <div className="pt-10 pb-8">
@@ -179,29 +227,28 @@ function CommunityPage() {
       </div>
 
       <div className="pt-6">
-        {/* Tab strip — mono-caps + gradient underline */}
-        <div className="flex gap-1 border-b border-hairline">
+        {/* Tab strip */}
+        <div className="flex gap-2 border-b border-hairline">
           {(["feed", "leaderboard"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`relative pb-3 pr-6 font-mono text-xs uppercase tracking-[0.08em] transition-colors ${
+              className={`pb-5 pr-10 transition-colors ${
                 tab === t ? "text-text-strong" : "text-text-muted hover:text-text-body"
               }`}
             >
-              {t}
-              {tab === t && (
-                <span
-                  className="absolute inset-x-0 bottom-0"
-                  style={{ backgroundImage: "var(--gradient-brand)", height: "2px" }}
-                />
-              )}
+              <span className="relative inline-block font-mono text-sm font-medium uppercase tracking-[0.05em]">
+                {t}
+                {tab === t && (
+                  <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-[var(--brand-periwinkle)]" />
+                )}
+              </span>
             </button>
           ))}
         </div>
 
         {tab === "feed" ? <FeedTab /> : <LeaderboardTab />}
       </div>
-    </PublicShell>
+    </AppShell>
   );
 }

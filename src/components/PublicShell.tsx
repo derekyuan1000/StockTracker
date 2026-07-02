@@ -1,22 +1,13 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Settings } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { authClient, useSession } from "@/lib/auth-client";
 import { Button } from "./ui/button";
 import { Logo } from "./Logo";
 import { SiteFooter } from "./SiteFooter";
 import { TickerTape } from "./TickerTape";
-
-function useScrolled(threshold = 60) {
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > threshold);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [threshold]);
-  return scrolled;
-}
+import { MarketStatus, ThemeToggle } from "./AppShell";
+import { useTheme } from "./ThemeProvider";
 
 function PublicNav({ onDark }: { onDark: boolean }) {
   const { data: session } = useSession();
@@ -67,11 +58,7 @@ function PublicNav({ onDark }: { onDark: boolean }) {
           </button>
         </>
       ) : (
-        <Button
-          asChild
-          size="sm"
-          variant={onDark ? "mint" : "default"}
-        >
+        <Button asChild size="sm" variant={onDark ? "mint" : "default"}>
           <Link to="/login">Sign in</Link>
         </Button>
       )}
@@ -86,12 +73,13 @@ export function PublicShell({
   children: ReactNode;
   fullBleed?: boolean;
 }) {
-  const scrolled = useScrolled(60);
-  const onDark = !scrolled;
+  const { resolvedTheme } = useTheme();
+  const { data: session } = useSession();
+  const onDark = resolvedTheme === "dark";
 
-  const bandClass = scrolled
-    ? "bg-[var(--canvas)] text-[var(--text-strong)] border-b border-[var(--hairline)]"
-    : "bg-[var(--canvas-dark)] text-[var(--on-dark)] border-b border-white/10";
+  const headerClass = onDark
+    ? "bg-[var(--canvas-dark)] text-[var(--on-dark)] border-b border-[var(--hairline)]"
+    : "bg-[var(--canvas)] text-[var(--text-strong)] border-b border-hairline";
 
   const navLink = (active = false) =>
     `px-3 py-1 font-mono text-xs uppercase tracking-[0.08em] transition-colors ${
@@ -106,10 +94,10 @@ export function PublicShell({
 
   return (
     <div className="min-h-screen bg-canvas text-text-body">
-      <header className={`sticky top-0 z-50 transition-colors duration-150 ${bandClass}`}>
+      <header className={`sticky top-0 z-50 ${headerClass}`}>
         <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-6">
           <div className="flex items-center gap-6">
-            <Link to="/">
+            <Link to={session?.user ? "/dashboard" : "/"}>
               <Logo size={20} showWordmark onDark={onDark} />
             </Link>
             <span className={`h-5 w-px ${onDark ? "bg-white/15" : "bg-hairline"}`} />
@@ -130,9 +118,13 @@ export function PublicShell({
               </Link>
             </nav>
           </div>
-          <PublicNav onDark={onDark} />
+          <div className="flex items-center gap-2">
+            <MarketStatus onDark={onDark} />
+            <ThemeToggle onDark={onDark} />
+            <PublicNav onDark={onDark} />
+          </div>
         </div>
-        <TickerTape />
+        <TickerTape onDark={onDark} />
       </header>
 
       {fullBleed ? (

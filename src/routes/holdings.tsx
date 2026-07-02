@@ -109,7 +109,11 @@ function ScatterTooltip({ active, payload }: { active?: boolean; payload?: any[]
         lineHeight: 1.6,
       }}
     >
-      <p style={{ color: "var(--brand-periwinkle)", fontSize: 11, fontWeight: 600, marginBottom: 2 }}>{d.name}</p>
+      <p
+        style={{ color: "var(--brand-periwinkle)", fontSize: 11, fontWeight: 600, marginBottom: 2 }}
+      >
+        {d.name}
+      </p>
       <p style={{ color: "#929aa5", fontSize: 10, marginBottom: 6 }}>{d.sector}</p>
       <p style={{ color: "#e2e8f0" }}>
         Gain:{" "}
@@ -171,7 +175,9 @@ function HoldingsPage() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow text-text-muted">Your Holdings</p>
-          <h1 className="mt-2 text-4xl font-medium tracking-[-0.02em] text-text-strong">Holdings</h1>
+          <h1 className="mt-2 text-4xl font-medium tracking-[-0.02em] text-text-strong">
+            Holdings
+          </h1>
           <p className="mt-2 text-[15px] text-text-muted">
             Position-level P&amp;L. Subtotals per bucket, grand total at bottom.
           </p>
@@ -189,11 +195,7 @@ function HoldingsPage() {
           <Table className="min-w-[1080px]">
             <TableHeader>
               <TableRow>
-                <TableHead
-                  className="pl-6 text-[var(--brand-periwinkle)]"
-                  style={{ borderLeft: "3px solid var(--brand-periwinkle)" }}
-                  rowSpan={2}
-                >
+                <TableHead className="pl-6 text-[var(--brand-periwinkle)]" rowSpan={2}>
                   Positions
                 </TableHead>
                 <TableHead className="whitespace-nowrap text-right" rowSpan={2}>
@@ -269,7 +271,6 @@ function HoldingsPage() {
                 return (
                   <Fragment key={g.bucket}>
                     <TableRow
-                      style={{ borderLeft: `3px solid ${bucketColor}` }}
                       className={
                         isFund
                           ? "bg-[var(--brand-periwinkle)]/[0.08] hover:bg-[var(--brand-periwinkle)]/[0.08]"
@@ -313,7 +314,9 @@ function HoldingsPage() {
                         >
                           {fmtGBPSigned(r.unrealisedGL)}
                         </TableNumericCell>
-                        <TableNumericCell className={`whitespace-nowrap ${dirClass(r.unrealisedPct)}`}>
+                        <TableNumericCell
+                          className={`whitespace-nowrap ${dirClass(r.unrealisedPct)}`}
+                        >
                           {fmtPct(r.unrealisedPct)}
                         </TableNumericCell>
                         <TableNumericCell className="whitespace-nowrap text-text-body">
@@ -361,7 +364,6 @@ function HoldingsPage() {
                       </TableRow>
                     ))}
                     <TableRow
-                      style={{ borderLeft: `3px solid ${bucketColor}` }}
                       className={`text-text-muted-strong ${
                         isFund
                           ? "bg-[var(--brand-periwinkle)]/[0.05] hover:bg-[var(--brand-periwinkle)]/[0.05]"
@@ -414,7 +416,9 @@ function HoldingsPage() {
                   >
                     {fmtGBPSigned(p.unrealisedGL)}
                   </TableNumericCell>
-                  <TableNumericCell className={`whitespace-nowrap font-medium ${dirClass(p.unrealisedPct)}`}>
+                  <TableNumericCell
+                    className={`whitespace-nowrap font-medium ${dirClass(p.unrealisedPct)}`}
+                  >
                     {fmtPct(p.unrealisedPct)}
                   </TableNumericCell>
                   <TableCell colSpan={4} />
@@ -427,9 +431,7 @@ function HoldingsPage() {
 
       <section className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-sm border border-hairline bg-surface p-5">
-          <h3 className="text-sm font-medium text-text-strong">
-            Contribution to unrealised gain
-          </h3>
+          <h3 className="text-sm font-medium text-text-strong">Contribution to unrealised gain</h3>
           <p className="text-[11px] text-text-muted">
             Each holding&apos;s £ contribution, sorted by impact.
           </p>
@@ -701,7 +703,7 @@ function AddHoldingDialog({ onSuccess }: { onSuccess: () => void }) {
           Add holding
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm border-hairline bg-[var(--surface)] text-text-strong">
+      <DialogContent className="max-w-sm border-hairline bg-[var(--surface-card)] text-text-strong">
         <DialogHeader>
           <DialogTitle>Add holding</DialogTitle>
         </DialogHeader>
@@ -737,7 +739,7 @@ function AddHoldingDialog({ onSuccess }: { onSuccess: () => void }) {
                           setDebouncedSearch("");
                           setShowSuggestions(false);
                         }}
-                        className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-[var(--surface)]"
+                        className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-[var(--surface-elevated)]"
                       >
                         <span className="num w-24 shrink-0 text-xs font-semibold text-[var(--primary)]">
                           {s.ticker}
@@ -804,7 +806,7 @@ function AddHoldingDialog({ onSuccess }: { onSuccess: () => void }) {
                   {priceFetching && !priceLocked ? (
                     <Loader2 className="h-4 w-4 animate-spin text-[var(--primary)]" />
                   ) : priceLocked ? (
-                    <Unlock className="h-4 w-4 text-[#ff7a45]" />
+                    <Unlock className="h-4 w-4 text-[#fc4c02]" />
                   ) : (
                     <Lock className="h-4 w-4" />
                   )}
@@ -912,7 +914,7 @@ function TradeDialog({
 
   return (
     <Dialog open={!!target} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm border-hairline bg-[var(--surface)] text-text-strong">
+      <DialogContent className="max-w-sm border-hairline bg-[var(--surface-card)] text-text-strong">
         <DialogHeader>
           <DialogTitle className="font-mono">
             {target?.ticker}
@@ -1055,7 +1057,7 @@ function DeleteConfirmDialog({
 
   return (
     <AlertDialog open={!!target} onOpenChange={(o) => !o && onClose()}>
-      <AlertDialogContent className="border-hairline bg-[var(--surface)] text-text-strong">
+      <AlertDialogContent className="border-hairline bg-[var(--surface-card)] text-text-strong">
         <AlertDialogHeader>
           <AlertDialogTitle>Remove {target?.ticker}?</AlertDialogTitle>
           <AlertDialogDescription className="leading-relaxed text-text-muted">

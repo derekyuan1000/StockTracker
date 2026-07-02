@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { motion, MotionConfig } from "framer-motion";
 import { TrendingUp, Users, ArrowRight } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
-import { PublicShell } from "@/components/PublicShell";
+import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { getPublicFeed, getPublicLeaderboard } from "@/fns/public";
 import type { PublicTrade, LeaderboardEntry } from "@/fns/public";
@@ -11,6 +12,24 @@ import type { PublicTrade, LeaderboardEntry } from "@/fns/public";
 export const Route = createFileRoute("/")({
   component: HomePage,
 });
+
+// ─── Shared motion variants ───────────────────────────────────────────────────
+
+const STAGGER = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1 } },
+};
+
+const FADE_UP = {
+  hidden: { opacity: 0, y: 14 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.42, ease: [0.2, 0, 0.2, 1] as [number, number, number, number] },
+  },
+};
+
+// ─── Community preview ────────────────────────────────────────────────────────
 
 function BuySellChip({ type }: { type: "buy" | "sell" }) {
   return (
@@ -79,202 +98,184 @@ function CommunityPreview() {
   const isLoading = tab === "feed" ? feedLoading : lbLoading;
 
   return (
-    <section>
-      <div className="mb-6 flex items-end justify-between">
-        <div>
-          <p className="eyebrow text-text-muted">Live from the community</p>
-          <h2 className="mt-2 text-3xl font-medium tracking-[-0.02em] text-text-strong">
-            What people are trading
-          </h2>
-        </div>
+    <motion.section
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.15 }}
+      variants={STAGGER}
+    >
+      <motion.div variants={FADE_UP} className="mb-6 flex items-end justify-between">
+        <h2 className="text-3xl font-medium tracking-[-0.025em] text-text-strong">
+          What people are trading
+        </h2>
         <Link
           to="/community"
-          className="flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.08em] text-text-body transition-opacity hover:opacity-70"
+          className="flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.08em] text-text-muted transition-colors hover:text-text-body"
         >
           View all <ArrowRight className="size-3.5" />
         </Link>
-      </div>
+      </motion.div>
 
-      {/* Tab strip — gradient underline */}
-      <div className="mb-4 flex gap-1 border-b border-hairline">
+      <motion.div variants={FADE_UP} className="mb-4 flex gap-2 border-b border-hairline">
         {(["feed", "leaderboard"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`relative pb-3 pr-6 font-mono text-xs uppercase tracking-[0.08em] transition-colors ${
+            className={`pb-4 pr-10 transition-colors ${
               tab === t ? "text-text-strong" : "text-text-muted hover:text-text-body"
             }`}
           >
-            {t}
-            {tab === t && (
-              <span
-                className="absolute inset-x-0 bottom-0"
-                style={{ backgroundImage: "var(--gradient-brand)", height: "2px" }}
-              />
-            )}
+            <span className="relative inline-block font-mono text-sm font-medium uppercase tracking-[0.05em]">
+              {t}
+              {tab === t && (
+                <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-[var(--brand-periwinkle)]" />
+              )}
+            </span>
           </button>
         ))}
-      </div>
+      </motion.div>
 
-      {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-12 animate-pulse rounded-sm bg-[var(--surface-elevated)]" />
-          ))}
-        </div>
-      ) : tab === "feed" ? (
-        feed.length === 0 ? (
+      <motion.div variants={FADE_UP}>
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="h-12 animate-pulse rounded-sm bg-[var(--surface-elevated)]" />
+            ))}
+          </div>
+        ) : tab === "feed" ? (
+          feed.length === 0 ? (
+            <div className="py-12 text-center">
+              <Users className="mx-auto mb-3 size-8 text-text-muted opacity-40" />
+              <p className="text-sm text-text-muted">No public trades yet.</p>
+              <p className="mt-1 text-xs text-text-muted opacity-70">
+                Be the first — publish your portfolio in Settings.
+              </p>
+            </div>
+          ) : (
+            <div>
+              {feed.map((t, i) => (
+                <FeedRow key={i} trade={t} />
+              ))}
+            </div>
+          )
+        ) : leaderboard.length === 0 ? (
           <div className="py-12 text-center">
-            <Users className="mx-auto mb-3 size-8 text-text-muted opacity-40" />
-            <p className="text-sm text-text-muted">No public trades yet.</p>
-            <p className="mt-1 text-xs text-text-muted opacity-70">
-              Be the first — publish your portfolio in Settings.
-            </p>
+            <TrendingUp className="mx-auto mb-3 size-8 text-text-muted opacity-40" />
+            <p className="text-sm text-text-muted">No public portfolios yet.</p>
           </div>
         ) : (
           <div>
-            {feed.map((t, i) => (
-              <FeedRow key={i} trade={t} />
+            {leaderboard.map((e, i) => (
+              <LeaderboardRow key={i} entry={e} rank={i + 1} />
             ))}
           </div>
-        )
-      ) : leaderboard.length === 0 ? (
-        <div className="py-12 text-center">
-          <TrendingUp className="mx-auto mb-3 size-8 text-text-muted opacity-40" />
-          <p className="text-sm text-text-muted">No public portfolios yet.</p>
-        </div>
-      ) : (
-        <div>
-          {leaderboard.map((e, i) => (
-            <LeaderboardRow key={i} entry={e} rank={i + 1} />
-          ))}
-        </div>
-      )}
-    </section>
+        )}
+      </motion.div>
+    </motion.section>
   );
 }
 
-function BrandRibbon() {
-  return (
-    <svg
-      viewBox="0 0 600 500"
-      className="pointer-events-none absolute right-0 top-0 h-full w-[45%] opacity-90"
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ff7a45" />
-          <stop offset="48%" stopColor="#e5484d" />
-          <stop offset="100%" stopColor="#8b8bff" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M 50 400 Q 300 100 580 200 Q 400 350 580 480 Q 300 380 50 480 Z"
-        fill="url(#brandGrad)"
-        opacity="0.5"
-      />
-      <ellipse
-        cx="400"
-        cy="200"
-        rx="280"
-        ry="180"
-        fill="url(#brandGrad)"
-        opacity="0.3"
-        transform="rotate(-20 400 200)"
-      />
-      <ellipse
-        cx="300"
-        cy="320"
-        rx="200"
-        ry="120"
-        fill="url(#brandGrad)"
-        opacity="0.3"
-        transform="rotate(15 300 320)"
-      />
-    </svg>
-  );
-}
+// ─── Hero ─────────────────────────────────────────────────────────────────────
 
 function Hero() {
   const { data: session } = useSession();
   const authed = Boolean(session?.user);
 
   return (
-    <section className="relative overflow-hidden bg-[var(--canvas-dark)] text-[var(--on-dark)]">
-      <BrandRibbon />
-      <div className="relative mx-auto flex min-h-[80vh] max-w-[1200px] items-center px-6 py-20">
-        <div className="w-full md:w-[55%]">
-          <p className="eyebrow text-white/50">Your portfolio, elevated</p>
-          <h1 className="mt-5 text-5xl font-medium leading-[1.05] tracking-[-0.02em] text-[var(--on-dark)] md:text-7xl">
-            Track it.
-            <br />
-            Understand it.
-            <br />
-            Own it.
-          </h1>
-          <p className="mt-6 max-w-[46ch] text-lg font-light text-white/60">
-            A calm, editorial home for your stocks and funds — real-time performance, honest numbers,
-            and a community that shares its work.
-          </p>
-          <div className="mt-9 flex flex-wrap gap-3">
+    <section className="bg-canvas">
+      <div className="mx-auto max-w-[1200px] px-6 py-24 md:py-32">
+        <motion.div
+          className="flex flex-col items-center text-center"
+          initial="hidden"
+          animate="show"
+          variants={STAGGER}
+        >
+          {/* Headline */}
+          <motion.h1
+            variants={FADE_UP}
+            className="mx-auto max-w-3xl text-5xl font-medium leading-[1.04] tracking-[-0.03em] text-text-strong md:text-6xl lg:text-[72px]"
+            style={{ textWrap: "balance" } as React.CSSProperties}
+          >
+            Track it. <span className="text-text-muted-strong">Understand it. Own it.</span>
+          </motion.h1>
+
+          {/* Subhead */}
+          <motion.p
+            variants={FADE_UP}
+            className="mx-auto mt-7 max-w-[44ch] text-lg leading-relaxed text-text-muted"
+          >
+            Real numbers, no noise. Your stocks and funds, tracked and shared.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div
+            variants={FADE_UP}
+            className="mt-9 flex flex-wrap items-center justify-center gap-3"
+          >
             {authed ? (
-              <Button asChild className="ring-1 ring-white/15">
+              <Button asChild>
                 <Link to="/dashboard">Go to dashboard</Link>
               </Button>
             ) : (
-              <Button asChild className="ring-1 ring-white/15">
+              <Button asChild>
                 <Link to="/login">Get started free</Link>
               </Button>
             )}
-            <Button asChild variant="mint">
+            <Button asChild variant="ghost-line">
               <Link to="/community">Explore community</Link>
             </Button>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );
 }
+
+// ─── Stats strip ──────────────────────────────────────────────────────────────
 
 const STATS = [
-  { value: "10,000+", label: "Portfolios tracked" },
   { value: "Real-time", label: "Market data" },
-  { value: "Stocks & Funds", label: "Asset classes" },
+  { value: "Stocks & ETFs", label: "Asset classes" },
+  { value: "Community", label: "Public leaderboard" },
 ];
 
-function StatsBand() {
+function StatsStrip() {
   return (
-    <section className="bg-[var(--canvas)]">
-      <div className="mx-auto max-w-[1200px] px-6 py-20">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {STATS.map((s) => (
-            <div
-              key={s.label}
-              className="rounded-sm border border-hairline bg-[var(--surface-card)] p-8"
-            >
-              <p className="num text-4xl font-medium tracking-[-0.02em] text-text-strong">
-                {s.value}
-              </p>
-              <p className="eyebrow mt-3 text-text-muted">{s.label}</p>
-            </div>
-          ))}
-        </div>
+    <motion.div
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.4 }}
+      variants={STAGGER}
+      className="border-t border-hairline"
+    >
+      <div className="mx-auto flex max-w-[1200px] flex-wrap justify-center gap-x-16 gap-y-6 px-6 py-10">
+        {STATS.map((s) => (
+          <motion.div key={s.label} variants={FADE_UP}>
+            <p className="num text-2xl font-medium tracking-[-0.02em] text-text-strong">
+              {s.value}
+            </p>
+            <p className="mt-0.5 text-sm text-text-muted">{s.label}</p>
+          </motion.div>
+        ))}
       </div>
-    </section>
+    </motion.div>
   );
 }
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 function HomePage() {
   return (
-    <PublicShell fullBleed>
-      <Hero />
-      <StatsBand />
-
-      <section className="bg-[var(--canvas)]">
-        <div className="mx-auto max-w-[1200px] px-6 pb-24">
-          <CommunityPreview />
-        </div>
-      </section>
-    </PublicShell>
+    <MotionConfig reducedMotion="user">
+      <AppShell fullBleed>
+        <Hero />
+        <StatsStrip />
+        <section className="border-t border-hairline">
+          <div className="mx-auto max-w-[1200px] px-6 py-16 pb-24">
+            <CommunityPreview />
+          </div>
+        </section>
+      </AppShell>
+    </MotionConfig>
   );
 }

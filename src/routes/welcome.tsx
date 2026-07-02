@@ -21,7 +21,8 @@ const TOTAL_STEPS = 2;
 
 function WelcomePage() {
   const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const onDark = resolvedTheme === "dark";
   const [portfolioPublic, setPortfolioPublic] = useState(false);
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
@@ -51,21 +52,25 @@ function WelcomePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
-      {/* Dark accent header band */}
-      <header className="bg-[var(--canvas-dark)] px-6 py-10 text-[var(--on-dark)]">
+      <header
+        className={`px-6 py-10 ${onDark ? "bg-[var(--canvas-dark)] text-[var(--on-dark)]" : "bg-canvas text-text-strong border-b border-hairline"}`}
+      >
         <div className="mx-auto max-w-md">
           <div className="mb-6 flex justify-between">
-            <Logo size={26} showWordmark onDark />
-            <span className="font-mono text-xs uppercase tracking-[0.08em] text-white/50">
+            <Logo size={26} showWordmark onDark={onDark} />
+            <span
+              className={`font-mono text-xs uppercase tracking-[0.08em] ${onDark ? "text-white/50" : "text-text-muted"}`}
+            >
               Step {step} of {TOTAL_STEPS}
             </span>
           </div>
-          <p className="eyebrow text-white/50">Get started</p>
-          <h1 className="mt-3 text-4xl font-medium leading-[1.05] tracking-[-0.02em] text-[var(--on-dark)]">
+          <p className={`eyebrow ${onDark ? "text-white/50" : "text-text-muted"}`}>Get started</p>
+          <h1 className="mt-3 text-4xl font-medium leading-[1.05] tracking-[-0.02em]">
             {step === 1 ? "Set your visibility" : "Choose your look"}
           </h1>
-          {/* Brand-gradient progress bar */}
-          <div className="mt-6 h-1 w-full overflow-hidden rounded-full bg-white/10">
+          <div
+            className={`mt-6 h-1 w-full overflow-hidden rounded-full ${onDark ? "bg-white/10" : "bg-[var(--surface-elevated)]"}`}
+          >
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{ width: `${progress}%`, backgroundImage: "var(--gradient-brand)" }}

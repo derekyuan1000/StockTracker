@@ -17,11 +17,12 @@
   --color-elevated: var(--surface-elevated);
   --color-hairline: var(--hairline);
   --color-accent-mint: var(--accent-mint);
-  --color-brand-orange: #ff7a45;
-  --color-brand-magenta: #e5484d;
-  --color-brand-periwinkle: #8b8bff;
+  /* DESIGN.md exact brand stops */
+  --color-brand-orange: #fc4c02;
+  --color-brand-magenta: #ef2cc1;
+  --color-brand-periwinkle: #bdbbff;
 
-  /* shadcn CSS variable aliases mapped onto the new tokens */
+  /* shadcn CSS variable aliases */
   --color-background: var(--canvas);
   --color-foreground: var(--text-body);
   --color-card: var(--surface-card);
@@ -56,68 +57,75 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-/* Light editorial theme (default :root) */
+/* ─── Light mode (white canvas, black ink) ─── */
 :root {
   --canvas: #ffffff;
-  --canvas-dark: #010120;
+  --canvas-dark: #1C1B18;         /* DESIGN.md: charcoal paper dark band */
   --surface-card: #ffffff;
-  --surface-elevated: #f6f6f8;
-  --hairline: rgba(0, 0, 0, 0.08);
+  --surface-elevated: #f5f5f7;
+  --surface-dark-soft: #2A2823;   /* DESIGN.md: Surface Soft — ghost buttons / badges on dark bands */
+  --hairline: #ebebeb;            /* DESIGN.md exact value */
 
-  --primary: #010120;
-  --primary-active: #1a1a2e;
-  --primary-disabled: #d4d4dc;
+  --primary: #000000;             /* DESIGN.md: black CTA pill */
+  --primary-active: #1a1a1a;
+  --primary-disabled: #d4d4d4;
   --on-primary: #ffffff;
 
-  /* Text color for fixed dark bands (hero/nav-at-top/footer) — always light */
-  --on-dark: #ffffff;
-  --on-dark-muted: rgba(255, 255, 255, 0.6);
+  --on-dark: #F2EFE7;             /* DESIGN.md: warm paper-white on dark bands */
+  --on-dark-muted: #A39E93;       /* DESIGN.md: warm grey secondary on dark */
 
   --accent-mint: #c8f6f9;
 
-  --text-strong: #010120;
-  --text-body: #1a1a2e;
-  --text-muted: #6a6a7a;
-  --text-muted-strong: #4a4a5a;
+  /* Text ramp: ink → near-ink → secondary → muted */
+  --text-strong: #000000;
+  --text-body: #111111;
+  --text-muted: #999999;          /* DESIGN.md body secondary */
+  --text-muted-strong: #555555;
 
   --up: #0a8f5f;
   --down: #d6455b;
-  --info: #8b8bff;
 
-  --brand-orange: #ff7a45;
-  --brand-magenta: #e5484d;
-  --brand-periwinkle: #8b8bff;
-  --gradient-brand: linear-gradient(100deg, #ff7a45 0%, #e5484d 48%, #8b8bff 100%);
+  /* DESIGN.md exact brand gradient stops */
+  --brand-orange: #fc4c02;
+  --brand-magenta: #ef2cc1;
+  --brand-periwinkle: #bdbbff;
+  --gradient-brand: linear-gradient(100deg, #fc4c02 0%, #ef2cc1 48%, #bdbbff 100%);
 }
 
-/* Opt-in dark theme (intentional dark bands + user preference) */
+/* ─── Dark mode — Charcoal Paper (DESIGN.md) ─────────────────────────────────── */
 .dark {
-  --canvas: #010120;
-  --canvas-dark: #010120;
-  --surface-card: #0a0a2e;
-  --surface-elevated: #12123a;
-  --hairline: rgba(255, 255, 255, 0.12);
+  /* Graphite scale: canvas → soft → raised */
+  --canvas: #1C1B18;             /* charcoal paper — warm near-black, no blue cast */
+  --canvas-dark: #1C1B18;
+  --surface-card: #2A2823;       /* Surface Soft — cards, inputs, ghost buttons */
+  --surface-elevated: #33312B;   /* Surface Raised — hover states, active nav rows */
+  --surface-dark-soft: #2A2823;
+  --hairline: rgba(242, 239, 231, 0.12); /* pressed into charcoal, not glowing */
 
-  --primary: #ffffff;
-  --primary-active: #e8e8f0;
-  --primary-disabled: #2a2a3e;
-  --on-primary: #010120;
+  --primary: #F2EFE7;            /* paper-white pill — ink/paper inversion of black CTA */
+  --primary-active: #E4DFD6;
+  --primary-disabled: #3A3830;
+  --on-primary: #1C1B18;         /* charcoal text on paper-white button */
+
+  --on-dark: #F2EFE7;            /* warm paper-white */
+  --on-dark-muted: #A39E93;      /* warm grey secondary */
 
   --accent-mint: #c8f6f9;
 
-  --text-strong: #ffffff;
-  --text-body: #e8e8f0;
-  --text-muted: #9a9ab0;
-  --text-muted-strong: #b8b8c8;
+  /* Text: paper-white ramp, warm-toned throughout */
+  --text-strong: #F2EFE7;
+  --text-body: #D8D3CB;
+  --text-muted: #A39E93;
+  --text-muted-strong: #C4BFB5;
 
-  --up: #3ddc97;
-  --down: #ff6b81;
-  --info: #8b8bff;
+  /* Semantic: desaturated ~12% — pigment on paper, not neon on glass */
+  --up: #5FA97C;
+  --down: #C96A5E;
 
-  --brand-orange: #ff7a45;
-  --brand-magenta: #e5484d;
-  --brand-periwinkle: #8b8bff;
-  --gradient-brand: linear-gradient(100deg, #ff7a45 0%, #e5484d 48%, #8b8bff 100%);
+  --brand-orange: #fc4c02;
+  --brand-magenta: #ef2cc1;
+  --brand-periwinkle: #bdbbff;
+  --gradient-brand: linear-gradient(100deg, #fc4c02 0%, #ef2cc1 48%, #bdbbff 100%);
 }
 
 @layer base {
@@ -128,10 +136,16 @@
     background-color: var(--canvas);
     color: var(--text-body);
     font-family: var(--font-sans);
+    /* DESIGN.md: Inter with ss01, tight tracking at body size */
     font-feature-settings: "ss01", "cv11";
     letter-spacing: -0.01em;
   }
-  h1, h2, h3, h4, h5, h6 { letter-spacing: -0.02em; }
+  /* DESIGN.md: progressive negative tracking at display sizes */
+  h1 { letter-spacing: -0.03em; }
+  h2 { letter-spacing: -0.025em; }
+  h3, h4 { letter-spacing: -0.02em; }
+  h5, h6 { letter-spacing: -0.015em; }
+
   .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
   /* Smooth color transitions for band swap and theme toggle */
@@ -140,62 +154,63 @@
     transition-duration: 150ms;
     transition-timing-function: ease;
   }
-  /* Respect reduced-motion */
   @media (prefers-reduced-motion: reduce) {
-    * {
-      transition-duration: 0ms !important;
-      animation-duration: 0ms !important;
-    }
+    * { transition-duration: 0ms !important; }
   }
 }
+
+/* ─── Utility classes ─────────────────────────────────────────────────────────── */
 
 @utility num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
+/* DESIGN.md: mono-caps-eyebrow — 11px / 500 / uppercase / 0.05em tracking */
 @utility eyebrow {
   font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 12px;
+  letter-spacing: 0.05em;
+  font-size: 11px;
   font-weight: 500;
+  line-height: 1;
 }
 
+/* DESIGN.md: mono-caps-button / mono-caps-label */
 @utility mono-caps {
   font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
 }
 
+/* ─── Animations ──────────────────────────────────────────────────────────────── */
+
 @keyframes flash-up {
-  0% { background-color: transparent; }
-  20% { background-color: color-mix(in srgb, var(--up) 18%, transparent); }
+  0%   { background-color: transparent; }
+  20%  { background-color: color-mix(in srgb, var(--up) 18%, transparent); }
   100% { background-color: transparent; }
 }
 @keyframes flash-down {
-  0% { background-color: transparent; }
-  20% { background-color: color-mix(in srgb, var(--down) 18%, transparent); }
+  0%   { background-color: transparent; }
+  20%  { background-color: color-mix(in srgb, var(--down) 18%, transparent); }
   100% { background-color: transparent; }
 }
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50%       { opacity: 0.4; }
 }
 .dot-live { animation: pulse-dot 1.6s ease-in-out infinite; }
 
-/* Indeterminate top route-progress bar */
 @keyframes route-progress-slide {
   0%   { transform: translateX(-100%) scaleX(0.4); }
-  50%  { transform: translateX(20%)  scaleX(0.7); }
-  100% { transform: translateX(120%) scaleX(0.4); }
+  50%  { transform: translateX(20%)   scaleX(0.7); }
+  100% { transform: translateX(120%)  scaleX(0.4); }
 }
 .route-progress-slide {
   animation: route-progress-slide 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   transform-origin: left center;
 }
 
-/* Skeleton shimmer sweep */
 @keyframes shimmer-sweep {
   100% { transform: translateX(100%); }
 }
@@ -213,10 +228,9 @@
   animation: shimmer-sweep 1.6s ease-in-out infinite;
 }
 
-/* Branded splash: logo mark breathing + bar fill */
 @keyframes splash-breathe {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.55; transform: scale(0.92); }
+  50%       { opacity: 0.55; transform: scale(0.92); }
 }
 .splash-breathe { animation: splash-breathe 1.4s ease-in-out infinite; }
 
@@ -226,24 +240,21 @@
 }
 .splash-bar { animation: splash-bar 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
 
-/* Horizontal ticker tape scroll */
 @keyframes ticker-scroll {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-33.333%); }
 }
-.ticker-scroll {
-  animation: ticker-scroll 25s linear infinite;
-  will-change: transform;
-}
+:root { --ticker-speed: 25s; }
 
 @media (prefers-reduced-motion: reduce) {
   .route-progress-slide,
   .shimmer::after,
   .splash-breathe,
   .splash-bar,
-  .dot-live,
-  .ticker-scroll { animation: none; }
+  .dot-live { animation: none; }
 }
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────────────── */
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--canvas); }

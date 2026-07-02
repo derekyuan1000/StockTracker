@@ -30,8 +30,8 @@ function StateRibbon() {
       className="pointer-events-none absolute inset-0 opacity-[0.18]"
       style={{
         background:
-          "radial-gradient(60% 55% at 78% 30%, rgba(139,139,255,0.5) 0%, transparent 60%)," +
-          "radial-gradient(50% 50% at 20% 80%, rgba(255,122,69,0.45) 0%, transparent 55%)",
+          "radial-gradient(60% 55% at 78% 30%, rgba(189,187,255,0.5) 0%, transparent 60%)," +
+          "radial-gradient(50% 50% at 20% 80%, rgba(252,76,2,0.45) 0%, transparent 55%)",
       }}
     />
   );
@@ -93,7 +93,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             Try again
           </Button>
-          <Button variant="ghost-line" className="border-white/25 text-[var(--on-dark)] hover:bg-white/10" asChild>
+          <Button
+            variant="ghost-line"
+            className="border-[rgba(242,239,231,0.25)] text-[var(--on-dark)] hover:bg-[rgba(242,239,231,0.08)]"
+            asChild
+          >
             <a href="/">Go home</a>
           </Button>
         </div>
@@ -103,22 +107,33 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async ({ location, context }) => {
     const isPublic =
       PUBLIC_PATHS.includes(location.pathname) ||
       location.pathname.startsWith("/api") ||
       location.pathname.startsWith("/profiles/");
 
-    const session = await getSession();
+    // Cache session for 60s — avoids a server round-trip on every client navigation
+    // while still catching expiry within a reasonable window.
+    const session = await context.queryClient.fetchQuery({
+      queryKey: ["session"],
+      queryFn: () => getSession(),
+      staleTime: 60_000,
+    });
 
     if (!session) {
       if (!isPublic) throw redirect({ to: "/login" });
       return {};
     }
 
-    // Onboarding gate: redirect new users to /welcome on first login
+    // Onboarding gate: redirect new users to /welcome on first login.
+    // Cache for 5 min — onboarded flag rarely changes after first login.
     if (location.pathname !== "/welcome" && location.pathname !== "/login") {
-      const settings = await getSettings();
+      const settings = await context.queryClient.fetchQuery({
+        queryKey: ["settings"],
+        queryFn: () => getSettings(),
+        staleTime: 5 * 60_000,
+      });
       if (!settings.onboarded) throw redirect({ to: "/welcome" });
     }
 
@@ -151,7 +166,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

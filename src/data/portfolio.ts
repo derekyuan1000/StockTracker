@@ -106,7 +106,9 @@ export function compute(
   const cost = rows.reduce((s, r) => s + r.costGBP, 0);
   const ugl = rows.reduce((s, r) => s + r.unrealisedGL, 0);
   const dayChangeGBP = rows.reduce((s, r) => s + r.dayChangeGBP, 0);
-  const prevTotal = rows.reduce((s, r) => s + pToGBP(r.prevClose * r.units), 0) + cashGBP;
+  const prevTotal =
+    rows.reduce((s, r) => s + (r.prevClose * r.units) / (r.currency === "GBp" ? 100 : 1), 0) +
+    cashGBP;
   rows.forEach(
     (r) => (r.allocActual = marketValue > 0 ? (r.marketValueGBP / marketValue) * 100 : 0),
   );
