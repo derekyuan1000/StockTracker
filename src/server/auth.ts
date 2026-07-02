@@ -9,6 +9,7 @@ const { secret, baseURL, googleClientId, googleClientSecret } = getAuthEnv();
 export const auth = betterAuth({
   secret,
   baseURL,
+  trustedOrigins: ["stocktracker://"],
   database: drizzleAdapter(db, { provider: "sqlite" }),
   socialProviders: {
     google: {
