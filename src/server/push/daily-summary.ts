@@ -1,7 +1,7 @@
 import { db } from "@/server/db/client";
 import { pushTokens, holdings, lots, portfolioMeta, quoteCache } from "@/server/db/schema";
 import { eq, and } from "drizzle-orm";
-import { sendPushNotifications } from "./expo";
+import { sendPushNotifications, type PushMessage } from "./expo";
 
 export async function sendDailySummaries(): Promise<{ sent: number }> {
   // Get all users with push tokens
@@ -9,7 +9,7 @@ export async function sendDailySummaries(): Promise<{ sent: number }> {
   if (allTokenRows.length === 0) return { sent: 0 };
 
   const userIds = [...new Set(allTokenRows.map((r) => r.userId))];
-  const messages: { to: string; title: string; body: string }[] = [];
+  const messages: PushMessage[] = [];
 
   for (const userId of userIds) {
     try {
@@ -56,8 +56,8 @@ export async function sendDailySummaries(): Promise<{ sent: number }> {
       const body = `£${totalGBP.toFixed(0)} (${sign}£${dayChangeGBP.toFixed(0)} today)`;
 
       const userTokens = allTokenRows.filter((r) => r.userId === userId);
-      for (const { token } of userTokens) {
-        messages.push({ to: token, title: "Portfolio Update", body });
+      for (const { token, platform } of userTokens) {
+        messages.push({ to: token, title: "Portfolio Update", body, platform });
       }
     } catch {
       // skip user on error

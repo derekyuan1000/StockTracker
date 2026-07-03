@@ -1,10 +1,12 @@
 import { deleteToken } from "@/server/services/devices";
+import { sendFcmNotifications } from "./fcm";
 
-interface PushMessage {
+export interface PushMessage {
   to: string;
   title: string;
   body: string;
-  data?: Record<string, unknown>;
+  platform?: "ios" | "android";
+  data?: Record<string, string>;
 }
 
 interface PushReceipt {
@@ -14,6 +16,18 @@ interface PushReceipt {
 }
 
 export async function sendPushNotifications(messages: PushMessage[]): Promise<void> {
+  if (messages.length === 0) return;
+
+  const expoMessages = messages.filter((m) => m.platform !== "android");
+  const fcmMessages = messages.filter((m) => m.platform === "android");
+
+  await Promise.all([
+    sendExpoNotifications(expoMessages),
+    sendFcmNotifications(fcmMessages),
+  ]);
+}
+
+async function sendExpoNotifications(messages: PushMessage[]): Promise<void> {
   if (messages.length === 0) return;
 
   const chunks: PushMessage[][] = [];
