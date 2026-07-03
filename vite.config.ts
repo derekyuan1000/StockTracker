@@ -6,6 +6,7 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { readFileSync, existsSync } from "fs";
+import path from "path";
 
 // Spike A fix: Vite doesn't auto-load .dev.vars (that's a wrangler behaviour).
 // This plugin populates process.env at config-time so server functions can read
@@ -39,5 +40,13 @@ export default defineConfig({
   },
   vite: {
     plugins: [loadDevVars()],
+    resolve: {
+      alias: {
+        "@stocktracker/api-contracts": path.resolve(
+          __dirname,
+          "packages/api-contracts/src/index.ts",
+        ),
+      },
+    },
   },
 });
