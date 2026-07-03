@@ -150,3 +150,16 @@ export const quoteCache = sqliteTable(
   },
   (t) => [primaryKey({ columns: [t.ticker, t.kind] })],
 );
+
+// Expo push notification tokens for mobile clients
+export const pushTokens = sqliteTable("push_tokens", {
+  token: text("token").primaryKey(),
+  userId: text("user_id").notNull(),
+  platform: text("platform", { enum: ["ios", "android"] }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  lastSeenAt: integer("last_seen_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
