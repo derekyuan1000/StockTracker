@@ -7,32 +7,32 @@ WebBrowser.maybeCompleteAuthSession();
 export async function signInWithGoogle(): Promise<boolean> {
   try {
     const callbackUrl = Linking.createURL("/auth-callback");
-    const authUrl = `${API_URL}/api/auth/sign-in/social?provider=google&callbackURL=${encodeURIComponent(callbackUrl)}`;
 
-    const result = await WebBrowser.openAuthSessionAsync(authUrl, callbackUrl);
+    // POST with disableRedirect=true so better-auth returns the Google OAuth URL as JSON
+    // instead of issuing a 302 redirect (which browsers follow, breaking expo-web-browser)
+    const res = await fetch(`${API_URL}/api/auth/sign-in/social`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        provider: "google",
+        callbackURL: callbackUrl,
+        disableRedirect: true,
+      }),
+    });
 
+    if (!res.ok) return false;
+
+    const json = (await res.json()) as { url?: string };
+    const oauthUrl = json.url;
+    if (!oauthUrl) return false;
+
+    // Open Google's OAuth page in the system browser
+    const result = await WebBrowser.openAuthSessionAsync(oauthUrl, callbackUrl);
     if (result.type !== "success") return false;
 
-    // After OAuth redirect, extract session token from the callback URL query params
-    const url = result.url;
-    const parsed = Linking.parse(url);
-    const tokenFromUrl =
-      parsed.queryParams?.token as string | undefined;
-
-    if (tokenFromUrl) {
-      await setToken(tokenFromUrl);
-      return true;
-    }
-
-    // Fallback: fetch session from server
-    const sessionRes = await fetch(`${API_URL}/api/auth/get-session`, {
-      credentials: "include",
-    });
-    const sessionData = (await sessionRes.json()) as {
-      session?: { token?: string };
-    };
-    const token = sessionData?.session?.token;
-
+    // Extract token from the deep-link redirect back to the app
+    const parsed = Linking.parse(result.url);
+    const token = parsed.queryParams?.token as string | undefined;
     if (token) {
       await setToken(token);
       return true;
