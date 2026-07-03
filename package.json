@@ -3,6 +3,7 @@
   "private": true,
   "sideEffects": false,
   "type": "module",
+  "workspaces": ["mobile", "packages/*"],
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -17,8 +18,13 @@
     "db:backfill-names": "node --env-file=.dev.vars scripts/backfill-names.mjs",
     "db:backfill-owner": "node --env-file=.dev.vars scripts/backfill-owner.mjs"
   },
+  "overrides": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.6.23",
+    "@better-auth/expo": "^1.0.0",
     "@libsql/client": "^0.17.4",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -35,8 +41,8 @@
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.42.2",
     "lucide-react": "^0.575.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "recharts": "^2.15.4",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
