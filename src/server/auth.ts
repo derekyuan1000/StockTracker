@@ -15,7 +15,7 @@ const applePrivateKey = process.env.APPLE_PRIVATE_KEY;
 export const auth = betterAuth({
   secret,
   baseURL,
-  trustedOrigins: ["stocktracker://", ...(process.env.DEV_ORIGIN ? [process.env.DEV_ORIGIN] : [])],
+  trustedOrigins: ["stocktracker://", "stocktracker://auth-callback", ...(process.env.DEV_ORIGIN ? [process.env.DEV_ORIGIN] : [])],
   database: drizzleAdapter(db, { provider: "sqlite" }),
   socialProviders: {
     google: {
