@@ -223,6 +223,9 @@ function AnalysisPage() {
                 </p>
                 <CorrelationMatrix
                   tickers={analysis.diversification.correlation.tickers}
+                  labels={analysis.diversification.correlation.tickers.map(
+                    (t) => computed.rows.find((r) => r.ticker === t)?.name ?? t.replace(".L", ""),
+                  )}
                   matrix={analysis.diversification.correlation.matrix}
                 />
               </div>
