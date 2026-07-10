@@ -3,6 +3,10 @@
     {
       "path": "/api/v1/internal/cron/daily-summary",
       "schedule": "40 16 * * 1-5"
+    },
+    {
+      "path": "/api/v1/internal/cron/check-alerts",
+      "schedule": "0 16 * * 1-5"
     }
   ]
 }

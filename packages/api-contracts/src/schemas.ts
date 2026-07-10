@@ -77,6 +77,15 @@ export const UpdateSettingsSchema = z.object({
 
 export const HistoryRangeSchema = z.enum(["1D", "5D", "15D", "1M", "6M", "YTD", "1Y", "5Y", "All"]);
 export const BenchmarkRangeSchema = z.enum(["1D", "5D", "1M", "6M", "YTD", "1Y", "5Y", "All"]);
+export const AnalysisRangeSchema = z.enum(["1M", "6M", "YTD", "1Y", "5Y", "All"]);
+
+export const CreateAlertSchema = z.object({
+  ticker: z.string().min(1).max(20).transform((s) => s.toUpperCase()),
+  direction: z.enum(["above", "below"]),
+  targetPrice: z.number().positive(),
+});
+
+export const DeleteAlertSchema = z.object({ id: z.number().int() });
 
 export const RegisterDeviceSchema = z.object({
   expoPushToken: z.string().min(1),

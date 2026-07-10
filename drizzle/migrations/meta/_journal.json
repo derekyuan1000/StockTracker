@@ -50,6 +50,13 @@
       "when": 1782900000000,
       "tag": "0006_user_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1783654570920,
+      "tag": "0007_milky_ozymandias",
+      "breakpoints": true
     }
   ]
 }

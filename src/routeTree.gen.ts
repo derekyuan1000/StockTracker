@@ -18,8 +18,10 @@ import { Route as FundamentalsRouteImport } from './routes/fundamentals'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as CashRouteImport } from './routes/cash'
+import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilesUserIdRouteImport } from './routes/profiles.$userId'
+import { Route as ApiAndroidAuthRouteImport } from './routes/api/android-auth'
 import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -68,6 +70,11 @@ const CashRoute = CashRouteImport.update({
   path: '/cash',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnalysisRoute = AnalysisRouteImport.update({
+  id: '/analysis',
+  path: '/analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -76,6 +83,11 @@ const IndexRoute = IndexRouteImport.update({
 const ProfilesUserIdRoute = ProfilesUserIdRouteImport.update({
   id: '/profiles/$userId',
   path: '/profiles/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAndroidAuthRoute = ApiAndroidAuthRouteImport.update({
+  id: '/api/android-auth',
+  path: '/api/android-auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiV1SplatRoute = ApiV1SplatRouteImport.update({
@@ -91,6 +103,7 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRoute
   '/cash': typeof CashRoute
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
@@ -100,12 +113,14 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
+  '/api/android-auth': typeof ApiAndroidAuthRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRoute
   '/cash': typeof CashRoute
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
@@ -115,6 +130,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
+  '/api/android-auth': typeof ApiAndroidAuthRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
@@ -122,6 +138,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/analysis': typeof AnalysisRoute
   '/cash': typeof CashRoute
   '/community': typeof CommunityRoute
   '/dashboard': typeof DashboardRoute
@@ -131,6 +148,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
+  '/api/android-auth': typeof ApiAndroidAuthRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
@@ -139,6 +157,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/analysis'
     | '/cash'
     | '/community'
     | '/dashboard'
@@ -148,12 +167,14 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/welcome'
+    | '/api/android-auth'
     | '/profiles/$userId'
     | '/api/auth/$'
     | '/api/v1/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/analysis'
     | '/cash'
     | '/community'
     | '/dashboard'
@@ -163,12 +184,14 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/welcome'
+    | '/api/android-auth'
     | '/profiles/$userId'
     | '/api/auth/$'
     | '/api/v1/$'
   id:
     | '__root__'
     | '/'
+    | '/analysis'
     | '/cash'
     | '/community'
     | '/dashboard'
@@ -178,6 +201,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/welcome'
+    | '/api/android-auth'
     | '/profiles/$userId'
     | '/api/auth/$'
     | '/api/v1/$'
@@ -185,6 +209,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnalysisRoute: typeof AnalysisRoute
   CashRoute: typeof CashRoute
   CommunityRoute: typeof CommunityRoute
   DashboardRoute: typeof DashboardRoute
@@ -194,6 +219,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   TransactionsRoute: typeof TransactionsRoute
   WelcomeRoute: typeof WelcomeRoute
+  ApiAndroidAuthRoute: typeof ApiAndroidAuthRoute
   ProfilesUserIdRoute: typeof ProfilesUserIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiV1SplatRoute: typeof ApiV1SplatRoute
@@ -264,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CashRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/analysis': {
+      id: '/analysis'
+      path: '/analysis'
+      fullPath: '/analysis'
+      preLoaderRoute: typeof AnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -276,6 +309,13 @@ declare module '@tanstack/react-router' {
       path: '/profiles/$userId'
       fullPath: '/profiles/$userId'
       preLoaderRoute: typeof ProfilesUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/android-auth': {
+      id: '/api/android-auth'
+      path: '/api/android-auth'
+      fullPath: '/api/android-auth'
+      preLoaderRoute: typeof ApiAndroidAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/v1/$': {
@@ -297,6 +337,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnalysisRoute: AnalysisRoute,
   CashRoute: CashRoute,
   CommunityRoute: CommunityRoute,
   DashboardRoute: DashboardRoute,
@@ -306,6 +347,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   TransactionsRoute: TransactionsRoute,
   WelcomeRoute: WelcomeRoute,
+  ApiAndroidAuthRoute: ApiAndroidAuthRoute,
   ProfilesUserIdRoute: ProfilesUserIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiV1SplatRoute: ApiV1SplatRoute,

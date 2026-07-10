@@ -163,3 +163,32 @@ export const pushTokens = sqliteTable("push_tokens", {
     .notNull()
     .default(sql`(unixepoch())`),
 });
+
+// Price alert rules: notify when ticker crosses targetPrice (in quote currency)
+export const alerts = sqliteTable("alerts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id").notNull(),
+  ticker: text("ticker").notNull(),
+  direction: text("direction", { enum: ["above", "below"] }).notNull(),
+  targetPrice: real("target_price").notNull(),
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  triggeredAt: integer("triggered_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .default(sql`(unixepoch())`),
+});
+
+// Per-user per-day AI-generated portfolio narrative (cached to avoid re-calling Claude)
+export const aiInsights = sqliteTable(
+  "ai_insights",
+  {
+    userId: text("user_id").notNull(),
+    day: text("day").notNull(), // YYYY-MM-DD
+    narrative: text("narrative").notNull(),
+    model: text("model").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.day] })],
+);

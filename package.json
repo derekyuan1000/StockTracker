@@ -23,6 +23,7 @@
     "react-dom": "19.2.3"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
     "@better-auth/drizzle-adapter": "^1.6.23",
     "@better-auth/expo": "^1.0.0",
     "@libsql/client": "^0.17.4",
@@ -35,12 +36,15 @@
     "@tanstack/react-router": "^1.170.16",
     "@tanstack/react-start": "^1.168.26",
     "@tanstack/router-plugin": "^1.168.18",
+    "@types/papaparse": "^5.5.2",
     "better-auth": "^1.6.23",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.42.2",
     "lucide-react": "^0.575.0",
+    "papaparse": "^5.5.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^2.15.4",

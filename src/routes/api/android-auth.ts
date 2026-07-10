@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/android-auth")({
+export const Route = createFileRoute("/api/android-auth")({
   server: {
     handlers: {
       GET: ({ request }) => {

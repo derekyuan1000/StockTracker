@@ -55,3 +55,60 @@ export const DEFAULT_SETTINGS: UserSettings = {
   theme: "dark",
   onboarded: false,
 };
+
+// ─── Portfolio Analysis types ─────────────────────────────────────────────────
+
+export type RiskMetrics = {
+  annualizedVolPct: number;
+  sharpePct: number;
+  maxDrawdownPct: number;
+  betaVsBenchmark: number | null;
+  drawdownSeries: { ts: number; pct: number }[];
+};
+
+export type DiversificationMetrics = {
+  hhi: number;
+  topHoldingsConcentration: { ticker: string; name: string; allocPct: number }[];
+  bySector: { label: string; pct: number }[];
+  byCurrency: { label: string; pct: number }[];
+  byBucket: { label: string; pct: number }[];
+  correlation: { tickers: string[]; matrix: number[][] } | null;
+};
+
+export type AttributionMetrics = {
+  byHolding: { ticker: string; name: string; contribution: number; periodReturnPct: number }[];
+  bySector: { label: string; contribution: number }[];
+};
+
+export type IncomeMetrics = {
+  projectedAnnualGBP: number;
+  portfolioYieldPct: number;
+  byHolding: {
+    ticker: string;
+    name: string;
+    annualIncomeGBP: number;
+    yieldOnCostPct: number;
+    exDivDate?: string;
+  }[];
+};
+
+export type PortfolioAnalysis = {
+  range: string;
+  benchmark: string | null;
+  risk: RiskMetrics;
+  diversification: DiversificationMetrics;
+  attribution: AttributionMetrics;
+  income: IncomeMetrics;
+};
+
+// ─── Alert types ──────────────────────────────────────────────────────────────
+
+export type Alert = {
+  id: number;
+  ticker: string;
+  direction: "above" | "below";
+  targetPrice: number;
+  active: boolean;
+  triggeredAt: string | null;
+  createdAt: string;
+};
