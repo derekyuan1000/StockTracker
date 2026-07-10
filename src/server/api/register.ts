@@ -9,6 +9,9 @@ import { settingsRoutes } from "./routes/settings";
 import { publicRoutes } from "./routes/public";
 import { devicesRoutes } from "./routes/devices";
 import { internalRoutes } from "./routes/internal";
+import { analysisRoutes } from "./routes/analysis";
+import { alertsRoutes } from "./routes/alerts";
+import { insightsRoutes } from "./routes/insights";
 
 registerRoutes([
   ...portfolioRoutes,
@@ -21,4 +24,7 @@ registerRoutes([
   ...publicRoutes,
   ...devicesRoutes,
   ...internalRoutes,
+  ...analysisRoutes,
+  ...alertsRoutes,
+  ...insightsRoutes,
 ]);
