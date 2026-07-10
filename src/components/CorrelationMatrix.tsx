@@ -1,5 +1,6 @@
 type Props = {
   tickers: string[];
+  labels?: string[];
   matrix: number[][];
 };
 
@@ -11,22 +12,24 @@ function cellColor(v: number): string {
   return "bg-[#60a5fa]/40";
 }
 
-export function CorrelationMatrix({ tickers, matrix }: Props) {
+export function CorrelationMatrix({ tickers, labels, matrix }: Props) {
   if (tickers.length === 0) return null;
+
+  const display = (i: number) => labels?.[i] ?? tickers[i].replace(".L", "");
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-[11px]">
         <thead>
           <tr>
-            <th className="w-16 p-1" />
-            {tickers.map((t) => (
+            <th className="w-24 p-1" />
+            {tickers.map((t, i) => (
               <th
                 key={t}
-                className="max-w-[40px] truncate p-1 text-center font-mono text-text-muted uppercase tracking-wider"
-                title={t}
+                className="max-w-[60px] truncate p-1 text-center font-mono text-text-muted tracking-wider"
+                title={display(i)}
               >
-                {t.replace(".L", "")}
+                {display(i).length > 8 ? display(i).slice(0, 7) + "…" : display(i)}
               </th>
             ))}
           </tr>
@@ -34,14 +37,17 @@ export function CorrelationMatrix({ tickers, matrix }: Props) {
         <tbody>
           {matrix.map((row, i) => (
             <tr key={tickers[i]}>
-              <td className="p-1 font-mono text-text-muted uppercase tracking-wider whitespace-nowrap">
-                {tickers[i].replace(".L", "")}
+              <td
+                className="p-1 font-mono text-text-muted tracking-wider whitespace-nowrap"
+                title={display(i)}
+              >
+                {display(i).length > 12 ? display(i).slice(0, 11) + "…" : display(i)}
               </td>
               {row.map((val, j) => (
                 <td
                   key={j}
                   className={`size-9 p-1 text-center rounded-sm ${cellColor(val)}`}
-                  title={`${tickers[i]} / ${tickers[j]}: ${val.toFixed(2)}`}
+                  title={`${display(i)} / ${display(j)}: ${val.toFixed(2)}`}
                 >
                   <span
                     className={
