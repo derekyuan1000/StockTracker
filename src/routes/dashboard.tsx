@@ -334,6 +334,12 @@ function SummaryPage() {
 
   return (
     <AppShell>
+      {/* Page header */}
+      <div className="mb-8">
+        <p className="eyebrow text-text-muted">Overview</p>
+        <h1 className="mt-2 text-4xl font-medium tracking-[-0.02em] text-text-strong">Summary</h1>
+      </div>
+
       {/* HERO: KPI + performance chart */}
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
         <div className="rounded-sm border border-hairline bg-surface p-6">

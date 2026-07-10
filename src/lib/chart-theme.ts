@@ -45,9 +45,19 @@ export function getSectorColor(sector: string, index = 0): string {
 }
 
 export const CHART_TOOLTIP_STYLE: React.CSSProperties = {
-  backgroundColor: "var(--surface-card)",
+  background: "var(--surface-card)",
   border: "1px solid var(--hairline)",
   borderRadius: 4,
-  fontSize: 12,
+  fontSize: 13,
+  fontFamily: "JetBrains Mono",
+  boxShadow: "none",
+};
+
+export const CHART_TOOLTIP_LABEL: React.CSSProperties = {
+  color: "var(--text-strong)",
+  fontSize: 11,
+};
+
+export const CHART_TOOLTIP_ITEM: React.CSSProperties = {
   color: "var(--text-body)",
 };
