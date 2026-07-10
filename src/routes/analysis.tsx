@@ -132,7 +132,7 @@ function AnalysisPage() {
         </div>
       ) : (
         <div className="mt-8 space-y-8">
-          <AiInsights range={range} />
+          <AiInsights />
 
           {/* Risk */}
           <Section title="Risk" subtitle="Volatility, Sharpe ratio and drawdown">
