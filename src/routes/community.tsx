@@ -213,20 +213,16 @@ function CommunityPage() {
 
   return (
     <AppShell>
-      {/* Page-header band */}
-      <div className="border-b border-hairline">
-        <div className="pt-10 pb-8">
-          <p className="eyebrow text-text-muted">Community</p>
-          <h1 className="mt-3 text-4xl font-medium leading-[1.05] tracking-[-0.02em] text-text-strong md:text-6xl">
-            Community
-          </h1>
-          <p className="mt-3 max-w-xl text-text-muted">
-            Trades and portfolio performance from public members.
-          </p>
-        </div>
+      {/* Page header */}
+      <div className="mb-8">
+        <p className="eyebrow text-text-muted">Community</p>
+        <h1 className="mt-2 text-4xl font-medium tracking-[-0.02em] text-text-strong">Community</h1>
+        <p className="mt-2 max-w-xl text-[15px] text-text-muted">
+          Trades and portfolio performance from public members.
+        </p>
       </div>
 
-      <div className="pt-6">
+      <div>
         {/* Tab strip */}
         <div className="flex gap-2 border-b border-hairline">
           {(["feed", "leaderboard"] as const).map((t) => (

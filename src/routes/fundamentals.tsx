@@ -164,16 +164,12 @@ function FundamentalsPage() {
   if (!h) {
     return (
       <AppShell>
-        <div
-          className={`-mx-6 -mt-8 mb-8 px-8 py-16 ${onDark ? "bg-[var(--canvas-dark)] text-[var(--on-dark)]" : "bg-canvas text-text-strong"}`}
-        >
-          <p className={`eyebrow ${onDark ? "text-[var(--accent-mint)]" : "text-text-muted"}`}>
+        <div className="mb-8">
+          <p className="eyebrow text-text-muted">Stock</p>
+          <h1 className="mt-2 text-4xl font-medium tracking-[-0.02em] text-text-strong">
             Fundamentals
-          </p>
-          <h1 className="mt-3 text-4xl font-medium tracking-[-0.02em]">Fundamentals</h1>
-          <p
-            className={`mt-3 max-w-xl text-[15px] ${onDark ? "text-white/60" : "text-text-muted"}`}
-          >
+          </h1>
+          <p className="mt-2 max-w-xl text-[15px] text-text-muted">
             No holdings to display. Add holdings to get started.
           </p>
         </div>
@@ -194,14 +190,12 @@ function FundamentalsPage() {
   return (
     <AppShell>
       {/* ── Page header ── */}
-      <div
-        className={`-mx-6 -mt-8 mb-8 px-8 py-16 ${onDark ? "bg-[var(--canvas-dark)] text-[var(--on-dark)]" : "bg-canvas text-text-strong"}`}
-      >
-        <p className={`eyebrow ${onDark ? "text-[var(--accent-mint)]" : "text-text-muted"}`}>
+      <div className="mb-8">
+        <p className="eyebrow text-text-muted">Stock</p>
+        <h1 className="mt-2 text-4xl font-medium tracking-[-0.02em] text-text-strong">
           Fundamentals
-        </p>
-        <h1 className="mt-3 text-4xl font-medium tracking-[-0.02em]">Fundamentals</h1>
-        <p className={`mt-3 max-w-xl text-[15px] ${onDark ? "text-white/60" : "text-text-muted"}`}>
+        </h1>
+        <p className="mt-2 max-w-xl text-[15px] text-text-muted">
           Per-holding deep dive — chart, valuation, growth, financial health and analyst view.
         </p>
       </div>

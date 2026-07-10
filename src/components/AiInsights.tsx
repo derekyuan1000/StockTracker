@@ -1,13 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Sparkles } from "lucide-react";
+import { useMemo } from "react";
 import { getPortfolio } from "@/fns/holdings";
 import { compute } from "@/data/portfolio";
 import { INSIGHT_TEXTS, renderInsight } from "@/lib/insights-texts";
 
 export function AiInsights() {
-  const [offset, setOffset] = useState(0);
-
   const { data: portfolio } = useQuery({
     queryKey: ["portfolio"],
     queryFn: () => getPortfolio(),
@@ -21,7 +19,7 @@ export function AiInsights() {
   const text = useMemo(() => {
     if (!INSIGHT_TEXTS.length) return null;
     const daysSinceEpoch = Math.floor(Date.now() / 86_400_000);
-    const idx = (daysSinceEpoch + offset) % INSIGHT_TEXTS.length;
+    const idx = daysSinceEpoch % INSIGHT_TEXTS.length;
     const template = INSIGHT_TEXTS[idx];
 
     const sorted = [...computed.rows].sort((a, b) => b.marketValueGBP - a.marketValueGBP);
@@ -47,7 +45,7 @@ export function AiInsights() {
       gain: `${gainPct >= 0 ? "+" : ""}${gainPct.toFixed(1)}%`,
       cash_pct: `${cashPct.toFixed(1)}%`,
     });
-  }, [computed, portfolio, offset]);
+  }, [computed, portfolio]);
 
   return (
     <div className="rounded-lg border border-hairline bg-[var(--surface-card)] p-5">
@@ -67,16 +65,6 @@ export function AiInsights() {
         ) : (
           <p className="text-text-muted">Add holdings to see personalised tips.</p>
         )}
-      </div>
-
-      <div className="mt-4 flex justify-end">
-        <button
-          onClick={() => setOffset((v) => v + 1)}
-          className="flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.08em] text-text-muted transition-colors hover:text-text-body"
-        >
-          Next tip
-          <ChevronRight className="size-3" />
-        </button>
       </div>
     </div>
   );

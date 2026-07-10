@@ -2,8 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   Cell,
@@ -26,7 +24,13 @@ import { getPortfolio } from "@/fns/holdings";
 import { compute } from "@/data/portfolio";
 import { fmtGBP } from "@/lib/format";
 import { BarChart3 } from "lucide-react";
-import { PALETTE, getSectorColor, CHART_TOOLTIP_STYLE } from "@/lib/chart-theme";
+import {
+  PALETTE,
+  getSectorColor,
+  CHART_TOOLTIP_STYLE,
+  CHART_TOOLTIP_LABEL,
+  CHART_TOOLTIP_ITEM,
+} from "@/lib/chart-theme";
 
 export const Route = createFileRoute("/analysis")({
   loader: ({ context: { queryClient } }) =>
@@ -81,10 +85,12 @@ function AnalysisPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow text-text-muted">Portfolio</p>
-          <h1 className="mt-0.5 text-xl font-semibold tracking-tight text-text-strong">Analysis</h1>
+          <h1 className="mt-2 text-4xl font-medium tracking-[-0.02em] text-text-strong">
+            Analysis
+          </h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <select
@@ -157,66 +163,6 @@ function AnalysisPage() {
                 sub={!benchmark ? "Select a benchmark" : undefined}
               />
             </div>
-
-            {analysis.risk.drawdownSeries.length > 0 && (
-              <div className="mt-4 h-[180px]">
-                <p className="mb-2 font-mono text-[10px] uppercase tracking-wider text-text-muted">
-                  Drawdown series
-                </p>
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={analysis.risk.drawdownSeries}
-                    margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
-                  >
-                    <defs>
-                      <linearGradient id="ddGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--down)" stopOpacity={0.25} />
-                        <stop offset="100%" stopColor="var(--down)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis
-                      dataKey="ts"
-                      type="number"
-                      domain={["dataMin", "dataMax"]}
-                      tickFormatter={(t) =>
-                        new Date(t).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })
-                      }
-                      tick={CHART_TICK}
-                      axisLine={{ stroke: "var(--hairline)" }}
-                      tickLine={false}
-                      minTickGap={48}
-                    />
-                    <YAxis
-                      tickFormatter={(v) => `${v.toFixed(0)}%`}
-                      tick={CHART_TICK}
-                      axisLine={false}
-                      tickLine={false}
-                      width={44}
-                    />
-                    <Tooltip
-                      contentStyle={CHART_TOOLTIP_STYLE}
-                      formatter={(v: number) => [`${v.toFixed(2)}%`, "Drawdown"]}
-                      labelFormatter={(t) =>
-                        new Date(t as number).toLocaleDateString("en-GB", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })
-                      }
-                    />
-                    <ReferenceLine y={0} stroke="var(--hairline)" />
-                    <Area
-                      type="monotone"
-                      dataKey="pct"
-                      stroke="var(--down)"
-                      strokeWidth={1.5}
-                      fill="url(#ddGrad)"
-                      isAnimationActive={false}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            )}
           </Section>
 
           {/* Diversification */}
@@ -236,9 +182,9 @@ function AnalysisPage() {
               {analysis.diversification.topHoldingsConcentration.slice(0, 3).map((h) => (
                 <KpiCard
                   key={h.ticker}
-                  label={h.ticker}
+                  label={h.name}
                   value={`${h.allocPct.toFixed(1)}%`}
-                  sub={h.name}
+                  sub={h.ticker.replace(".L", "")}
                 />
               ))}
             </div>
@@ -301,16 +247,18 @@ function AnalysisPage() {
                   >
                     <XAxis type="number" hide />
                     <YAxis
-                      dataKey="ticker"
+                      dataKey="name"
                       type="category"
-                      width={60}
+                      width={110}
                       tick={CHART_TICK}
                       axisLine={false}
                       tickLine={false}
-                      tickFormatter={(v: string) => v.replace(".L", "")}
+                      tickFormatter={(v: string) => (v.length > 14 ? v.slice(0, 13) + "…" : v)}
                     />
                     <Tooltip
                       contentStyle={CHART_TOOLTIP_STYLE}
+                      labelStyle={CHART_TOOLTIP_LABEL}
+                      itemStyle={CHART_TOOLTIP_ITEM}
                       formatter={(v: number, _n, item) => [
                         `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`,
                         item?.payload?.name ?? "Contribution",
@@ -356,11 +304,11 @@ function AnalysisPage() {
                     margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
                   >
                     <XAxis
-                      dataKey="ticker"
+                      dataKey="name"
                       tick={CHART_TICK}
                       axisLine={{ stroke: "var(--hairline)" }}
                       tickLine={false}
-                      tickFormatter={(v: string) => v.replace(".L", "")}
+                      tickFormatter={(v: string) => (v.length > 12 ? v.slice(0, 11) + "…" : v)}
                     />
                     <YAxis
                       tickFormatter={(v) => `£${v}`}
@@ -371,6 +319,8 @@ function AnalysisPage() {
                     />
                     <Tooltip
                       contentStyle={CHART_TOOLTIP_STYLE}
+                      labelStyle={CHART_TOOLTIP_LABEL}
+                      itemStyle={CHART_TOOLTIP_ITEM}
                       formatter={(v: number, _n, item) => [
                         fmtGBP(v),
                         `${item?.payload?.name ?? ""} (YOC: ${item?.payload?.yieldOnCostPct?.toFixed(2) ?? "—"}%)`,
@@ -473,6 +423,8 @@ function DonutCard({
             </Pie>
             <Tooltip
               contentStyle={CHART_TOOLTIP_STYLE}
+              labelStyle={CHART_TOOLTIP_LABEL}
+              itemStyle={CHART_TOOLTIP_ITEM}
               formatter={(v: number, _n, item) => [
                 `${(v as number).toFixed(1)}%`,
                 item?.payload?.label,
