@@ -89,6 +89,21 @@ function useSidebarCollapsed() {
   return [collapsed, toggle] as const;
 }
 
+const LONDON_TIME_FORMAT = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/London",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+/** Always renders the wall-clock time in London, regardless of the viewer's own timezone. */
+function londonTimeParts(date: Date) {
+  const parts = LONDON_TIME_FORMAT.formatToParts(date);
+  const hh = parts.find((p) => p.type === "hour")?.value ?? "00";
+  const mm = parts.find((p) => p.type === "minute")?.value ?? "00";
+  return { hh, mm };
+}
+
 export function MarketStatus({ onDark }: { onDark: boolean }) {
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
@@ -101,8 +116,7 @@ export function MarketStatus({ onDark }: { onDark: boolean }) {
   const h = now.getUTCHours();
   const day = now.getUTCDay();
   const open = day >= 1 && day <= 5 && h >= 7 && h < 16;
-  const hh = String(now.getHours()).padStart(2, "0");
-  const mm = String(now.getMinutes()).padStart(2, "0");
+  const { hh, mm } = londonTimeParts(now);
   return (
     <div
       className={`flex items-center gap-4 text-[11px] ${onDark ? "text-white/55" : "text-text-muted"}`}
