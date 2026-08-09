@@ -9,65 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WelcomeRouteImport } from './routes/welcome'
-import { Route as TransactionsRouteImport } from './routes/transactions'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as HoldingsRouteImport } from './routes/holdings'
-import { Route as FundamentalsRouteImport } from './routes/fundamentals'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as CommunityRouteImport } from './routes/community'
-import { Route as CashRouteImport } from './routes/cash'
-import { Route as AnalysisRouteImport } from './routes/analysis'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProfilesUserIdRouteImport } from './routes/profiles.$userId'
+import { Route as AnalysisRouteImport } from './routes/analysis'
+import { Route as CashRouteImport } from './routes/cash'
+import { Route as CommunityRouteImport } from './routes/community'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as FundamentalsRouteImport } from './routes/fundamentals'
+import { Route as HoldingsRouteImport } from './routes/holdings'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as TransactionsRouteImport } from './routes/transactions'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ApiAndroidAuthRouteImport } from './routes/api/android-auth'
-import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
+import { Route as ProfilesUserIdRouteImport } from './routes/profiles.$userId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
 
-const WelcomeRoute = WelcomeRouteImport.update({
-  id: '/welcome',
-  path: '/welcome',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TransactionsRoute = TransactionsRouteImport.update({
-  id: '/transactions',
-  path: '/transactions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HoldingsRoute = HoldingsRouteImport.update({
-  id: '/holdings',
-  path: '/holdings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FundamentalsRoute = FundamentalsRouteImport.update({
-  id: '/fundamentals',
-  path: '/fundamentals',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CommunityRoute = CommunityRouteImport.update({
-  id: '/community',
-  path: '/community',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CashRoute = CashRouteImport.update({
-  id: '/cash',
-  path: '/cash',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnalysisRoute = AnalysisRouteImport.update({
@@ -75,14 +35,49 @@ const AnalysisRoute = AnalysisRouteImport.update({
   path: '/analysis',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const CashRoute = CashRouteImport.update({
+  id: '/cash',
+  path: '/cash',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfilesUserIdRoute = ProfilesUserIdRouteImport.update({
-  id: '/profiles/$userId',
-  path: '/profiles/$userId',
+const CommunityRoute = CommunityRouteImport.update({
+  id: '/community',
+  path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FundamentalsRoute = FundamentalsRouteImport.update({
+  id: '/fundamentals',
+  path: '/fundamentals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HoldingsRoute = HoldingsRouteImport.update({
+  id: '/holdings',
+  path: '/holdings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransactionsRoute = TransactionsRouteImport.update({
+  id: '/transactions',
+  path: '/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAndroidAuthRoute = ApiAndroidAuthRouteImport.update({
@@ -90,14 +85,19 @@ const ApiAndroidAuthRoute = ApiAndroidAuthRouteImport.update({
   path: '/api/android-auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiV1SplatRoute = ApiV1SplatRouteImport.update({
-  id: '/api/v1/$',
-  path: '/api/v1/$',
+const ProfilesUserIdRoute = ProfilesUserIdRouteImport.update({
+  id: '/profiles/$userId',
+  path: '/profiles/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1SplatRoute = ApiV1SplatRouteImport.update({
+  id: '/api/v1/$',
+  path: '/api/v1/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -227,67 +227,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/welcome': {
-      id: '/welcome'
-      path: '/welcome'
-      fullPath: '/welcome'
-      preLoaderRoute: typeof WelcomeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/transactions': {
-      id: '/transactions'
-      path: '/transactions'
-      fullPath: '/transactions'
-      preLoaderRoute: typeof TransactionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/holdings': {
-      id: '/holdings'
-      path: '/holdings'
-      fullPath: '/holdings'
-      preLoaderRoute: typeof HoldingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fundamentals': {
-      id: '/fundamentals'
-      path: '/fundamentals'
-      fullPath: '/fundamentals'
-      preLoaderRoute: typeof FundamentalsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/community': {
-      id: '/community'
-      path: '/community'
-      fullPath: '/community'
-      preLoaderRoute: typeof CommunityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cash': {
-      id: '/cash'
-      path: '/cash'
-      fullPath: '/cash'
-      preLoaderRoute: typeof CashRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/analysis': {
@@ -297,18 +241,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalysisRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/cash': {
+      id: '/cash'
+      path: '/cash'
+      fullPath: '/cash'
+      preLoaderRoute: typeof CashRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profiles/$userId': {
-      id: '/profiles/$userId'
-      path: '/profiles/$userId'
-      fullPath: '/profiles/$userId'
-      preLoaderRoute: typeof ProfilesUserIdRouteImport
+    '/community': {
+      id: '/community'
+      path: '/community'
+      fullPath: '/community'
+      preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fundamentals': {
+      id: '/fundamentals'
+      path: '/fundamentals'
+      fullPath: '/fundamentals'
+      preLoaderRoute: typeof FundamentalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/holdings': {
+      id: '/holdings'
+      path: '/holdings'
+      fullPath: '/holdings'
+      preLoaderRoute: typeof HoldingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transactions': {
+      id: '/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof TransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/android-auth': {
@@ -318,11 +311,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAndroidAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/v1/$': {
-      id: '/api/v1/$'
-      path: '/api/v1/$'
-      fullPath: '/api/v1/$'
-      preLoaderRoute: typeof ApiV1SplatRouteImport
+    '/profiles/$userId': {
+      id: '/profiles/$userId'
+      path: '/profiles/$userId'
+      fullPath: '/profiles/$userId'
+      preLoaderRoute: typeof ProfilesUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -330,6 +323,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/$': {
+      id: '/api/v1/$'
+      path: '/api/v1/$'
+      fullPath: '/api/v1/$'
+      preLoaderRoute: typeof ApiV1SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
