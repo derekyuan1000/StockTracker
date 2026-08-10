@@ -1,5 +1,5 @@
 import { fmtGBP } from "@/lib/format";
-import type { HoldingComputed } from "@/data/portfolio";
+import type { HoldingComputed } from "@stocktracker/shared";
 
 export function RebalancePanel({
   rows,

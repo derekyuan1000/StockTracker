@@ -9,7 +9,7 @@ import {
   fetchQuote,
 } from "@/server/market/yahoo";
 import type { HistoryRange } from "@/server/market/types";
-import type { Holding } from "@/data/portfolio";
+import type { Holding } from "@stocktracker/shared";
 
 // ─── adjustCash helper ────────────────────────────────────────────────────────
 
@@ -208,6 +208,132 @@ export async function getPortfolioHistory(userId: string, range: string) {
   return Array.from(tsMap.entries())
     .sort(([a], [b]) => a - b)
     .map(([ts, value]) => ({ ts, value }));
+}
+
+// ─── getPortfolioReturns ─────────────────────────────────────────────────────
+
+export type ReturnPeriod = "1W" | "1M" | "6M" | "1Y" | "3Y";
+
+export const RETURN_PERIODS = ["1W", "1M", "6M", "1Y", "3Y"] as const;
+
+const PERIOD_DAYS: Record<ReturnPeriod, number> = {
+  "1W": 7,
+  "1M": 30,
+  "6M": 182,
+  "1Y": 365,
+  "3Y": 1095,
+};
+
+// How far either side of a period's cut-off we still accept a price bar as the
+// anchor. Daily bars only need to bridge weekends and holidays; the 3Y anchor
+// comes out of the weekly 5Y series, so it needs a wider window.
+const PERIOD_TOLERANCE_DAYS: Record<ReturnPeriod, number> = {
+  "1W": 5,
+  "1M": 7,
+  "6M": 7,
+  "1Y": 7,
+  "3Y": 14,
+};
+
+export interface PeriodReturn {
+  period: ReturnPeriod;
+  pct: number;
+  gbp: number;
+  /** Holdings whose price history reaches back past this period's cut-off. */
+  covered: number;
+  /** Holdings currently held with a non-zero unit count. */
+  total: number;
+}
+
+/** Nearest bar to `target` by timestamp, over a series sorted ascending. */
+function nearestBar<T extends { ts: number }>(bars: T[], target: number): T {
+  let lo = 0,
+    hi = bars.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (bars[mid].ts < target) lo = mid + 1;
+    else hi = mid;
+  }
+  const right = bars[lo];
+  const left = bars[Math.max(0, lo - 1)];
+  return Math.abs(left.ts - target) <= Math.abs(right.ts - target) ? left : right;
+}
+
+/**
+ * Market return of the portfolio as it is composed *today*, measured over each
+ * trailing window: current units priced at the window's start versus their
+ * latest close. Cash is excluded — it does not move with the market.
+ *
+ * A holding whose price history does not reach a window's cut-off (a recent
+ * listing, say) is left out of that window only, which is what `covered`
+ * reports so the UI can flag a partial figure.
+ */
+export async function getPortfolioReturns(userId: string): Promise<PeriodReturn[]> {
+  const [holdingRows, lotRows] = await Promise.all([
+    db.select().from(holdings).where(eq(holdings.userId, userId)),
+    db.select().from(lots).where(eq(lots.userId, userId)),
+  ]);
+
+  const unitsByTicker = new Map<string, number>();
+  for (const l of lotRows) {
+    unitsByTicker.set(l.ticker, (unitsByTicker.get(l.ticker) ?? 0) + l.units);
+  }
+
+  const held = holdingRows.filter((h) => (unitsByTicker.get(h.ticker) ?? 0) > 0);
+
+  const series = await Promise.all(
+    held.map(async (h) => {
+      const units = unitsByTicker.get(h.ticker)!;
+      const divisor = h.currency === "GBp" ? 100 : 1;
+
+      // Daily bars for the last year, weekly bars for the four years before it.
+      // Both go through fetchHistory's cache, so all five windows cost at most
+      // two upstream lookups per holding.
+      const [recent, long] = await Promise.all([
+        fetchHistory(h.ticker, "1Y").catch(() => [] as { ts: number; close: number }[]),
+        fetchHistory(h.ticker, "5Y").catch(() => [] as { ts: number; close: number }[]),
+      ]);
+
+      const byTs = new Map<number, number>();
+      for (const b of long) if (b.close > 0) byTs.set(b.ts, b.close);
+      for (const b of recent) if (b.close > 0) byTs.set(b.ts, b.close);
+
+      return Array.from(byTs.entries())
+        .sort(([a], [b]) => a - b)
+        .map(([ts, close]) => ({ ts, value: (close / divisor) * units }));
+    }),
+  );
+
+  const now = Date.now();
+
+  return RETURN_PERIODS.map((period) => {
+    const cutoff = now - PERIOD_DAYS[period] * 86_400_000;
+    const tolerance = PERIOD_TOLERANCE_DAYS[period] * 86_400_000;
+
+    let then = 0;
+    let latest = 0;
+    let covered = 0;
+
+    for (const bars of series) {
+      if (bars.length < 2) continue;
+      const anchor = nearestBar(bars, cutoff);
+      if (Math.abs(anchor.ts - cutoff) > tolerance) continue;
+      then += anchor.value;
+      latest += bars.at(-1)!.value;
+      covered++;
+    }
+
+    if (covered === 0 || then <= 0) {
+      return { period, pct: 0, gbp: 0, covered: 0, total: series.length };
+    }
+    return {
+      period,
+      pct: (latest / then - 1) * 100,
+      gbp: latest - then,
+      covered,
+      total: series.length,
+    };
+  });
 }
 
 // ─── getBenchmarkHistory ─────────────────────────────────────────────────────

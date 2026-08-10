@@ -59,11 +59,12 @@ import {
   getBenchmarkHistory,
   getPortfolio,
   getPortfolioHistory,
+  getPortfolioReturns,
   getPriceForDate,
   searchTicker,
   sellUnits,
 } from "@/fns/holdings";
-import { compute, type Bucket, type Holding } from "@/data/portfolio";
+import { compute, type Bucket, type Holding } from "@stocktracker/shared";
 import { dirClass, fmtGBP, fmtGBPSigned, fmtPct } from "@/lib/format";
 
 export const Route = createFileRoute("/dashboard")({
@@ -86,6 +87,18 @@ export const Route = createFileRoute("/dashboard")({
 
 type Range = "1D" | "5D" | "15D" | "1M" | "6M" | "YTD" | "1Y" | "All";
 const RANGES: Range[] = ["1D", "5D", "15D", "1M", "6M", "YTD", "1Y", "All"];
+
+// Trailing windows shown in the "Returns by period" strip. Must match
+// RETURN_PERIODS in server/services/portfolio.ts.
+const PERF_PERIODS = ["1W", "1M", "6M", "1Y", "3Y"] as const;
+
+type PeriodReturn = {
+  period: string;
+  pct: number;
+  gbp: number;
+  covered: number;
+  total: number;
+};
 
 const BENCHMARKS = [
   { label: "vs Index…", ticker: "" },
@@ -189,6 +202,13 @@ function SummaryPage() {
     queryKey: ["portfolio-history", range],
     queryFn: () => getPortfolioHistory({ data: { range } }),
     enabled: holdings.length > 0,
+  });
+
+  const { data: periodReturns = [], isFetching: returnsFetching } = useQuery({
+    queryKey: ["portfolio-returns"],
+    queryFn: () => getPortfolioReturns(),
+    enabled: holdings.length > 0,
+    staleTime: 5 * 60_000,
   });
 
   const [benchmark, setBenchmark] = useState("");
@@ -390,7 +410,7 @@ function SummaryPage() {
                 )}
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-end gap-2 self-end sm:self-auto">
               {perfZoomDomain && (
                 <button
                   onClick={() => setPerfZoomDomain(null)}
@@ -555,6 +575,29 @@ function SummaryPage() {
               </ComposedChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      </section>
+
+      {/* RETURNS BY PERIOD */}
+      <section className="mt-8 overflow-hidden rounded-sm border border-hairline bg-surface">
+        <div className="border-b border-hairline px-6 py-4">
+          <p className="eyebrow text-text-muted">Performance</p>
+          <h2 className="mt-1 text-base font-medium tracking-[-0.01em] text-text-strong">
+            Returns by period
+          </h2>
+          <p className="mt-1 text-xs text-text-muted">
+            Market return of your current holdings over each trailing window. Excludes cash.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-px bg-[var(--hairline)] sm:grid-cols-5">
+          {PERF_PERIODS.map((period) => (
+            <PeriodReturnTile
+              key={period}
+              period={period}
+              data={periodReturns.find((r) => r.period === period)}
+              loading={returnsFetching && periodReturns.length === 0}
+            />
+          ))}
         </div>
       </section>
 
@@ -1460,6 +1503,67 @@ function KpiRow({
           {sub}
         </div>
       )}
+    </div>
+  );
+}
+
+function PeriodReturnTile({
+  period,
+  data,
+  loading,
+}: {
+  period: string;
+  data?: PeriodReturn;
+  loading: boolean;
+}) {
+  // Stacked as label-left / figures-right rows on mobile, as columns from sm up.
+  const shell = "flex items-baseline justify-between gap-3 bg-surface px-6 py-4 sm:block sm:py-5";
+
+  if (loading) {
+    return (
+      <div className={shell}>
+        <div className="eyebrow text-text-muted">{period}</div>
+        <div className="sm:mt-2">
+          <div className="h-[22px] w-20 animate-pulse rounded bg-[var(--surface-elevated)]" />
+          <div className="mt-1.5 h-3 w-16 animate-pulse rounded bg-[var(--surface-elevated)]" />
+        </div>
+      </div>
+    );
+  }
+
+  // A window is unreported when no holding has price history reaching back
+  // that far — a portfolio of recent listings has no honest 3Y figure.
+  const unavailable = !data || data.covered === 0;
+  const partial = !unavailable && data.covered < data.total;
+
+  return (
+    <div
+      className={shell}
+      title={unavailable ? `Not enough price history to measure ${period}` : undefined}
+    >
+      <div className="eyebrow text-text-muted">{period}</div>
+      <div className="text-right sm:mt-2 sm:text-left">
+        <div
+          className={`num text-xl font-medium leading-none ${
+            unavailable ? "text-text-muted" : dirClass(data.pct)
+          }`}
+        >
+          {unavailable ? "—" : fmtPct(data.pct)}
+        </div>
+        <div
+          className={`num mt-1.5 text-xs ${unavailable ? "text-text-muted" : dirClass(data.gbp)}`}
+        >
+          {unavailable ? "—" : fmtGBPSigned(data.gbp)}
+        </div>
+        {partial && (
+          <div
+            className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-text-muted"
+            title={`Only ${data.covered} of ${data.total} holdings have price history covering ${period}.`}
+          >
+            {data.covered}/{data.total} holdings
+          </div>
+        )}
+      </div>
     </div>
   );
 }

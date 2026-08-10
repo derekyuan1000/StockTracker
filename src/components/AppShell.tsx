@@ -15,7 +15,7 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "./ui/button";
 import { authClient, useSession } from "@/lib/auth-client";
 import { Logo } from "./Logo";
@@ -197,6 +197,29 @@ function UserMenu({ onDark }: { onDark: boolean }) {
   );
 }
 
+/**
+ * Height of the sticky header (masthead + ticker tape), measured rather than
+ * hard-coded so the sidebar can pin directly beneath it even when the tape
+ * wraps or its type metrics shift. Falls back to the historical 112px estimate
+ * before the first measurement lands.
+ */
+function useStickyHeaderHeight() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(112);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => setHeight(el.offsetHeight);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, height] as const;
+}
+
 function useLocalSettingsInit() {
   useEffect(() => {
     try {
@@ -340,6 +363,7 @@ export function AppShell({
   const { data: session } = useSession();
   const [showTour, setShowTour] = useState(false);
   const [collapsed, toggleCollapsed] = useSidebarCollapsed();
+  const [headerRef, headerHeight] = useStickyHeaderHeight();
 
   useEffect(() => {
     if (!session?.user) return;
@@ -360,7 +384,10 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-canvas text-text-body">
-      <div className={`sticky top-0 z-50 transition-all duration-150 ${headerClass}`}>
+      <div
+        ref={headerRef}
+        className={`sticky top-0 z-50 transition-all duration-150 ${headerClass}`}
+      >
         <header>
           <div className="flex h-14 items-center justify-between px-4 md:px-6">
             <Link to={session?.user ? "/dashboard" : "/"}>
@@ -388,10 +415,13 @@ export function AppShell({
         </header>
       </div>
 
-      <div className="flex min-h-[calc(100vh-112px)]">
-        {/* Desktop sidebar */}
+      <div className="flex" style={{ minHeight: `calc(100vh - ${headerHeight}px)` }}>
+        {/* Desktop sidebar. Pinned under the header and bounded to the viewport
+            so the nav — and the collapse toggle at its foot — stay reachable
+            without scrolling to the bottom of a long page. */}
         <aside
-          className={`hidden md:flex ${sidebarWidth} shrink-0 flex-col border-r border-hairline bg-[var(--canvas)] transition-[width] duration-200`}
+          style={{ top: headerHeight, height: `calc(100vh - ${headerHeight}px)` }}
+          className={`hidden md:sticky md:flex ${sidebarWidth} shrink-0 flex-col self-start border-r border-hairline bg-[var(--canvas)] transition-[width] duration-200`}
         >
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
             <SidebarNav collapsed={collapsed} />
