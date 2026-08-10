@@ -3,10 +3,19 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@stocktracker/shared": ["../../packages/shared/src/index.ts"],
-      "@stocktracker/api-contracts": ["../../packages/api-contracts/src/index.ts"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@stocktracker/shared": [
+        "../../packages/shared/src/index.ts"
+      ],
+      "@stocktracker/api-contracts": [
+        "../../packages/api-contracts/src/index.ts"
+      ]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ]
 }
