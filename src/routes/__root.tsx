@@ -8,7 +8,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { Suspense, useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteProgress } from "@/components/RouteProgress";
 import { Logo } from "@/components/Logo";
@@ -185,7 +185,18 @@ function RootComponent() {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <RouteProgress />
-        <Outlet />
+        {/*
+          Suspense boundary required around Outlet: without it, SSR streaming hits a
+          React retry pass (visible as `retryNode` in the react-dom-server stack) that
+          re-renders part of the route tree without the context stack — any useQuery
+          call caught in that retry throws "No QueryClient set" even though the
+          provider above is very much mounted. TickerTape (rendered on every route)
+          is what surfaces it, but the bug is structural, not specific to that
+          component. An explicit boundary here gives the retry somewhere safe to land.
+        */}
+        <Suspense fallback={null}>
+          <Outlet />
+        </Suspense>
         <Toaster richColors position="bottom-right" />
       </QueryClientProvider>
     </ThemeProvider>
