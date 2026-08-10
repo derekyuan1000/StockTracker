@@ -1,0 +1,15 @@
+# Normalize all text files to LF in the working tree, regardless of the
+# local core.autocrlf setting. Prevents git/Prettier fighting over line
+# endings on Windows checkouts.
+* text=auto eol=lf
+
+# Binary files that should never be touched by the above.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
