@@ -372,7 +372,7 @@ function SummaryPage() {
         </div>
 
         <div className="rounded-sm border border-hairline bg-surface p-6">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="eyebrow text-text-muted">Performance</div>
               <div className="mt-1 flex items-baseline gap-3">
@@ -390,7 +390,7 @@ function SummaryPage() {
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {perfZoomDomain && (
                 <button
                   onClick={() => setPerfZoomDomain(null)}

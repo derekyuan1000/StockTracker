@@ -1,0 +1,31 @@
+# Local dev secrets for `vite dev` (Nitro's cloudflare preset loads this into process.env).
+# Copy this file to `.dev.vars` and fill in real values — `.dev.vars` is gitignored
+# and must never be committed.
+
+# --- Turso (required to boot) ---------------------------------------------
+# https://turso.tech -> turso db create <name> -> turso db show <name> --url
+# -> turso db tokens create <name>
+TURSO_DATABASE_URL=libsql://your-db.turso.io
+TURSO_AUTH_TOKEN=
+
+# --- Better Auth (required to boot) ----------------------------------------
+# Any long random string works for local dev, e.g.: openssl rand -base64 32
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=http://localhost:8080
+
+# --- Google OAuth (required to boot — auth.ts wires it up unconditionally) -
+# https://console.cloud.google.com/apis/credentials
+# Authorized redirect URI: http://localhost:8080/api/auth/callback/google
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# --- Optional (only needed if you exercise these features) -----------------
+# ANTHROPIC_API_KEY=
+# ANTHROPIC_MODEL=claude-sonnet-4-6
+# APPLE_CLIENT_ID=
+# APPLE_TEAM_ID=
+# APPLE_KEY_ID=
+# APPLE_PRIVATE_KEY=
+# FIREBASE_PROJECT_ID=
+# FIREBASE_SERVICE_ACCOUNT_JSON=
+# CRON_SECRET=
