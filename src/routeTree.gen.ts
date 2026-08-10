@@ -20,7 +20,6 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as WelcomeRouteImport } from './routes/welcome'
-import { Route as ApiAndroidAuthRouteImport } from './routes/api/android-auth'
 import { Route as ProfilesUserIdRouteImport } from './routes/profiles.$userId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
@@ -80,11 +79,6 @@ const WelcomeRoute = WelcomeRouteImport.update({
   path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAndroidAuthRoute = ApiAndroidAuthRouteImport.update({
-  id: '/api/android-auth',
-  path: '/api/android-auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProfilesUserIdRoute = ProfilesUserIdRouteImport.update({
   id: '/profiles/$userId',
   path: '/profiles/$userId',
@@ -113,7 +107,6 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
-  '/api/android-auth': typeof ApiAndroidAuthRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
@@ -130,7 +123,6 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
-  '/api/android-auth': typeof ApiAndroidAuthRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
@@ -148,7 +140,6 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
-  '/api/android-auth': typeof ApiAndroidAuthRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
@@ -167,7 +158,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/welcome'
-    | '/api/android-auth'
     | '/profiles/$userId'
     | '/api/auth/$'
     | '/api/v1/$'
@@ -184,7 +174,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/welcome'
-    | '/api/android-auth'
     | '/profiles/$userId'
     | '/api/auth/$'
     | '/api/v1/$'
@@ -201,7 +190,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/transactions'
     | '/welcome'
-    | '/api/android-auth'
     | '/profiles/$userId'
     | '/api/auth/$'
     | '/api/v1/$'
@@ -219,7 +207,6 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   TransactionsRoute: typeof TransactionsRoute
   WelcomeRoute: typeof WelcomeRoute
-  ApiAndroidAuthRoute: typeof ApiAndroidAuthRoute
   ProfilesUserIdRoute: typeof ProfilesUserIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiV1SplatRoute: typeof ApiV1SplatRoute
@@ -304,13 +291,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/android-auth': {
-      id: '/api/android-auth'
-      path: '/api/android-auth'
-      fullPath: '/api/android-auth'
-      preLoaderRoute: typeof ApiAndroidAuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/profiles/$userId': {
       id: '/profiles/$userId'
       path: '/profiles/$userId'
@@ -347,7 +327,6 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   TransactionsRoute: TransactionsRoute,
   WelcomeRoute: WelcomeRoute,
-  ApiAndroidAuthRoute: ApiAndroidAuthRoute,
   ProfilesUserIdRoute: ProfilesUserIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiV1SplatRoute: ApiV1SplatRoute,

@@ -26,7 +26,7 @@ import {
   deleteHolding,
   searchTicker,
 } from "@/fns/holdings";
-import { compute, type Bucket, type Holding } from "@/data/portfolio";
+import { compute, type Bucket, type Holding } from "@stocktracker/shared";
 import { dirClass, fmtGBP, fmtGBPSigned, fmtNum, fmtPct } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

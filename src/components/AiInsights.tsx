@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Sparkles } from "lucide-react";
 import { useMemo } from "react";
 import { getPortfolio } from "@/fns/holdings";
-import { compute } from "@/data/portfolio";
+import { compute } from "@stocktracker/shared";
 import { INSIGHT_TEXTS, renderInsight } from "@/lib/insights-texts";
 
 export function AiInsights() {

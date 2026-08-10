@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db } from "@/server/db/client";
 import { cashFlows, holdings, lots, portfolioMeta, quoteCache, trades } from "@/server/db/schema";
 import { authMiddleware } from "@/fns/_middleware";
+import * as portfolioService from "@/server/services/portfolio";
 import {
   fetchEarnings,
   fetchFundamentals,
@@ -13,7 +14,7 @@ import {
   searchSymbols,
 } from "@/server/market/yahoo";
 import type { HistoryRange } from "@/server/market/types";
-import type { Holding } from "@/data/portfolio";
+import type { Holding } from "@stocktracker/shared";
 
 // ─── getPortfolio ─────────────────────────────────────────────────────────────
 
@@ -624,6 +625,12 @@ export const getPortfolioHistory = createServerFn()
       .sort(([a], [b]) => a - b)
       .map(([ts, value]) => ({ ts, value }));
   });
+
+// ─── getPortfolioReturns ─────────────────────────────────────────────────────
+
+export const getPortfolioReturns = createServerFn()
+  .middleware([authMiddleware])
+  .handler(({ context }) => portfolioService.getPortfolioReturns(context.userId));
 
 // ─── Cash flow CRUD ───────────────────────────────────────────────────────────
 

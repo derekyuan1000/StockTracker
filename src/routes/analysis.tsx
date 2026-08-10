@@ -21,7 +21,7 @@ import { AiInsights } from "@/components/AiInsights";
 import { RebalancePanel } from "@/components/RebalancePanel";
 import { getAnalysis } from "@/fns/analysis";
 import { getPortfolio } from "@/fns/holdings";
-import { compute } from "@/data/portfolio";
+import { compute } from "@stocktracker/shared";
 import { fmtGBP } from "@/lib/format";
 import { BarChart3 } from "lucide-react";
 import {

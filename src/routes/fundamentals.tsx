@@ -22,7 +22,7 @@ import {
   getPortfolio,
   getPriceHistory,
 } from "@/fns/holdings";
-import { compute } from "@/data/portfolio";
+import { compute } from "@stocktracker/shared";
 import { toast } from "sonner";
 import { RefreshCw } from "lucide-react";
 import {
@@ -421,7 +421,7 @@ function FundamentalsPage() {
 
 // ── Key stats card ─────────────────────────────────────────────────────────────
 
-function KeyStatsCard({ h }: { h: import("@/data/portfolio").Holding }) {
+function KeyStatsCard({ h }: { h: import("@stocktracker/shared").Holding }) {
   return (
     <div className="grid grid-cols-2 gap-x-4 gap-y-4">
       <KeyStatItem label="Market cap" value={h.mktCap ? `£${fmtCompact(h.mktCap)}` : null} />
@@ -473,7 +473,7 @@ function PositionSummaryCard({
   row,
   allocActual,
 }: {
-  row: import("@/data/portfolio").HoldingComputed;
+  row: import("@stocktracker/shared").HoldingComputed;
   allocActual: number;
 }) {
   const isGain = row.unrealisedGL >= 0;
@@ -515,7 +515,7 @@ function ValuationCard({
   x1,
   x2,
 }: {
-  h: import("@/data/portfolio").Holding;
+  h: import("@stocktracker/shared").Holding;
   x1: (v?: number) => string | undefined;
   x2: (v?: number) => string | undefined;
 }) {
@@ -570,7 +570,7 @@ function AnalystConsensusCard({
   h,
   upside,
 }: {
-  h: import("@/data/portfolio").Holding;
+  h: import("@stocktracker/shared").Holding;
   upside: number;
 }) {
   if (!h.analyst) {
@@ -624,7 +624,7 @@ function ProfitabilityCard({
   h,
   pct,
 }: {
-  h: import("@/data/portfolio").Holding;
+  h: import("@stocktracker/shared").Holding;
   pct: (v?: number) => string | undefined;
 }) {
   return (
@@ -678,7 +678,7 @@ function GrowthCard({
   h,
   pct,
 }: {
-  h: import("@/data/portfolio").Holding;
+  h: import("@stocktracker/shared").Holding;
   pct: (v?: number) => string | undefined;
 }) {
   return (
@@ -717,7 +717,7 @@ function FinancialHealthCard({
   x1,
   x2,
 }: {
-  h: import("@/data/portfolio").Holding;
+  h: import("@stocktracker/shared").Holding;
   x1: (v?: number) => string | undefined;
   x2: (v?: number) => string | undefined;
 }) {
@@ -903,7 +903,7 @@ function RevenueEpsChart({
 
 // ── Dividend ───────────────────────────────────────────────────────────────────
 
-function DividendCard({ h }: { h: import("@/data/portfolio").Holding }) {
+function DividendCard({ h }: { h: import("@stocktracker/shared").Holding }) {
   return (
     <div className="rounded-sm border border-hairline bg-surface p-5">
       <h3 className="eyebrow mb-4 text-text-muted">Dividend details</h3>

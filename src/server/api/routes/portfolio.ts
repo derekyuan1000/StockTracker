@@ -39,6 +39,12 @@ export const portfolioRoutes: RouteEntry[] = [
   },
   {
     method: "GET",
+    pattern: "/api/v1/portfolio/returns",
+    requireAuth: true,
+    handler: async ({ userId }) => portfolio.getPortfolioReturns(userId!),
+  },
+  {
+    method: "GET",
     pattern: "/api/v1/portfolio/benchmark",
     requireAuth: true,
     handler: async ({ userId, query }) => {

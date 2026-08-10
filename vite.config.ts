@@ -46,6 +46,7 @@ export default defineConfig({
           __dirname,
           "packages/api-contracts/src/index.ts",
         ),
+        "@stocktracker/shared": path.resolve(__dirname, "packages/shared/src/index.ts"),
       },
     },
   },
