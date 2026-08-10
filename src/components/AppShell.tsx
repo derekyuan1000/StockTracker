@@ -426,13 +426,26 @@ export function AppShell({
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
             <SidebarNav collapsed={collapsed} />
           </div>
-          <div className="border-t border-hairline p-2">
+          <div className="shrink-0 border-t border-hairline bg-[var(--canvas)] p-2">
             <button
               onClick={toggleCollapsed}
               title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className="flex w-full items-center justify-center rounded-md p-2 text-text-muted transition-colors hover:bg-[var(--surface-elevated)] hover:text-text-body"
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-expanded={!collapsed}
+              className={`flex w-full items-center gap-2 rounded-md border border-hairline bg-[var(--surface-elevated)] py-2 text-text-body transition-colors hover:border-[var(--brand-periwinkle)] hover:text-text-strong ${
+                collapsed ? "justify-center px-0" : "px-2.5"
+              }`}
             >
-              {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
+              {collapsed ? (
+                <ChevronRight className="size-4 shrink-0" />
+              ) : (
+                <ChevronLeft className="size-4 shrink-0" />
+              )}
+              {!collapsed && (
+                <span className="truncate font-mono text-[11px] uppercase tracking-[0.08em]">
+                  Collapse
+                </span>
+              )}
             </button>
           </div>
         </aside>
