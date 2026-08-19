@@ -99,7 +99,7 @@ export async function deleteHolding(userId: string, ticker: string) {
 
 export async function sellUnits(
   userId: string,
-  data: { ticker: string; units: number; price: number },
+  data: { ticker: string; units: number; price: number; date?: string },
 ) {
   const [holding] = await db
     .select()
@@ -142,6 +142,19 @@ export async function sellUnits(
   // Credit proceeds to available cash
   const proceedsGBP = (data.price * data.units) / (currency === "GBp" ? 100 : 1);
   await adjustCash(userId, proceedsGBP);
+
+  // Log the sell so it appears in Transactions and Community feed
+  const sellDate = data.date ?? new Date().toISOString().split("T")[0];
+  await db.insert(trades).values({
+    userId,
+    type: "sell",
+    ticker: data.ticker,
+    name: holding?.name ?? data.ticker,
+    units: data.units,
+    price: data.price,
+    amountGBP: proceedsGBP,
+    date: sellDate,
+  });
 
   return { closed: data.units >= totalUnits };
 }

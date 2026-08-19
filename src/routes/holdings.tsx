@@ -264,7 +264,6 @@ function HoldingsPage() {
                 const subVal = g.rows.reduce((s, r) => s + r.marketValueGBP, 0);
                 const subGain = subVal - subCost;
                 const isFund = g.bucket === "Fund";
-                const bucketColor = isFund ? "var(--brand-periwinkle)" : "var(--text-muted)";
                 const bucketText = isFund
                   ? "text-[var(--brand-periwinkle)]"
                   : "text-[var(--text-muted)]";
@@ -901,7 +900,7 @@ function TradeDialog({
           data: { ticker: target!.ticker, units: u, price: p, date },
         });
       } else {
-        await sellUnits({ data: { ticker: target!.ticker, units: u, price: p } });
+        await sellUnits({ data: { ticker: target!.ticker, units: u, price: p, date } });
       }
       onSuccess();
       onClose();
@@ -990,17 +989,15 @@ function TradeDialog({
             />
           </div>
 
-          {mode === "buy" && (
-            <div>
-              <label className="mb-1 block text-xs font-medium text-text-muted">Date</label>
-              <Input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="border-hairline bg-canvas text-text-strong"
-              />
-            </div>
-          )}
+          <div>
+            <label className="mb-1 block text-xs font-medium text-text-muted">Date</label>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="border-hairline bg-canvas text-text-strong"
+            />
+          </div>
 
           {mode === "sell" && target && parseFloat(tradeUnits) >= target.units && (
             <p className="text-xs text-[var(--down)]">— will close position</p>
