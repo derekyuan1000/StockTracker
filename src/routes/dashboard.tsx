@@ -1,7 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeftRight, Loader2, Lock, Plus, Trash2, Unlock } from "lucide-react";
-import { Fragment, useMemo, useState, useEffect, useRef, useCallback } from "react";
+import {
+  Fragment,
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type ComponentProps,
+} from "react";
 import {
   Dialog,
   DialogContent,
@@ -177,12 +185,12 @@ const CHART_DOWN = "var(--down)";
 
 function SummaryPage() {
   const queryClient = useQueryClient();
-  const { data: portfolio, isLoading: portfolioLoading } = useQuery({
+  const { data: portfolio } = useQuery({
     queryKey: ["portfolio"],
     queryFn: () => getPortfolio(),
   });
 
-  const holdings = portfolio?.holdings ?? [];
+  const holdings = useMemo(() => portfolio?.holdings ?? [], [portfolio]);
   const cashGBP = portfolio?.cashGBP ?? 0;
   const realisedGL = portfolio?.realisedGL ?? 0;
 
@@ -194,7 +202,9 @@ function SummaryPage() {
         const r = JSON.parse(stored) as string;
         if ((RANGES as readonly string[]).includes(r)) return r as Range;
       }
-    } catch {}
+    } catch {
+      /* ignore localStorage errors */
+    }
     return "1Y";
   });
 
@@ -269,16 +279,16 @@ function SummaryPage() {
   const perfYMin = allValues.length ? Math.min(...allValues) - 200 : ("auto" as const);
   const perfYMax = allValues.length ? Math.max(...allValues) + 200 : ("auto" as const);
 
-  const handlePerfMouseMove = useCallback((e: any) => {
+  const handlePerfMouseMove = useCallback((e: { activeLabel?: number }) => {
     if (perfSelecting.current && e?.activeLabel != null) {
-      setPerfRefRight(e.activeLabel as number);
+      setPerfRefRight(e.activeLabel);
     }
   }, []);
 
-  const handlePerfMouseDown = useCallback((e: any) => {
+  const handlePerfMouseDown = useCallback((e: { activeLabel?: number }) => {
     if (e?.activeLabel != null) {
       perfSelecting.current = true;
-      setPerfRefLeft(e.activeLabel as number);
+      setPerfRefLeft(e.activeLabel);
       setPerfRefRight(null);
     }
   }, []);
@@ -616,7 +626,9 @@ function SummaryPage() {
                   paddingAngle={1}
                   stroke="var(--surface-card)"
                   strokeWidth={2}
-                  activeShape={(props: any) => <Sector {...props} />}
+                  activeShape={(props: object) => (
+                    <Sector {...(props as ComponentProps<typeof Sector>)} />
+                  )}
                 >
                   {sectorData.map((s) => (
                     <Cell key={s.name} fill={s.color} />
@@ -657,7 +669,9 @@ function SummaryPage() {
                   paddingAngle={1}
                   stroke="var(--surface-card)"
                   strokeWidth={2}
-                  activeShape={(props: any) => <Sector {...props} />}
+                  activeShape={(props: object) => (
+                    <Sector {...(props as ComponentProps<typeof Sector>)} />
+                  )}
                 >
                   {stockData.map((s) => (
                     <Cell key={s.ticker} fill={s.color} />
@@ -983,6 +997,7 @@ function SummaryTradeDialog({
       setDate(new Date().toISOString().split("T")[0]);
       setError("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target?.ticker, target?.mode]);
 
   const handleSubmit = async () => {
@@ -1008,7 +1023,7 @@ function SummaryTradeDialog({
           data: { ticker: target!.ticker, units: u, price: p, date },
         });
       } else {
-        await sellUnits({ data: { ticker: target!.ticker, units: u, price: p } });
+        await sellUnits({ data: { ticker: target!.ticker, units: u, price: p, date } });
       }
       onSuccess();
       onClose();
@@ -1085,17 +1100,15 @@ function SummaryTradeDialog({
               className="border-hairline bg-canvas text-text-strong"
             />
           </div>
-          {mode === "buy" && (
-            <div>
-              <label className="mb-1 block text-xs font-medium text-text-muted">Date</label>
-              <Input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="border-hairline bg-canvas text-text-strong"
-              />
-            </div>
-          )}
+          <div>
+            <label className="mb-1 block text-xs font-medium text-text-muted">Date</label>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="border-hairline bg-canvas text-text-strong"
+            />
+          </div>
           {error && <p className="text-xs text-[var(--down)]">{error}</p>}
         </div>
         <DialogFooter>

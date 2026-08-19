@@ -188,11 +188,15 @@ export const addHolding = createServerFn({ method: "POST" })
         const q = await fetchQuote(ticker);
         name = q.name;
         currency = q.currency;
-      } catch {}
+      } catch {
+        /* quote unavailable, use ticker as name */
+      }
       try {
         const f = await fetchFundamentals(ticker);
         sector = f.sector ?? "";
-      } catch {}
+      } catch {
+        /* fundamentals unavailable */
+      }
       await db.insert(holdings).values({
         userId,
         ticker,
@@ -292,6 +296,10 @@ export const sellUnits = createServerFn({ method: "POST" })
         ticker: z.string().min(1).max(20),
         units: z.number().positive(),
         price: z.number().positive(), // sell price in pence (GBp) or GBP
+        date: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .optional(),
       })
       .parse(raw),
   )
@@ -338,6 +346,19 @@ export const sellUnits = createServerFn({ method: "POST" })
     // Credit proceeds to available cash
     const proceedsGBP = (data.price * data.units) / (currency === "GBp" ? 100 : 1);
     await adjustCash(userId, proceedsGBP);
+
+    // Log the sell so it appears in Transactions and Community feed
+    const sellDate = data.date ?? new Date().toISOString().split("T")[0];
+    await db.insert(trades).values({
+      userId,
+      type: "sell",
+      ticker: data.ticker,
+      name: holding?.name ?? data.ticker,
+      units: data.units,
+      price: data.price,
+      amountGBP: proceedsGBP,
+      date: sellDate,
+    });
 
     return { closed: data.units >= totalUnits };
   });
@@ -595,7 +616,9 @@ export const getPortfolioHistory = createServerFn()
               todayMidnight.setHours(0, 0, 0, 0);
               return [{ ts: todayMidnight.getTime(), value: (price / divisor) * units }];
             }
-          } catch {}
+          } catch {
+            /* quote unavailable for 1D fallback */
+          }
         }
 
         return filtered;
