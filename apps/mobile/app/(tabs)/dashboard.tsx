@@ -21,7 +21,7 @@ const RANGES: HistoryRange[] = ["1D", "1M", "6M", "1Y", "All"];
 
 function HoldingCard({ h }: { h: HoldingComputed }) {
   const { t } = useTheme();
-  const color = { up: t.up, down: t.down, flat: t.textMutedStrong }[dir(h.dayChangeGBP)];
+  const color = { up: t.up, down: t.down, flat: t.textMutedStrong }[dir(h.unrealisedGL)];
 
   return (
     <Pressable onPress={() => router.push(`/stock/${h.ticker}` as never)} style={{ paddingVertical: 12 }}>
@@ -46,7 +46,7 @@ function HoldingCard({ h }: { h: HoldingComputed }) {
         <View style={{ alignItems: "flex-end" }}>
           <Num medium>{fmtGBP(h.marketValueGBP)}</Num>
           <Num style={{ color, fontSize: 12, marginTop: 2 }}>
-            {fmtGBPSigned(h.dayChangeGBP)} ({fmtPct(h.dayChangePct)})
+            {fmtGBPSigned(h.unrealisedGL)} ({fmtPct(h.unrealisedPct)})
           </Num>
         </View>
       </Row>
@@ -75,6 +75,7 @@ export default function DashboardScreen() {
 
   const chartWidth = width - 32; // Screen's horizontal padding (16 * 2)
   const changeColor = { up: t.up, down: t.down, flat: t.textMutedStrong }[dir(p.dayChangeGBP)];
+  const allTimeColor = { up: t.up, down: t.down, flat: t.textMutedStrong }[dir(p.unrealisedGL)];
 
   if (isLoading) {
     return (
@@ -102,6 +103,9 @@ export default function DashboardScreen() {
         </Num>
         <Num style={{ color: changeColor, fontSize: 14, marginTop: 4 }}>
           {fmtGBPSigned(p.dayChangeGBP)} ({fmtPct(p.dayChangePct)}) today
+        </Num>
+        <Num style={{ color: allTimeColor, fontSize: 13, marginTop: 2 }}>
+          {fmtGBPSigned(p.unrealisedGL)} ({fmtPct(p.unrealisedPct)}) all time
         </Num>
 
         <View style={{ flexDirection: "row", gap: 6, marginTop: 16 }}>
