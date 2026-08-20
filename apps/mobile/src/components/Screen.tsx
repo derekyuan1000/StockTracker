@@ -1,4 +1,4 @@
-import { ScrollView, View, type ViewStyle } from "react-native";
+import { ScrollView, View, RefreshControl, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/theme/ThemeProvider";
 import type { ReactNode } from "react";
@@ -8,10 +8,14 @@ export function Screen({
   children,
   scroll = true,
   contentStyle,
+  refreshing,
+  onRefresh,
 }: {
   children: ReactNode;
   scroll?: boolean;
   contentStyle?: ViewStyle;
+  refreshing?: boolean;
+  onRefresh?: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const { t } = useTheme();
@@ -31,6 +35,16 @@ export function Screen({
       style={{ flex: 1, backgroundColor: t.canvas }}
       contentContainerStyle={[padding, contentStyle]}
       keyboardShouldPersistTaps="handled"
+      refreshControl={
+        onRefresh != null ? (
+          <RefreshControl
+            refreshing={refreshing ?? false}
+            onRefresh={onRefresh}
+            tintColor={t.brandPeriwinkle}
+            colors={[t.brandPeriwinkle]}
+          />
+        ) : undefined
+      }
     >
       {children}
     </ScrollView>

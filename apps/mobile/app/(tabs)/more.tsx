@@ -4,7 +4,7 @@ import {
   ChevronRight,
   ReceiptText,
   Wallet,
-  BarChart3,
+  Users,
   Settings as SettingsIcon,
 } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
@@ -24,10 +24,10 @@ export default function MoreScreen() {
 
   const items: MenuItem[] = [
     {
-      label: "Analysis",
-      description: "Risk, concentration & sector breakdown",
-      route: "/analysis",
-      icon: <BarChart3 color={t.textBody} size={20} />,
+      label: "Community",
+      description: "Leaderboard & public trades",
+      route: "/(tabs)/community",
+      icon: <Users color={t.textBody} size={20} />,
     },
     {
       label: "Transactions",
@@ -38,13 +38,13 @@ export default function MoreScreen() {
     {
       label: "Cash",
       description: "Manage your cash balance",
-      route: "/cash",
+      route: "/(tabs)/cash",
       icon: <Wallet color={t.textBody} size={20} />,
     },
     {
       label: "Settings",
       description: "Preferences & account",
-      route: "/settings",
+      route: "/(tabs)/settings",
       icon: <SettingsIcon color={t.textBody} size={20} />,
     },
   ];
@@ -64,12 +64,8 @@ export default function MoreScreen() {
             >
               {item.icon}
               <View style={{ flex: 1 }}>
-                <Body medium size={14}>
-                  {item.label}
-                </Body>
-                <Muted size={12} style={{ marginTop: 2 }}>
-                  {item.description}
-                </Muted>
+                <Body medium size={14}>{item.label}</Body>
+                <Muted size={12} style={{ marginTop: 2 }}>{item.description}</Muted>
               </View>
               <ChevronRight color={t.textMuted} size={18} />
             </Pressable>

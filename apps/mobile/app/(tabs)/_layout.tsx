@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Home, Briefcase, TrendingUp, BarChart3, Users, MoreHorizontal } from "lucide-react-native";
+import { Home, Briefcase, TrendingUp, BarChart3, MoreHorizontal } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/theme/ThemeProvider";
 import { monoCaps } from "@/theme/text";
@@ -39,17 +39,17 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="analysis"
+        name="performance"
         options={{
           title: "Performance",
           tabBarIcon: ({ color, size }) => <TrendingUp color={color} size={size ?? 20} />,
         }}
       />
       <Tabs.Screen
-        name="community"
+        name="analysis"
         options={{
-          title: "Community",
-          tabBarIcon: ({ color, size }) => <Users color={color} size={size ?? 20} />,
+          title: "Analysis",
+          tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size ?? 20} />,
         }}
       />
       <Tabs.Screen
@@ -59,6 +59,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => <MoreHorizontal color={color} size={size ?? 20} />,
         }}
       />
+      <Tabs.Screen name="community" options={{ href: null }} />
       <Tabs.Screen name="cash" options={{ href: null }} />
       <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>
