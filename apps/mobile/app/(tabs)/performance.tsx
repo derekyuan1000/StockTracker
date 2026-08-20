@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { View } from "react-native";
 import { compute } from "@stocktracker/shared";
 import { fmtGBPSigned, fmtPct, dir } from "@stocktracker/shared";
-import { usePortfolio, usePortfolioReturns } from "@/api/queries";
+import { usePortfolio, usePortfolioReturns, usePortfolioHistory } from "@/api/queries";
 import { Screen } from "@/components/Screen";
 import { Card, Hairline, Row } from "@/components/Card";
 import { Heading, Body, Muted, Num, Eyebrow } from "@/components/Typography";
@@ -74,11 +74,34 @@ function MoverRow({ name, pct }: { name: string; pct: number }) {
 export default function PerformanceScreen() {
   const { data: portfolio, isLoading: portfolioLoading } = usePortfolio();
   const { data: periodReturns = [], isLoading: returnsLoading } = usePortfolioReturns();
+  const { data: ytdHistory = [] } = usePortfolioHistory("YTD");
 
   const holdings = portfolio?.holdings ?? [];
   const p = useMemo(
     () => compute(holdings, portfolio?.cashGBP ?? 0),
     [holdings, portfolio?.cashGBP],
+  );
+
+  // Synthesize 1D, YTD, and All locally — the server only returns 1W/1M/6M/1Y/3Y.
+  const localPeriods = useMemo((): PeriodReturn[] => {
+    if (!p.rows.length) return [];
+    const n = p.rows.length;
+    const result: PeriodReturn[] = [
+      { period: "1D", pct: p.dayChangePct, gbp: p.dayChangeGBP, covered: n, total: n },
+      { period: "All", pct: p.unrealisedPct, gbp: p.unrealisedGL, covered: n, total: n },
+    ];
+    if (ytdHistory.length >= 2) {
+      const first = ytdHistory[0].value;
+      const last = ytdHistory[ytdHistory.length - 1].value;
+      const gbp = last - first;
+      result.push({ period: "YTD", pct: first > 0 ? (gbp / first) * 100 : 0, gbp, covered: n, total: n });
+    }
+    return result;
+  }, [p, ytdHistory]);
+
+  const allPeriodReturns = useMemo(
+    () => [...localPeriods, ...periodReturns],
+    [localPeriods, periodReturns],
   );
 
   const dayMovers = useMemo(
@@ -136,7 +159,7 @@ export default function PerformanceScreen() {
                   <PeriodTile
                     key={period}
                     period={period}
-                    data={periodReturns.find((r) => r.period === period)}
+                    data={allPeriodReturns.find((r) => r.period === period)}
                   />
                 ))}
               </View>
