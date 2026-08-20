@@ -13,18 +13,24 @@ import { analysisRoutes } from "./routes/analysis";
 import { alertsRoutes } from "./routes/alerts";
 import { insightsRoutes } from "./routes/insights";
 
-registerRoutes([
-  ...portfolioRoutes,
-  ...holdingsRoutes,
-  ...transactionsRoutes,
-  ...cashRoutes,
-  ...marketRoutes,
-  ...researchRoutes,
-  ...settingsRoutes,
-  ...publicRoutes,
-  ...devicesRoutes,
-  ...internalRoutes,
-  ...analysisRoutes,
-  ...alertsRoutes,
-  ...insightsRoutes,
-]);
+let registered = false;
+
+export function initRoutes() {
+  if (registered) return;
+  registered = true;
+  registerRoutes([
+    ...portfolioRoutes,
+    ...holdingsRoutes,
+    ...transactionsRoutes,
+    ...cashRoutes,
+    ...marketRoutes,
+    ...researchRoutes,
+    ...settingsRoutes,
+    ...publicRoutes,
+    ...devicesRoutes,
+    ...internalRoutes,
+    ...analysisRoutes,
+    ...alertsRoutes,
+    ...insightsRoutes,
+  ]);
+}
