@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { handleV1 } from "@/server/api/router";
-import "@/server/api/register";
+import { initRoutes } from "@/server/api/register";
+
+initRoutes();
 
 export const Route = createFileRoute("/api/v1/$")({
   server: {
