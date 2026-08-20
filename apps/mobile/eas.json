@@ -6,7 +6,7 @@
   "build": {
     "base": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://your-vercel-domain.example.com"
+        "EXPO_PUBLIC_API_URL": "https://stocktracker.derekyuan.co.uk"
       }
     },
     "development": {
