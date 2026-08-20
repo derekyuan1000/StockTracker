@@ -87,9 +87,15 @@ export default function PublicProfileScreen() {
               value={`£${profile.stats.totalInvestedGBP.toFixed(0)}`}
             />
             <StatCard
-              label="G/L"
-              value={`${profile.stats.realisedGL >= 0 ? "+" : ""}£${profile.stats.realisedGL.toFixed(0)}`}
-              color={profile.stats.realisedGL >= 0 ? t.up : t.down}
+              label="Realised G/L"
+              value={
+                profile.stats.realisedGL === 0
+                  ? "£0"
+                  : `${profile.stats.realisedGL > 0 ? "+" : "-"}£${Math.abs(profile.stats.realisedGL).toFixed(0)}`
+              }
+              color={
+                profile.stats.realisedGL > 0 ? t.up : profile.stats.realisedGL < 0 ? t.down : undefined
+              }
             />
             <StatCard label="Trades" value={String(profile.stats.tradeCount)} />
           </View>

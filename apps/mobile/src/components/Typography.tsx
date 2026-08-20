@@ -4,7 +4,8 @@ import { num, numMedium, eyebrow as eyebrowStyle, body, bodyMedium, heading } fr
 
 /** `.num` — tabular-nums monospace, for prices/quantities. Mirrors web's `<span className="num">`. */
 export function Num({ style, medium, ...props }: TextProps & { medium?: boolean }) {
-  return <Text {...props} style={[medium ? numMedium : num, style]} />;
+  const { t } = useTheme();
+  return <Text {...props} style={[medium ? numMedium : num, { color: t.numColor }, style]} />;
 }
 
 /** `.eyebrow` — small uppercase mono label above a heading. */

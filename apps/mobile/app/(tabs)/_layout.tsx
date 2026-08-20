@@ -1,10 +1,12 @@
 import { Tabs } from "expo-router";
 import { Home, Briefcase, BarChart3, Users, MoreHorizontal } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/theme/ThemeProvider";
 import { monoCaps } from "@/theme/text";
 
 export default function TabsLayout() {
   const { t } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -15,7 +17,8 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: t.canvas,
           borderTopColor: t.hairline,
-          height: 64,
+          height: 64 + insets.bottom,
+          paddingBottom: insets.bottom,
         },
         tabBarLabelStyle: { ...monoCaps(10), letterSpacing: 0.5 },
         tabBarIconStyle: { marginTop: 2 },

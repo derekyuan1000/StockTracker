@@ -24,6 +24,8 @@ export type ThemeTokens = {
   textMuted: string;
   textMutedStrong: string;
 
+  numColor: string;
+
   up: string;
   down: string;
 
@@ -33,16 +35,16 @@ export type ThemeTokens = {
 };
 
 export const light: ThemeTokens = {
-  canvas: "#ffffff",
+  canvas: "#f2f2f7",
   canvasDark: "#1C1B18",
   surfaceCard: "#ffffff",
-  surfaceElevated: "#f5f5f7",
+  surfaceElevated: "#e8e8ed",
   surfaceDarkSoft: "#2A2823",
-  hairline: "#ebebeb",
+  hairline: "#d8d8de",
 
-  primary: "#000000",
-  primaryActive: "#1a1a1a",
-  primaryDisabled: "#d4d4d4",
+  primary: "#1a1a2e",
+  primaryActive: "#0f0f1e",
+  primaryDisabled: "#c8c8d0",
   onPrimary: "#ffffff",
 
   onDark: "#F2EFE7",
@@ -51,16 +53,18 @@ export const light: ThemeTokens = {
   accentMint: "#c8f6f9",
 
   textStrong: "#000000",
-  textBody: "#111111",
-  textMuted: "#999999",
-  textMutedStrong: "#555555",
+  textBody: "#1c1c1e",
+  textMuted: "#8a8a8e",
+  textMutedStrong: "#48484a",
+
+  numColor: "#1a1a2e",
 
   up: "#0a8f5f",
   down: "#d6455b",
 
   brandOrange: "#fc4c02",
   brandMagenta: "#ef2cc1",
-  brandPeriwinkle: "#bdbbff",
+  brandPeriwinkle: "#5856d6",
 };
 
 export const dark: ThemeTokens = {
@@ -85,6 +89,8 @@ export const dark: ThemeTokens = {
   textBody: "#D8D3CB",
   textMuted: "#A39E93",
   textMutedStrong: "#C4BFB5",
+
+  numColor: "#ffffff",
 
   up: "#5FA97C",
   down: "#C96A5E",
