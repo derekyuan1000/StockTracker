@@ -4,6 +4,7 @@ import {
   ChevronRight,
   ReceiptText,
   Wallet,
+  BarChart3,
   Settings as SettingsIcon,
 } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
@@ -22,6 +23,12 @@ export default function MoreScreen() {
   const { t } = useTheme();
 
   const items: MenuItem[] = [
+    {
+      label: "Analysis",
+      description: "Risk, concentration & sector breakdown",
+      route: "/analysis",
+      icon: <BarChart3 color={t.textBody} size={20} />,
+    },
     {
       label: "Transactions",
       description: "Lots, trades & cash flows",
