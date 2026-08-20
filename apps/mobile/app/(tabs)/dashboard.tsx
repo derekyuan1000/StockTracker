@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { View, Pressable, useWindowDimensions } from "react-native";
 import { router } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { compute } from "@stocktracker/shared";
 import { fmtGBP, fmtGBPSigned, fmtPct, dir } from "@stocktracker/shared";
 import { usePortfolio, usePortfolioHistory } from "@/api/queries";
+import { qk } from "@/api/queries";
 import { useLocalSetting } from "@/hooks/useLocalSetting";
 import { useTheme } from "@/theme/ThemeProvider";
 import { Screen } from "@/components/Screen";
@@ -57,8 +59,19 @@ function HoldingCard({ h }: { h: HoldingComputed }) {
 export default function DashboardScreen() {
   const { t } = useTheme();
   const { width } = useWindowDimensions();
+  const qc = useQueryClient();
   const { data: portfolio, isLoading } = usePortfolio();
   const [range, setRange, rangeLoaded] = useLocalSetting<HistoryRange>("st-default-range", "1Y");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: qk.portfolio }),
+      qc.invalidateQueries({ queryKey: qk.portfolioHistory(rangeLoaded ? range : "1Y") }),
+    ]);
+    setRefreshing(false);
+  }, [qc, range, rangeLoaded]);
 
   const holdings = portfolio?.holdings ?? [];
   const cashGBP = portfolio?.cashGBP ?? 0;
@@ -88,7 +101,7 @@ export default function DashboardScreen() {
   }
 
   return (
-    <Screen>
+    <Screen refreshing={refreshing} onRefresh={onRefresh}>
       <Eyebrow>Portfolio</Eyebrow>
       <Heading level={1} style={{ marginTop: 4, marginBottom: 16 }}>
         Summary
