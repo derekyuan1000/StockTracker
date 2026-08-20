@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { View, GestureResponderEvent } from "react-native";
+import { View, Text, GestureResponderEvent } from "react-native";
 import Svg, { Defs, LinearGradient, Stop, Path, Line as SvgLine, Circle, Text as SvgText, G } from "react-native-svg";
 import { scaleLinear } from "d3-scale";
 import { line as d3line, area as d3area, curveMonotoneX } from "d3-shape";
@@ -9,6 +9,8 @@ import type { HistoryRange, HistoryPoint } from "@/api/endpoints";
 
 const HEIGHT = 220;
 const PAD = { top: 10, right: 8, bottom: 24, left: 8 };
+// Width of the floating tooltip card — used to clamp it within chart bounds.
+const TOOLTIP_W = 140;
 
 function formatXTick(ts: number, range: HistoryRange): string {
   const d = new Date(ts);
@@ -16,6 +18,25 @@ function formatXTick(ts: number, range: HistoryRange): string {
     return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   }
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+}
+
+function formatScrubDate(ts: number, range: HistoryRange): string {
+  const d = new Date(ts);
+  if (range === "1D") {
+    return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  }
+  if (range === "5D") {
+    return d.toLocaleString("en-GB", {
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 const formatYTick = (v: number) => `£${(v / 1000).toFixed(1)}k`;
@@ -35,33 +56,42 @@ export function PerformanceChart({
   const innerWidth = width - PAD.left - PAD.right;
   const innerHeight = HEIGHT - PAD.top - PAD.bottom;
 
-  const { linePath, areaPath, x, points, yMin, yMax } = useMemo(() => {
+  const { linePath, areaPath, xScale, yScale, points, yMin, yMax } = useMemo(() => {
     if (!data.length || innerWidth <= 0) {
-      return { linePath: "", areaPath: "", x: null, points: [] as HistoryPoint[], yMin: 0, yMax: 1 };
+      return {
+        linePath: "",
+        areaPath: "",
+        xScale: null as ReturnType<typeof scaleLinear> | null,
+        yScale: null as ReturnType<typeof scaleLinear> | null,
+        points: [] as HistoryPoint[],
+        yMin: 0,
+        yMax: 1,
+      };
     }
     const values = data.map((d) => d.value);
     const yMin = Math.min(...values) * 0.998;
     const yMax = Math.max(...values) * 1.002;
 
-    const xScale = scaleLinear()
+    const xSc = scaleLinear()
       .domain([data[0].ts, data[data.length - 1].ts])
       .range([0, innerWidth]);
-    const yScale = scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
+    const ySc = scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
 
     const lineGen = d3line<HistoryPoint>()
-      .x((d) => xScale(d.ts))
-      .y((d) => yScale(d.value))
+      .x((d) => xSc(d.ts))
+      .y((d) => ySc(d.value))
       .curve(curveMonotoneX);
     const areaGen = d3area<HistoryPoint>()
-      .x((d) => xScale(d.ts))
+      .x((d) => xSc(d.ts))
       .y0(innerHeight)
-      .y1((d) => yScale(d.value))
+      .y1((d) => ySc(d.value))
       .curve(curveMonotoneX);
 
     return {
       linePath: lineGen(data) ?? "",
       areaPath: areaGen(data) ?? "",
-      x: xScale,
+      xScale: xSc,
+      yScale: ySc,
       points: data,
       yMin,
       yMax,
@@ -69,9 +99,9 @@ export function PerformanceChart({
   }, [data, innerWidth, innerHeight]);
 
   function handleTouch(e: GestureResponderEvent) {
-    if (!x || !points.length) return;
+    if (!xScale || !points.length) return;
     const localX = e.nativeEvent.locationX - PAD.left;
-    const ts = x.invert(localX);
+    const ts = xScale.invert(localX);
     let nearest = 0;
     let best = Infinity;
     points.forEach((p, i) => {
@@ -94,7 +124,6 @@ export function PerformanceChart({
     );
   }
 
-  // Show ~4 evenly spaced X ticks regardless of point density.
   const tickCount = Math.min(4, points.length);
   const tickIndices = Array.from({ length: tickCount }, (_, i) =>
     Math.round((i * (points.length - 1)) / Math.max(1, tickCount - 1)),
@@ -102,6 +131,14 @@ export function PerformanceChart({
   const yTicks = [yMin, (yMin + yMax) / 2, yMax];
 
   const active = touchIndex != null ? points[touchIndex] : null;
+
+  // Pixel X of the crosshair within the full SVG (including left pad).
+  const activePxX = active && xScale ? PAD.left + xScale(active.ts) : null;
+  // Clamp tooltip so it stays within the chart width.
+  const tooltipLeft =
+    activePxX != null
+      ? Math.max(0, Math.min(width - TOOLTIP_W, activePxX - TOOLTIP_W / 2))
+      : null;
 
   return (
     <View
@@ -139,7 +176,7 @@ export function PerformanceChart({
           <SvgLine x1={0} y1={innerHeight} x2={innerWidth} y2={innerHeight} stroke={t.hairline} strokeWidth={1} />
           {tickIndices.map((idx) => {
             const p = points[idx];
-            const cx = x ? x(p.ts) : 0;
+            const cx = xScale ? xScale(p.ts) : 0;
             return (
               <SvgText
                 key={idx}
@@ -155,21 +192,21 @@ export function PerformanceChart({
             );
           })}
 
-          {/* Touch scrub indicator */}
-          {active && x ? (
+          {/* Crosshair + dot */}
+          {active && xScale && yScale ? (
             <>
               <SvgLine
-                x1={x(active.ts)}
+                x1={xScale(active.ts)}
                 y1={0}
-                x2={x(active.ts)}
+                x2={xScale(active.ts)}
                 y2={innerHeight}
                 stroke={t.brandPeriwinkle}
                 strokeWidth={1}
                 strokeDasharray="3 3"
               />
               <Circle
-                cx={x(active.ts)}
-                cy={scaleLinear().domain([yMin, yMax]).range([innerHeight, 0])(active.value)}
+                cx={xScale(active.ts)}
+                cy={yScale(active.value)}
                 r={4}
                 fill={t.brandPeriwinkle}
               />
@@ -177,11 +214,43 @@ export function PerformanceChart({
           ) : null}
         </G>
       </Svg>
-      {active ? (
-        <View style={{ position: "absolute", top: 4, right: 8 }}>
-          <SvgText fill={t.textStrong} fontSize={13} fontFamily="JetBrainsMono_500Medium">
+
+      {/* Floating tooltip: date + value */}
+      {active && tooltipLeft != null ? (
+        <View
+          style={{
+            position: "absolute",
+            top: PAD.top,
+            left: tooltipLeft,
+            width: TOOLTIP_W,
+            backgroundColor: t.surfaceElevated,
+            borderRadius: 6,
+            paddingHorizontal: 8,
+            paddingVertical: 5,
+            alignItems: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "JetBrainsMono_400Regular",
+              fontSize: 10,
+              color: t.textMuted,
+              letterSpacing: 0.2,
+            }}
+          >
+            {formatScrubDate(active.ts, range)}
+          </Text>
+          <Text
+            style={{
+              fontFamily: "JetBrainsMono_500Medium",
+              fontSize: 15,
+              color: t.numColor,
+              marginTop: 1,
+            }}
+          >
             {fmtGBP(active.value)}
-          </SvgText>
+          </Text>
         </View>
       ) : null}
     </View>
