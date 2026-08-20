@@ -71,17 +71,35 @@ function SettingRow({
 
 export default function SettingsScreen() {
   const { t, theme, setTheme } = useTheme();
-  const { signOut } = useAuth();
-  const { data: settings, isLoading } = useSettings();
+  const { signOut, session } = useAuth();
+  const { data: settings, isLoading, isError, refetch } = useSettings();
   const { mutate: save, isPending: saving } = useUpdateSettings();
   const [defaultRange, setDefaultRange] = useLocalSetting("st-default-range", "1Y");
 
-  if (isLoading || !settings) {
+  if (isLoading) {
     return (
       <Screen>
         <CardSkeleton height={140} />
         <View style={{ height: 16 }} />
         <CardSkeleton height={140} />
+      </Screen>
+    );
+  }
+
+  if (isError || !settings) {
+    return (
+      <Screen>
+        <Heading level={1} style={{ marginBottom: 20 }}>
+          Settings
+        </Heading>
+        <Card style={{ marginBottom: 16 }}>
+          <Body style={{ marginBottom: 12 }}>
+            Could not load settings. Check your connection and try again.
+          </Body>
+          <Button title="Retry" onPress={() => refetch()} />
+        </Card>
+        <Hairline style={{ marginVertical: 8 }} />
+        <Button title="Sign out" variant="ghost" onPress={signOut} style={{ marginTop: 12 }} />
       </Screen>
     );
   }
@@ -148,12 +166,25 @@ export default function SettingsScreen() {
                 backgroundColor: defaultRange === r ? t.primary : t.surfaceElevated,
               }}
             >
-              <Body medium size={12} style={{ color: defaultRange === r ? t.onPrimary : t.textMuted }}>
+              <Body
+                medium
+                size={12}
+                style={{ color: defaultRange === r ? t.onPrimary : t.textMuted }}
+              >
                 {r}
               </Body>
             </Pressable>
           ))}
         </View>
+      </SectionCard>
+
+      <SectionCard title="Account">
+        <SettingRow label="Name">
+          <Muted size={13}>{session?.user?.name ?? "—"}</Muted>
+        </SettingRow>
+        <SettingRow label="Email">
+          <Muted size={13}>{session?.user?.email ?? "—"}</Muted>
+        </SettingRow>
       </SectionCard>
 
       <Hairline style={{ marginVertical: 8 }} />
