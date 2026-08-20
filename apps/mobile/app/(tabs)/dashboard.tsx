@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { View, useWindowDimensions } from "react-native";
+import { View, Pressable, useWindowDimensions } from "react-native";
+import { router } from "expo-router";
 import { compute } from "@stocktracker/shared";
 import { fmtGBP, fmtGBPSigned, fmtPct, dir } from "@stocktracker/shared";
 import { usePortfolio, usePortfolioHistory } from "@/api/queries";
@@ -23,7 +24,7 @@ function HoldingCard({ h }: { h: HoldingComputed }) {
   const color = { up: t.up, down: t.down, flat: t.textMutedStrong }[dir(h.dayChangeGBP)];
 
   return (
-    <View style={{ paddingVertical: 12 }}>
+    <Pressable onPress={() => router.push(`/stock/${h.ticker}` as never)} style={{ paddingVertical: 12 }}>
       <Row>
         <View style={{ flex: 1, marginRight: 12 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -49,7 +50,7 @@ function HoldingCard({ h }: { h: HoldingComputed }) {
           </Num>
         </View>
       </Row>
-    </View>
+    </Pressable>
   );
 }
 

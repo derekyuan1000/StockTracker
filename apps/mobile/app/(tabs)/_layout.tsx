@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Home, Wallet, Users, Settings as SettingsIcon } from "lucide-react-native";
+import { Home, Briefcase, BarChart3, Users, MoreHorizontal } from "lucide-react-native";
 import { useTheme } from "@/theme/ThemeProvider";
 import { monoCaps } from "@/theme/text";
 
@@ -23,23 +23,41 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="dashboard"
-        options={{ title: "Summary", tabBarIcon: ({ color, size }) => <Home color={color} size={size ?? 20} /> }}
+        options={{
+          title: "Summary",
+          tabBarIcon: ({ color, size }) => <Home color={color} size={size ?? 20} />,
+        }}
       />
       <Tabs.Screen
-        name="cash"
-        options={{ title: "Cash", tabBarIcon: ({ color, size }) => <Wallet color={color} size={size ?? 20} /> }}
+        name="holdings"
+        options={{
+          title: "Holdings",
+          tabBarIcon: ({ color, size }) => <Briefcase color={color} size={size ?? 20} />,
+        }}
+      />
+      <Tabs.Screen
+        name="analysis"
+        options={{
+          title: "Analysis",
+          tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size ?? 20} />,
+        }}
       />
       <Tabs.Screen
         name="community"
-        options={{ title: "Community", tabBarIcon: ({ color, size }) => <Users color={color} size={size ?? 20} /> }}
-      />
-      <Tabs.Screen
-        name="settings"
         options={{
-          title: "Settings",
-          tabBarIcon: ({ color, size }) => <SettingsIcon color={color} size={size ?? 20} />,
+          title: "Community",
+          tabBarIcon: ({ color, size }) => <Users color={color} size={size ?? 20} />,
         }}
       />
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: "More",
+          tabBarIcon: ({ color, size }) => <MoreHorizontal color={color} size={size ?? 20} />,
+        }}
+      />
+      <Tabs.Screen name="cash" options={{ href: null }} />
+      <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>
   );
 }

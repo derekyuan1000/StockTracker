@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { View, Pressable } from "react-native";
+import { router } from "expo-router";
 import { usePublicFeed, usePublicLeaderboard } from "@/api/queries";
 import { Screen } from "@/components/Screen";
 import { Card, Hairline } from "@/components/Card";
@@ -48,7 +49,10 @@ function FeedRow({ trade }: { trade: PublicTrade }) {
 function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number }) {
   const { t } = useTheme();
   return (
-    <View style={{ paddingVertical: 12, gap: 4 }}>
+    <Pressable
+      onPress={() => router.push(`/profile/${entry.userId}` as never)}
+      style={{ paddingVertical: 12, gap: 4 }}
+    >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <Muted size={13} style={{ fontFamily: "JetBrainsMono_400Regular", width: 20 }}>
           {rank}
@@ -67,7 +71,7 @@ function LeaderboardRow({ entry, rank }: { entry: LeaderboardEntry; rank: number
         <Muted size={11}>1y</Muted>
         <PctText value={entry.yearGainPct} />
       </View>
-    </View>
+    </Pressable>
   );
 }
 
