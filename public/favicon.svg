@@ -1,11 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-<line x1="4" y1="11" x2="4" y2="14" stroke="rgba(242,239,231,0.35)" stroke-width="1.5" stroke-linecap="round"/>
-  <rect x="2" y="14" width="4" height="6" rx="0.75" fill="rgba(242,239,231,0.35)"/>
-  <line x1="4" y1="20" x2="4" y2="22" stroke="rgba(242,239,231,0.35)" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="12" y1="7" x2="12" y2="10" stroke="rgba(242,239,231,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-  <rect x="10" y="10" width="4" height="8" rx="0.75" fill="rgba(242,239,231,0.55)"/>
-  <line x1="12" y1="18" x2="12" y2="21" stroke="rgba(242,239,231,0.55)" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="20" y1="2" x2="20" y2="5" stroke="#F2EFE7" stroke-width="1.5" stroke-linecap="round"/>
-  <rect x="18" y="5" width="4" height="12" rx="0.75" fill="#F2EFE7"/>
-  <line x1="20" y1="17" x2="20" y2="20" stroke="#F2EFE7" stroke-width="1.5" stroke-linecap="round"/>
+  <style>
+    .bar-lo  { fill: rgba(28,27,24,0.30); }
+    .bar-mid { fill: rgba(28,27,24,0.60); }
+    .bar-hi  { fill: #1C1B18; }
+    .line-lo  { stroke: rgba(28,27,24,0.30); }
+    .line-mid { stroke: rgba(28,27,24,0.60); }
+    .line-hi  { stroke: #1C1B18; }
+    @media (prefers-color-scheme: dark) {
+      .bar-lo  { fill: rgba(242,239,231,0.30); }
+      .bar-mid { fill: rgba(242,239,231,0.60); }
+      .bar-hi  { fill: #F2EFE7; }
+      .line-lo  { stroke: rgba(242,239,231,0.30); }
+      .line-mid { stroke: rgba(242,239,231,0.60); }
+      .line-hi  { stroke: #F2EFE7; }
+    }
+  </style>
+  <line x1="4" y1="11" x2="4" y2="14" class="line-lo" stroke-width="1.5" stroke-linecap="round"/>
+  <rect x="2" y="14" width="4" height="6" rx="0.75" class="bar-lo"/>
+  <line x1="4" y1="20" x2="4" y2="22" class="line-lo" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="12" y1="7" x2="12" y2="10" class="line-mid" stroke-width="1.5" stroke-linecap="round"/>
+  <rect x="10" y="10" width="4" height="8" rx="0.75" class="bar-mid"/>
+  <line x1="12" y1="18" x2="12" y2="21" class="line-mid" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="20" y1="2" x2="20" y2="5" class="line-hi" stroke-width="1.5" stroke-linecap="round"/>
+  <rect x="18" y="5" width="4" height="12" rx="0.75" class="bar-hi"/>
+  <line x1="20" y1="17" x2="20" y2="20" class="line-hi" stroke-width="1.5" stroke-linecap="round"/>
 </svg>
