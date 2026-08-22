@@ -31,6 +31,7 @@
       "expo-web-browser",
       "expo-secure-store",
       "expo-font",
+      "expo-notifications",
       [
         "expo-build-properties",
         {

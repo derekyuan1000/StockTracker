@@ -8,6 +8,7 @@ import type {
   TickerItem,
   PortfolioAnalysis,
   PublicProfile,
+  WatchlistRow,
 } from "@stocktracker/api-contracts";
 import type { z } from "zod";
 import type {
@@ -157,6 +158,35 @@ export const getTrades = () => api<TradeRow[]>("/trades");
 export const getSettings = () => api<UserSettings>("/settings");
 export const updateSettings = (data: z.infer<typeof UpdateSettingsSchema>) =>
   api<void>("/settings", { method: "PATCH", json: data });
+
+// ─── Devices (push tokens) ────────────────────────────────────────────────────
+export const registerDevice = (expoPushToken: string, platform: "ios" | "android") =>
+  api<void>("/devices", { json: { expoPushToken, platform } });
+
+// ─── Price alerts ─────────────────────────────────────────────────────────────
+export type Alert = {
+  id: number;
+  userId: string;
+  ticker: string;
+  direction: "above" | "below";
+  targetPrice: number;
+  active: boolean;
+  triggeredAt: number | null;
+  createdAt: number;
+};
+export const getAlerts = () => api<Alert[]>("/alerts");
+export const createAlert = (data: {
+  ticker: string;
+  direction: "above" | "below";
+  targetPrice: number;
+}) => api<Alert>("/alerts", { json: data });
+export const deleteAlert = (id: number) => api<void>(`/alerts/${id}`, { method: "DELETE" });
+
+// ─── Watchlist ────────────────────────────────────────────────────────────────
+export const getWatchlist = () => api<WatchlistRow[]>("/watchlist");
+export const addWatchlist = (ticker: string) => api<void>("/watchlist", { json: { ticker } });
+export const removeWatchlist = (ticker: string) =>
+  api<void>(`/watchlist/${encodeURIComponent(ticker)}`, { method: "DELETE" });
 
 // ─── Public ──────────────────────────────────────────────────────────────────
 export const getPublicFeed = (limit = 20) => api<PublicTrade[]>(`/public/feed?limit=${limit}`);

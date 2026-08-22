@@ -41,6 +41,30 @@ export async function getPriceForDate(ticker: string, date: string) {
   }
 }
 
+// ─── getQuotes ───────────────────────────────────────────────────────────────
+// Bulk quote lookup for the watchlist. Reuses the 60s-cached fetchQuote; a failed
+// ticker is omitted rather than failing the whole batch.
+
+export async function getQuotes(tickers: string[]) {
+  const results = await Promise.all(
+    tickers.map(async (ticker) => {
+      try {
+        const q = await fetchQuote(ticker);
+        return {
+          ticker: q.ticker,
+          name: q.name,
+          lastPrice: q.lastPrice,
+          prevClose: q.prevClose,
+          currency: q.currency,
+        };
+      } catch {
+        return null;
+      }
+    }),
+  );
+  return results.filter((r): r is NonNullable<typeof r> => r !== null);
+}
+
 // ─── getNews ─────────────────────────────────────────────────────────────────
 
 export async function getNews(ticker: string) {

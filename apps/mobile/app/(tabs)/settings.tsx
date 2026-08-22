@@ -1,8 +1,12 @@
-import { View, Pressable } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Pressable, Alert } from "react-native";
+import * as LocalAuthentication from "expo-local-authentication";
 import { useTheme, type Theme } from "@/theme/ThemeProvider";
 import { useSettings, useUpdateSettings } from "@/api/queries";
 import { useLocalSetting } from "@/hooks/useLocalSetting";
 import { useAuth } from "@/auth/AuthProvider";
+import { setHapticsEnabled, haptic } from "@/haptics";
+import { isBiometricEnabled, setBiometricEnabled } from "@/security/BiometricGate";
 import { Screen } from "@/components/Screen";
 import { Card, Hairline, Row } from "@/components/Card";
 import { Heading, Body, Muted } from "@/components/Typography";
@@ -75,6 +79,43 @@ export default function SettingsScreen() {
   const { data: settings, isLoading, isError, refetch } = useSettings();
   const { mutate: save, isPending: saving } = useUpdateSettings();
   const [defaultRange, setDefaultRange] = useLocalSetting("st-default-range", "1Y");
+  const [hapticsOn, setHapticsOn] = useLocalSetting("st-haptics-enabled", true);
+  const [biometricOn, setBiometricOn] = useState(false);
+  const [biometricBusy, setBiometricBusy] = useState(false);
+
+  useEffect(() => {
+    isBiometricEnabled().then(setBiometricOn);
+  }, []);
+
+  async function toggleBiometric(next: boolean) {
+    if (biometricBusy) return;
+    setBiometricBusy(true);
+    try {
+      if (next) {
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const enrolled = await LocalAuthentication.isEnrolledAsync();
+        if (!hasHardware || !enrolled) {
+          Alert.alert(
+            "Biometrics unavailable",
+            "Set up Face ID / fingerprint in your device settings first.",
+          );
+          return;
+        }
+        const res = await LocalAuthentication.authenticateAsync({
+          promptMessage: "Confirm to enable app lock",
+        });
+        if (!res.success) return;
+        await setBiometricEnabled(true);
+        setBiometricOn(true);
+        haptic.success();
+      } else {
+        await setBiometricEnabled(false);
+        setBiometricOn(false);
+      }
+    } finally {
+      setBiometricBusy(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -176,6 +217,28 @@ export default function SettingsScreen() {
             </Pressable>
           ))}
         </View>
+      </SectionCard>
+
+      <SectionCard
+        title="Security"
+        description="Require Face ID / fingerprint each time you open the app."
+      >
+        <SettingRow label="App lock" description="Unlock with biometrics">
+          <Toggle checked={biometricOn} onChange={toggleBiometric} disabled={biometricBusy} />
+        </SettingRow>
+      </SectionCard>
+
+      <SectionCard title="Preferences" description="Small touches that make the app feel better.">
+        <SettingRow label="Haptic feedback" description="Vibrate on key actions">
+          <Toggle
+            checked={hapticsOn}
+            onChange={(v) => {
+              setHapticsOn(v);
+              setHapticsEnabled(v);
+              if (v) haptic.selection();
+            }}
+          />
+        </SettingRow>
       </SectionCard>
 
       <SectionCard title="Account">
