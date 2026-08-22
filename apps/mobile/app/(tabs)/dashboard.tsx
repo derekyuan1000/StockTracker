@@ -7,6 +7,7 @@ import { fmtGBP, fmtGBPSigned, fmtPct, dir } from "@stocktracker/shared";
 import { usePortfolio, usePortfolioHistory } from "@/api/queries";
 import { qk } from "@/api/queries";
 import { useLocalSetting } from "@/hooks/useLocalSetting";
+import { haptic } from "@/haptics";
 import { useTheme } from "@/theme/ThemeProvider";
 import { Screen } from "@/components/Screen";
 import { Card, Hairline, Row } from "@/components/Card";
@@ -65,6 +66,7 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
+    haptic.impact();
     setRefreshing(true);
     await Promise.all([
       qc.invalidateQueries({ queryKey: qk.portfolio }),

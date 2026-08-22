@@ -10,6 +10,8 @@ import { ThemeProvider, useTheme } from "@/theme/ThemeProvider";
 import { fontsToLoad } from "@/theme/text";
 import { AuthProvider } from "@/auth/AuthProvider";
 import { createQueryClient, setupQueryFocusManager } from "@/api/queryClient";
+import { initHaptics } from "@/haptics";
+import { BiometricGate } from "@/security/BiometricGate";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -36,6 +38,9 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => setupQueryFocusManager(), []);
+  useEffect(() => {
+    initHaptics();
+  }, []);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -52,7 +57,9 @@ export default function RootLayout() {
         <ThemeProvider>
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
-              <RootNavigator />
+              <BiometricGate>
+                <RootNavigator />
+              </BiometricGate>
             </AuthProvider>
           </QueryClientProvider>
         </ThemeProvider>

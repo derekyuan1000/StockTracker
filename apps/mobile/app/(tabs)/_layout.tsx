@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Home, Briefcase, TrendingUp, BarChart3, MoreHorizontal } from "lucide-react-native";
+import { Home, Briefcase, TrendingUp, BarChart3, Star, MoreHorizontal } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/theme/ThemeProvider";
 import { monoCaps } from "@/theme/text";
@@ -50,6 +50,13 @@ export default function TabsLayout() {
         options={{
           title: "Analysis",
           tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size ?? 20} />,
+        }}
+      />
+      <Tabs.Screen
+        name="watchlist"
+        options={{
+          title: "Watch",
+          tabBarIcon: ({ color, size }) => <Star color={color} size={size ?? 20} />,
         }}
       />
       <Tabs.Screen

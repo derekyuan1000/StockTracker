@@ -1,12 +1,21 @@
 import { useState, useMemo } from "react";
 import { View, Pressable, Linking, useWindowDimensions } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
-import { usePortfolio, useTickerHistory, useTickerNews } from "@/api/queries";
+import { ArrowLeft, Bell, Bookmark } from "lucide-react-native";
+import {
+  usePortfolio,
+  useTickerHistory,
+  useTickerNews,
+  useWatchlist,
+  useAddWatchlist,
+  useRemoveWatchlist,
+} from "@/api/queries";
+import { PriceAlertSheet } from "@/components/PriceAlertSheet";
+import { haptic } from "@/haptics";
 import { compute, fmtGBP, fmtGBPSigned, fmtPct, dir } from "@stocktracker/shared";
 import { Screen } from "@/components/Screen";
 import { Card, Hairline, Row } from "@/components/Card";
-import { Heading, Body, Muted, Num } from "@/components/Typography";
+import { Body, Muted, Num } from "@/components/Typography";
 import { PctText } from "@/components/PctText";
 import { PerformanceChart } from "@/charts/PerformanceChart";
 import { useTheme } from "@/theme/ThemeProvider";
@@ -43,9 +52,23 @@ export default function StockDetailScreen() {
   const { width } = useWindowDimensions();
   const [range, setRange] = useState<HistoryRange>("1Y");
 
+  const [alertOpen, setAlertOpen] = useState(false);
+
   const portfolio = usePortfolio();
   const historyQuery = useTickerHistory(ticker ?? "", range);
   const newsQuery = useTickerNews(ticker ?? "");
+
+  const { data: watchlist = [] } = useWatchlist();
+  const addWatch = useAddWatchlist();
+  const removeWatch = useRemoveWatchlist();
+  const isWatched = watchlist.some((w) => w.ticker.toUpperCase() === (ticker ?? "").toUpperCase());
+
+  function toggleWatch() {
+    if (!ticker) return;
+    haptic.selection();
+    if (isWatched) removeWatch.mutate(ticker);
+    else addWatch.mutate(ticker);
+  }
 
   const holding = useMemo(() => {
     if (!portfolio.data || !ticker) return null;
@@ -91,7 +114,25 @@ export default function StockDetailScreen() {
             </Muted>
           )}
         </View>
+        <Pressable onPress={toggleWatch} hitSlop={8}>
+          <Bookmark
+            color={isWatched ? t.brandPeriwinkle : t.textMuted}
+            fill={isWatched ? t.brandPeriwinkle : "transparent"}
+            size={22}
+          />
+        </Pressable>
+        <Pressable onPress={() => setAlertOpen(true)} hitSlop={8}>
+          <Bell color={t.textMuted} size={22} />
+        </Pressable>
       </View>
+
+      <PriceAlertSheet
+        visible={alertOpen}
+        onClose={() => setAlertOpen(false)}
+        ticker={ticker}
+        lastPrice={lastPrice}
+        currency={(holding?.currency as "GBp" | "GBP") ?? "GBp"}
+      />
 
       <Card style={{ marginBottom: 16 }}>
         <Num medium style={{ fontSize: 28 }}>
@@ -139,14 +180,14 @@ export default function StockDetailScreen() {
           <StatRow label="Cost" value={fmtGBP(holding.costGBP)} />
           <Hairline />
           <Row style={{ paddingVertical: 10 }}>
-            <Muted size={13}>
-              Gain / Loss
-            </Muted>
+            <Muted size={13}>Gain / Loss</Muted>
             <View style={{ flexDirection: "row", gap: 8 }}>
               <Num
                 style={{
                   fontSize: 13,
-                  color: { up: t.up, down: t.down, flat: t.textMutedStrong }[dir(holding.unrealisedGL)],
+                  color: { up: t.up, down: t.down, flat: t.textMutedStrong }[
+                    dir(holding.unrealisedGL)
+                  ],
                 }}
               >
                 {fmtGBPSigned(holding.unrealisedGL)}
@@ -161,56 +202,60 @@ export default function StockDetailScreen() {
         </Card>
       )}
 
-      {holding && (holding.pe != null || holding.divYield != null || holding.mktCap != null || holding.beta != null) && (
-        <Card style={{ marginBottom: 16 }}>
-          <Body medium size={15} style={{ marginBottom: 8 }}>
-            Key Stats
-          </Body>
-          <Hairline />
-          {holding.pe != null && (
-            <>
-              <StatRow label="P/E" value={holding.pe.toFixed(1)} />
-              <Hairline />
-            </>
-          )}
-          {holding.forwardPe != null && (
-            <>
-              <StatRow label="Forward P/E" value={holding.forwardPe.toFixed(1)} />
-              <Hairline />
-            </>
-          )}
-          {holding.divYield != null && holding.divYield > 0 && (
-            <>
-              <StatRow label="Div yield" value={`${holding.divYield.toFixed(2)}%`} />
-              <Hairline />
-            </>
-          )}
-          {holding.mktCap != null && (
-            <>
-              <StatRow label="Market cap" value={`£${(holding.mktCap / 1e9).toFixed(1)}B`} />
-              <Hairline />
-            </>
-          )}
-          {holding.beta != null && (
-            <>
-              <StatRow label="Beta" value={holding.beta.toFixed(2)} />
-              <Hairline />
-            </>
-          )}
-          <StatRow label="52w high" value={`${holding.yearHigh.toFixed(0)}p`} />
-          <Hairline />
-          <StatRow label="52w low" value={`${holding.yearLow.toFixed(0)}p`} />
-          {holding.analyst && (
-            <>
-              <Hairline />
-              <StatRow
-                label="Analyst target"
-                value={`${holding.analyst.targetLow.toFixed(0)}–${holding.analyst.targetHigh.toFixed(0)}p`}
-              />
-            </>
-          )}
-        </Card>
-      )}
+      {holding &&
+        (holding.pe != null ||
+          holding.divYield != null ||
+          holding.mktCap != null ||
+          holding.beta != null) && (
+          <Card style={{ marginBottom: 16 }}>
+            <Body medium size={15} style={{ marginBottom: 8 }}>
+              Key Stats
+            </Body>
+            <Hairline />
+            {holding.pe != null && (
+              <>
+                <StatRow label="P/E" value={holding.pe.toFixed(1)} />
+                <Hairline />
+              </>
+            )}
+            {holding.forwardPe != null && (
+              <>
+                <StatRow label="Forward P/E" value={holding.forwardPe.toFixed(1)} />
+                <Hairline />
+              </>
+            )}
+            {holding.divYield != null && holding.divYield > 0 && (
+              <>
+                <StatRow label="Div yield" value={`${holding.divYield.toFixed(2)}%`} />
+                <Hairline />
+              </>
+            )}
+            {holding.mktCap != null && (
+              <>
+                <StatRow label="Market cap" value={`£${(holding.mktCap / 1e9).toFixed(1)}B`} />
+                <Hairline />
+              </>
+            )}
+            {holding.beta != null && (
+              <>
+                <StatRow label="Beta" value={holding.beta.toFixed(2)} />
+                <Hairline />
+              </>
+            )}
+            <StatRow label="52w high" value={`${holding.yearHigh.toFixed(0)}p`} />
+            <Hairline />
+            <StatRow label="52w low" value={`${holding.yearLow.toFixed(0)}p`} />
+            {holding.analyst && (
+              <>
+                <Hairline />
+                <StatRow
+                  label="Analyst target"
+                  value={`${holding.analyst.targetLow.toFixed(0)}–${holding.analyst.targetHigh.toFixed(0)}p`}
+                />
+              </>
+            )}
+          </Card>
+        )}
 
       <Card style={{ marginBottom: 16, padding: 0, paddingHorizontal: 16 }}>
         <Body medium size={15} style={{ paddingVertical: 12 }}>

@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { authClient, useSession } from "./client";
 import { setUnauthorizedHandler } from "@/api/client";
+import { registerPushToken } from "@/push/registerPushToken";
 
 type AuthContextValue = {
   session: ReturnType<typeof useSession>["data"];
@@ -28,6 +29,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     qc.clear();
     router.replace("/login");
   }
+
+  // Register this device for push notifications once signed in (best-effort).
+  useEffect(() => {
+    if (session) registerPushToken();
+  }, [session]);
 
   // A 401 from the REST API (expired/invalid session cookie) triggers the same
   // cleanup as an explicit sign-out.

@@ -43,6 +43,14 @@ export type PublicProfile = {
   };
 };
 
+export type WatchlistRow = {
+  ticker: string;
+  name: string;
+  lastPrice: number;
+  prevClose: number;
+  currency: "GBp" | "GBP";
+};
+
 export type WidgetSummary = {
   totalGBP: number;
   dayChangeGBP: number;

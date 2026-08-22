@@ -91,3 +91,11 @@ export const RegisterDeviceSchema = z.object({
   expoPushToken: z.string().min(1),
   platform: z.enum(["ios", "android"]),
 });
+
+export const AddWatchlistSchema = z.object({
+  ticker: z
+    .string()
+    .min(1)
+    .max(20)
+    .transform((s) => s.toUpperCase()),
+});

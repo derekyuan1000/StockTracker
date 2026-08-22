@@ -12,6 +12,7 @@ import { internalRoutes } from "./routes/internal";
 import { analysisRoutes } from "./routes/analysis";
 import { alertsRoutes } from "./routes/alerts";
 import { insightsRoutes } from "./routes/insights";
+import { watchlistRoutes } from "./routes/watchlist";
 
 let registered = false;
 
@@ -32,5 +33,6 @@ export function initRoutes() {
     ...analysisRoutes,
     ...alertsRoutes,
     ...insightsRoutes,
+    ...watchlistRoutes,
   ]);
 }

@@ -25,6 +25,8 @@ export const qk = {
   publicFeed: (limit: number) => ["public-feed", limit] as const,
   publicLeaderboard: ["public-leaderboard"] as const,
   publicProfile: (userId: string) => ["public-profile", userId] as const,
+  alerts: ["alerts"] as const,
+  watchlist: ["watchlist"] as const,
 };
 
 export function useMe(enabled = true) {
@@ -191,5 +193,48 @@ export function usePublicProfile(userId: string) {
     queryKey: qk.publicProfile(userId),
     queryFn: () => endpoints.getPublicProfile(userId),
     enabled: !!userId,
+  });
+}
+
+// ─── Price alerts ─────────────────────────────────────────────────────────────
+export function useAlerts(enabled = true) {
+  return useQuery({ queryKey: qk.alerts, queryFn: endpoints.getAlerts, enabled });
+}
+
+export function useCreateAlert() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { ticker: string; direction: "above" | "below"; targetPrice: number }) =>
+      endpoints.createAlert(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.alerts }),
+  });
+}
+
+export function useDeleteAlert() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => endpoints.deleteAlert(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.alerts }),
+  });
+}
+
+// ─── Watchlist ────────────────────────────────────────────────────────────────
+export function useWatchlist() {
+  return useQuery({ queryKey: qk.watchlist, queryFn: endpoints.getWatchlist });
+}
+
+export function useAddWatchlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (ticker: string) => endpoints.addWatchlist(ticker),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.watchlist }),
+  });
+}
+
+export function useRemoveWatchlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (ticker: string) => endpoints.removeWatchlist(ticker),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.watchlist }),
   });
 }

@@ -5,6 +5,7 @@ import {
   ReceiptText,
   Wallet,
   Users,
+  Bell,
   Settings as SettingsIcon,
 } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
@@ -34,6 +35,12 @@ export default function MoreScreen() {
       description: "Lots, trades & cash flows",
       route: "/transactions",
       icon: <ReceiptText color={t.textBody} size={20} />,
+    },
+    {
+      label: "Price alerts",
+      description: "Manage your price notifications",
+      route: "/alerts",
+      icon: <Bell color={t.textBody} size={20} />,
     },
     {
       label: "Cash",

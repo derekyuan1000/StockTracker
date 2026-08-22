@@ -178,6 +178,21 @@ export const alerts = sqliteTable("alerts", {
     .default(sql`(unixepoch())`),
 });
 
+// Per-user watchlist: tickers the user is tracking but doesn't necessarily own
+export const watchlist = sqliteTable(
+  "watchlist",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: text("user_id").notNull(),
+    ticker: text("ticker").notNull(),
+    name: text("name").notNull().default(""),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (t) => [uniqueIndex("watchlist_user_ticker_unique").on(t.userId, t.ticker)],
+);
+
 // Per-user per-day AI-generated portfolio narrative (cached to avoid re-calling Claude)
 export const aiInsights = sqliteTable(
   "ai_insights",

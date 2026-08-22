@@ -57,6 +57,13 @@
       "when": 1783654570920,
       "tag": "0007_milky_ozymandias",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1787320906450,
+      "tag": "0008_chemical_thunderbolt_ross",
+      "breakpoints": true
     }
   ]
 }
