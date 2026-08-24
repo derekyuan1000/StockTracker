@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { View, Text, GestureResponderEvent } from "react-native";
 import Svg, { Defs, LinearGradient, Stop, Path, Line as SvgLine, Circle, Text as SvgText, G } from "react-native-svg";
-import { scaleLinear } from "d3-scale";
+import { scaleLinear, type ScaleLinear } from "d3-scale";
+
+type Scale = ScaleLinear<number, number, never>;
 import { line as d3line, area as d3area, curveMonotoneX } from "d3-shape";
 import { fmtGBP } from "@stocktracker/shared";
 import { useTheme } from "@/theme/ThemeProvider";
@@ -61,8 +63,8 @@ export function PerformanceChart({
       return {
         linePath: "",
         areaPath: "",
-        xScale: null as ReturnType<typeof scaleLinear> | null,
-        yScale: null as ReturnType<typeof scaleLinear> | null,
+        xScale: null as Scale | null,
+        yScale: null as Scale | null,
         points: [] as HistoryPoint[],
         yMin: 0,
         yMax: 1,

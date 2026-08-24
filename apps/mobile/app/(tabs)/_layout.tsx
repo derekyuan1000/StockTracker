@@ -11,11 +11,11 @@ export default function TabsLayout() {
       <Tabs.Screen name="holdings" options={{ title: "Holdings" }} />
       <Tabs.Screen name="performance" options={{ title: "Performance" }} />
       <Tabs.Screen name="analysis" options={{ title: "Analysis" }} />
-      <Tabs.Screen name="watchlist" options={{ href: null }} />
+      <Tabs.Screen name="watchlist" options={{ title: "Watch" }} />
       <Tabs.Screen name="more" options={{ title: "More" }} />
-      <Tabs.Screen name="community" options={{ href: null }} />
-      <Tabs.Screen name="cash" options={{ href: null }} />
-      <Tabs.Screen name="settings" options={{ href: null }} />
+      <Tabs.Screen name="community" options={{ title: "Community" }} />
+      <Tabs.Screen name="cash" options={{ title: "Cash" }} />
+      <Tabs.Screen name="settings" options={{ title: "Settings" }} />
     </Tabs>
   );
 }

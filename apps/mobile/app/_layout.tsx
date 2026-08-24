@@ -9,6 +9,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { ThemeProvider, useTheme } from "@/theme/ThemeProvider";
+import { SidebarProvider } from "@/context/SidebarContext";
 import { fontsToLoad } from "@/theme/text";
 import { AuthProvider } from "@/auth/AuthProvider";
 import { createQueryClient, setupQueryFocusManager } from "@/api/queryClient";
@@ -60,7 +61,9 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <AuthProvider>
               <BiometricGate>
-                <RootNavigator />
+                <SidebarProvider>
+                  <RootNavigator />
+                </SidebarProvider>
               </BiometricGate>
             </AuthProvider>
           </QueryClientProvider>

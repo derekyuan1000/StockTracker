@@ -7,7 +7,7 @@ import {
   Users,
   Bell,
   Star,
-  Settings as SettingsIcon,
+  BarChart3,
 } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
 import { Card, Hairline } from "@/components/Card";
@@ -44,6 +44,12 @@ export default function MoreScreen() {
       icon: <Star color={t.textBody} size={20} />,
     },
     {
+      label: "Analysis",
+      description: "Portfolio breakdown & insights",
+      route: "/(tabs)/analysis",
+      icon: <BarChart3 color={t.textBody} size={20} />,
+    },
+    {
       label: "Community",
       description: "Leaderboard & public trades",
       route: "/(tabs)/community",
@@ -66,12 +72,6 @@ export default function MoreScreen() {
       description: "Manage your cash balance",
       route: "/(tabs)/cash",
       icon: <Wallet color={t.textBody} size={20} />,
-    },
-    {
-      label: "Settings",
-      description: "Preferences & account",
-      route: "/(tabs)/settings",
-      icon: <SettingsIcon color={t.textBody} size={20} />,
     },
   ];
 

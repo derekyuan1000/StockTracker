@@ -202,42 +202,17 @@ export default function SettingsScreen() {
         title="Dashboard"
         description={
           isTablet
-            ? "Default left-panel range, plus three right-panel chart ranges."
+            ? "Three chart ranges shown in the right panel."
             : "The time range shown when you first open the dashboard."
         }
       >
         {isTablet ? (
           <View style={{ gap: 14 }}>
-            {/* Left-panel default range */}
-            <View>
-              <Muted size={11} style={{ marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.6 }}>
-                Left panel default
-              </Muted>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-                {DEFAULT_RANGES.map((r) => (
-                  <Pressable
-                    key={r}
-                    onPress={() => { haptic.selection(); setDefaultRange(r); }}
-                    style={{
-                      borderRadius: radius.sm,
-                      paddingHorizontal: 12,
-                      paddingVertical: 6,
-                      backgroundColor: defaultRange === r ? t.primary : t.surfaceElevated,
-                    }}
-                  >
-                    <Body medium size={12} style={{ color: defaultRange === r ? t.onPrimary : t.textMuted }}>
-                      {r}
-                    </Body>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-            {/* Three right-panel range slots */}
             {(
               [
-                ["Right panel — slot 1", tabletRange1, setTabletRange1],
-                ["Right panel — slot 2", tabletRange2, setTabletRange2],
-                ["Right panel — slot 3", tabletRange3, setTabletRange3],
+                ["Chart 1", tabletRange1, setTabletRange1],
+                ["Chart 2", tabletRange2, setTabletRange2],
+                ["Chart 3", tabletRange3, setTabletRange3],
               ] as [string, HistoryRange, (v: HistoryRange) => void][]
             ).map(([label, val, setter]) => (
               <View key={label}>
