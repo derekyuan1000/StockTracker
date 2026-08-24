@@ -6,12 +6,14 @@ import {
   Wallet,
   Users,
   Bell,
+  Star,
   Settings as SettingsIcon,
 } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
 import { Card, Hairline } from "@/components/Card";
 import { Heading, Body, Muted } from "@/components/Typography";
 import { useTheme } from "@/theme/ThemeProvider";
+import { useIsTablet } from "@/hooks/useIsTablet";
 
 type MenuItem = {
   label: string;
@@ -22,8 +24,25 @@ type MenuItem = {
 
 export default function MoreScreen() {
   const { t } = useTheme();
+  const isTablet = useIsTablet();
+
+  // On tablet, navigation items are in the sidebar — More tab is unused
+  if (isTablet) {
+    return (
+      <Screen>
+        <Heading level={1} style={{ marginBottom: 12 }}>More</Heading>
+        <Muted size={13}>Use the sidebar to navigate to Settings, Alerts, and other screens.</Muted>
+      </Screen>
+    );
+  }
 
   const items: MenuItem[] = [
+    {
+      label: "Watchlist",
+      description: "Stocks you're tracking",
+      route: "/(tabs)/watchlist",
+      icon: <Star color={t.textBody} size={20} />,
+    },
     {
       label: "Community",
       description: "Leaderboard & public trades",

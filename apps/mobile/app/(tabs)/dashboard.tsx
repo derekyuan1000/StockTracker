@@ -1,5 +1,5 @@
-import { useMemo, useState, useCallback } from "react";
-import { View, Pressable, ScrollView, RefreshControl, useWindowDimensions } from "react-native";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { View, Pressable, ScrollView, RefreshControl, useWindowDimensions, Animated } from "react-native";
 import { router } from "expo-router";
 import { X } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
@@ -23,8 +23,9 @@ import { radius } from "@/theme/tokens";
 import type { HistoryRange } from "@/api/endpoints";
 import type { HoldingComputed } from "@stocktracker/shared";
 
-// Reduced from the web's 8 ranges — a 4x2 grid doesn't fit a 360dp screen legibly.
 const RANGES: HistoryRange[] = ["1D", "1M", "6M", "1Y", "All"];
+// Range options available in the tablet right panel
+const TABLET_PANEL_RANGES: HistoryRange[] = ["1M", "1Y", "All"];
 
 function HoldingCard({
   h,
@@ -37,44 +38,67 @@ function HoldingCard({
 }) {
   const { t } = useTheme();
   const color = { up: t.up, down: t.down, flat: t.textMutedStrong }[dir(h.unrealisedGL)];
+  const scale = useRef(new Animated.Value(1)).current;
+
+  function handlePress() {
+    Animated.sequence([
+      Animated.timing(scale, { toValue: 0.97, duration: 80, useNativeDriver: true }),
+      Animated.timing(scale, { toValue: 1, duration: 80, useNativeDriver: true }),
+    ]).start();
+    onPress();
+  }
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={{
-        paddingVertical: 12,
-        backgroundColor: selected ? t.surfaceElevated : "transparent",
-        marginHorizontal: selected ? -16 : 0,
-        paddingHorizontal: selected ? 16 : 0,
-      }}
-    >
-      <Row>
-        <View style={{ flex: 1, marginRight: 12 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <Body
-              medium
-              size={12}
-              style={{ fontFamily: "JetBrainsMono_500Medium", textTransform: "uppercase" }}
-            >
-              {h.ticker}
-            </Body>
-            <Muted size={11} numberOfLines={1} style={{ flexShrink: 1 }}>
-              {h.name}
+    <Pressable onPress={handlePress} style={{ paddingVertical: 12 }}>
+      <Animated.View
+        style={{
+          transform: [{ scale }],
+          backgroundColor: selected ? t.surfaceElevated : "transparent",
+          marginHorizontal: selected ? -16 : 0,
+          paddingHorizontal: selected ? 16 : 0,
+          borderRadius: selected ? radius.sm : 0,
+        }}
+      >
+        <Row>
+          <View style={{ flex: 1, marginRight: 12 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Body
+                medium
+                size={12}
+                style={{ fontFamily: "JetBrainsMono_500Medium", textTransform: "uppercase" }}
+              >
+                {h.ticker}
+              </Body>
+              <Muted size={11} numberOfLines={1} style={{ flexShrink: 1 }}>
+                {h.name}
+              </Muted>
+            </View>
+            <Muted size={11} style={{ marginTop: 2 }}>
+              {h.allocActual.toFixed(1)}% of portfolio
             </Muted>
           </View>
-          <Muted size={11} style={{ marginTop: 2 }}>
-            {h.allocActual.toFixed(1)}% of portfolio
-          </Muted>
-        </View>
-        <View style={{ alignItems: "flex-end" }}>
-          <Num medium>{fmtGBP(h.marketValueGBP)}</Num>
-          <Num style={{ color, fontSize: 12, marginTop: 2 }}>
-            {fmtGBPSigned(h.unrealisedGL)} ({fmtPct(h.unrealisedPct)})
-          </Num>
-        </View>
-      </Row>
+          <View style={{ alignItems: "flex-end" }}>
+            <Num medium>{fmtGBP(h.marketValueGBP)}</Num>
+            <Num style={{ color, fontSize: 12, marginTop: 2 }}>
+              {fmtGBPSigned(h.unrealisedGL)} ({fmtPct(h.unrealisedPct)})
+            </Num>
+          </View>
+        </Row>
+      </Animated.View>
     </Pressable>
   );
+}
+
+/** Fades in whenever `content` changes — used to animate right-panel transitions. */
+function FadePanel({ children, triggerKey }: { children: React.ReactNode; triggerKey: string }) {
+  const opacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    opacity.setValue(0);
+    Animated.timing(opacity, { toValue: 1, duration: 220, useNativeDriver: true }).start();
+  }, [triggerKey]);
+
+  return <Animated.View style={{ opacity, flex: 1 }}>{children}</Animated.View>;
 }
 
 export default function DashboardScreen() {
@@ -85,6 +109,7 @@ export default function DashboardScreen() {
   const qc = useQueryClient();
   const { data: portfolio, isLoading } = usePortfolio();
   const [range, setRange, rangeLoaded] = useLocalSetting<HistoryRange>("st-default-range", "1Y");
+  const [rightRange, setRightRange] = useLocalSetting<HistoryRange>("st-tablet-right-range", "1Y");
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
 
@@ -109,6 +134,11 @@ export default function DashboardScreen() {
 
   const { data: history = [], isFetching: historyFetching } = usePortfolioHistory(
     rangeLoaded ? range : "1Y",
+  );
+
+  // Right panel uses its own range when showing the portfolio chart
+  const { data: rightHistory = [], isFetching: rightHistoryFetching } = usePortfolioHistory(
+    rightRange,
   );
 
   const changeColor = { up: t.up, down: t.down, flat: t.textMutedStrong }[dir(p.dayChangeGBP)];
@@ -138,9 +168,10 @@ export default function DashboardScreen() {
 
   // ─── Tablet split-pane layout ───────────────────────────────────────────────
   if (isTablet) {
-    const leftPanelWidth = width * 0.38 - SIDEBAR_WIDTH * 0.38;
-    const rightPanelWidth = width * 0.62 - SIDEBAR_WIDTH * 0.62;
-    const chartWidth = rightPanelWidth - 64;
+    const availableWidth = width - SIDEBAR_WIDTH;
+    const rightPanelWidth = availableWidth * 0.62;
+    // ScrollView paddingHorizontal (20 per side) + Card padding (16 per side) = 72
+    const chartWidth = rightPanelWidth - 80;
 
     return (
       <View
@@ -182,30 +213,6 @@ export default function DashboardScreen() {
             <Num style={{ color: allTimeColor, fontSize: 12, marginTop: 2 }}>
               {fmtGBPSigned(p.unrealisedGL)} ({fmtPct(p.unrealisedPct)}) all time
             </Num>
-
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 12 }}>
-              {RANGES.map((r) => (
-                <Body
-                  key={r}
-                  medium
-                  size={12}
-                  onPress={() => {
-                    setRange(r);
-                    setSelectedTicker(null);
-                  }}
-                  style={{
-                    paddingVertical: 6,
-                    paddingHorizontal: 10,
-                    borderRadius: radius.sm,
-                    backgroundColor: range === r ? t.primary : t.surfaceElevated,
-                    color: range === r ? t.onPrimary : t.textMuted,
-                    overflow: "hidden",
-                  }}
-                >
-                  {r}
-                </Body>
-              ))}
-            </View>
           </Card>
 
           <Body medium size={15} style={{ marginBottom: 8 }}>
@@ -237,42 +244,76 @@ export default function DashboardScreen() {
           )}
         </ScrollView>
 
-        {/* Right panel: chart or stock detail */}
-        <ScrollView
-          style={{ flex: 0.62 }}
-          contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 32 }}
-        >
-          {selectedTicker ? (
-            <>
-              <Row style={{ marginBottom: 12 }}>
-                <Body
-                  medium
-                  size={14}
-                  style={{ fontFamily: "JetBrainsMono_500Medium", textTransform: "uppercase" }}
-                >
-                  {selectedTicker}
-                </Body>
-                <Pressable onPress={() => setSelectedTicker(null)} hitSlop={8}>
-                  <X color={t.textMuted} size={18} />
-                </Pressable>
-              </Row>
-              <StockDetailPanel ticker={selectedTicker} panelWidth={rightPanelWidth} />
-            </>
-          ) : (
-            <Card style={{ opacity: historyFetching ? 0.5 : 1 }}>
-              <Muted size={11} style={{ textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 12 }}>
-                Portfolio Performance · {range}
-              </Muted>
-              <PerformanceChart data={history} range={range} width={chartWidth} />
-            </Card>
-          )}
-        </ScrollView>
+        {/* Right panel: portfolio chart or stock detail */}
+        <View style={{ flex: 0.62 }}>
+          <FadePanel triggerKey={selectedTicker ?? "__chart__"}>
+            <ScrollView
+              contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 32 }}
+            >
+              {selectedTicker ? (
+                <>
+                  {/* Dismiss row */}
+                  <Pressable
+                    onPress={() => { haptic.selection(); setSelectedTicker(null); }}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                      marginBottom: 16,
+                      alignSelf: "flex-start",
+                      paddingVertical: 6,
+                      paddingHorizontal: 12,
+                      borderRadius: radius.full,
+                      backgroundColor: t.surfaceElevated,
+                    }}
+                  >
+                    <X color={t.textMuted} size={14} />
+                    <Body size={12} style={{ color: t.textMuted }}>
+                      {selectedTicker.toUpperCase()} — tap to close
+                    </Body>
+                  </Pressable>
+                  <StockDetailPanel ticker={selectedTicker} panelWidth={rightPanelWidth} />
+                </>
+              ) : (
+                <Card style={{ opacity: rightHistoryFetching ? 0.6 : 1 }}>
+                  <Row style={{ marginBottom: 12 }}>
+                    <Muted size={11} style={{ textTransform: "uppercase", letterSpacing: 0.8 }}>
+                      Portfolio Performance
+                    </Muted>
+                    {/* Independent range picker for right panel */}
+                    <View style={{ flexDirection: "row", gap: 6 }}>
+                      {TABLET_PANEL_RANGES.map((r) => (
+                        <Body
+                          key={r}
+                          medium
+                          size={11}
+                          onPress={() => { haptic.selection(); setRightRange(r); }}
+                          style={{
+                            paddingVertical: 4,
+                            paddingHorizontal: 8,
+                            borderRadius: radius.sm,
+                            backgroundColor: rightRange === r ? t.primary : t.surfaceElevated,
+                            color: rightRange === r ? t.onPrimary : t.textMuted,
+                            overflow: "hidden",
+                          }}
+                        >
+                          {r}
+                        </Body>
+                      ))}
+                    </View>
+                  </Row>
+                  <PerformanceChart data={rightHistory} range={rightRange} width={chartWidth} />
+                </Card>
+              )}
+            </ScrollView>
+          </FadePanel>
+        </View>
       </View>
     );
   }
 
   // ─── Phone layout (unchanged) ────────────────────────────────────────────────
-  const chartWidth = width - 32;
+  const chartWidth = width - 64;
 
   return (
     <Screen refreshing={refreshing} onRefresh={onRefresh}>
@@ -317,7 +358,7 @@ export default function DashboardScreen() {
         </View>
 
         <View style={{ marginTop: 12, opacity: historyFetching ? 0.5 : 1 }}>
-          <PerformanceChart data={history} range={range} width={chartWidth - 32} />
+          <PerformanceChart data={history} range={range} width={chartWidth} />
         </View>
       </Card>
 

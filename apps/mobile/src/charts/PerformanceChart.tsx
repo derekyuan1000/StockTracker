@@ -8,7 +8,7 @@ import { useTheme } from "@/theme/ThemeProvider";
 import type { HistoryRange, HistoryPoint } from "@/api/endpoints";
 
 const HEIGHT = 220;
-const PAD = { top: 10, right: 8, bottom: 24, left: 8 };
+const PAD = { top: 20, right: 8, bottom: 24, left: 8 };
 // Width of the floating tooltip card — used to clamp it within chart bounds.
 const TOOLTIP_W = 140;
 

@@ -14,6 +14,8 @@ import { Toggle } from "@/components/Toggle";
 import { Button } from "@/components/Button";
 import { CardSkeleton } from "@/components/Skeleton";
 import { radius } from "@/theme/tokens";
+import { useIsTablet } from "@/hooks/useIsTablet";
+import type { HistoryRange } from "@/api/endpoints";
 
 const THEMES: { value: Theme; label: string; description: string }[] = [
   { value: "dark", label: "Dark", description: "Easy on the eyes in low light" },
@@ -78,7 +80,12 @@ export default function SettingsScreen() {
   const { signOut, session } = useAuth();
   const { data: settings, isLoading, isError, refetch } = useSettings();
   const { mutate: save, isPending: saving } = useUpdateSettings();
-  const [defaultRange, setDefaultRange] = useLocalSetting("st-default-range", "1Y");
+  const isTablet = useIsTablet();
+  const [defaultRange, setDefaultRange] = useLocalSetting<HistoryRange>("st-default-range", "1Y");
+  // Tablet right-panel ranges (3 configurable slots)
+  const [tabletRange1, setTabletRange1] = useLocalSetting<HistoryRange>("st-tablet-range-1", "1M");
+  const [tabletRange2, setTabletRange2] = useLocalSetting<HistoryRange>("st-tablet-range-2", "1Y");
+  const [tabletRange3, setTabletRange3] = useLocalSetting<HistoryRange>("st-tablet-range-3", "All");
   const [hapticsOn, setHapticsOn] = useLocalSetting("st-haptics-enabled", true);
   const [biometricOn, setBiometricOn] = useState(false);
   const [biometricBusy, setBiometricBusy] = useState(false);
@@ -193,30 +200,91 @@ export default function SettingsScreen() {
 
       <SectionCard
         title="Dashboard"
-        description="The time range shown when you first open the dashboard."
+        description={
+          isTablet
+            ? "Default left-panel range, plus three right-panel chart ranges."
+            : "The time range shown when you first open the dashboard."
+        }
       >
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-          {DEFAULT_RANGES.map((r) => (
-            <Pressable
-              key={r}
-              onPress={() => setDefaultRange(r)}
-              style={{
-                borderRadius: radius.sm,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                backgroundColor: defaultRange === r ? t.primary : t.surfaceElevated,
-              }}
-            >
-              <Body
-                medium
-                size={12}
-                style={{ color: defaultRange === r ? t.onPrimary : t.textMuted }}
+        {isTablet ? (
+          <View style={{ gap: 14 }}>
+            {/* Left-panel default range */}
+            <View>
+              <Muted size={11} style={{ marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.6 }}>
+                Left panel default
+              </Muted>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+                {DEFAULT_RANGES.map((r) => (
+                  <Pressable
+                    key={r}
+                    onPress={() => { haptic.selection(); setDefaultRange(r); }}
+                    style={{
+                      borderRadius: radius.sm,
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      backgroundColor: defaultRange === r ? t.primary : t.surfaceElevated,
+                    }}
+                  >
+                    <Body medium size={12} style={{ color: defaultRange === r ? t.onPrimary : t.textMuted }}>
+                      {r}
+                    </Body>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+            {/* Three right-panel range slots */}
+            {(
+              [
+                ["Right panel — slot 1", tabletRange1, setTabletRange1],
+                ["Right panel — slot 2", tabletRange2, setTabletRange2],
+                ["Right panel — slot 3", tabletRange3, setTabletRange3],
+              ] as [string, HistoryRange, (v: HistoryRange) => void][]
+            ).map(([label, val, setter]) => (
+              <View key={label}>
+                <Muted size={11} style={{ marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.6 }}>
+                  {label}
+                </Muted>
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+                  {DEFAULT_RANGES.map((r) => (
+                    <Pressable
+                      key={r}
+                      onPress={() => { haptic.selection(); setter(r); }}
+                      style={{
+                        borderRadius: radius.sm,
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                        backgroundColor: val === r ? t.primary : t.surfaceElevated,
+                      }}
+                    >
+                      <Body medium size={12} style={{ color: val === r ? t.onPrimary : t.textMuted }}>
+                        {r}
+                      </Body>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+            {DEFAULT_RANGES.map((r) => (
+              <Pressable
+                key={r}
+                onPress={() => setDefaultRange(r)}
+                style={{
+                  borderRadius: radius.sm,
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  backgroundColor: defaultRange === r ? t.primary : t.surfaceElevated,
+                }}
               >
-                {r}
-              </Body>
-            </Pressable>
-          ))}
-        </View>
+                <Body medium size={12} style={{ color: defaultRange === r ? t.onPrimary : t.textMuted }}>
+                  {r}
+                </Body>
+              </Pressable>
+            ))}
+          </View>
+        )}
       </SectionCard>
 
       <SectionCard
