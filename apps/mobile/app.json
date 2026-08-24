@@ -4,7 +4,7 @@
     "slug": "stocktracker",
     "scheme": "stocktracker",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -39,13 +39,29 @@
             "usesCleartextTraffic": true
           }
         }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "Portfolio",
+              "label": "StockTracker Portfolio",
+              "minWidth": "180dp",
+              "minHeight": "180dp",
+              "description": "Current portfolio balance and performance",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
       ]
     ],
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "0f03b666-8525-4ac9-b3dd-1ed6e537fa57"
+        "projectId": "07925194-7288-468e-8918-c3810508bd99"
       }
-    }
+    },
+    "owner": "dereky123"
   }
 }

@@ -10,16 +10,18 @@
     "target": "ES2022",
     "jsx": "react-jsx",
     "module": "ESNext",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client"],
-
-    /* Bundler mode */
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "vite/client"
+    ],
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": false,
     "noEmit": true,
-
-    /* Linting */
     "skipLibCheck": true,
     "strict": true,
     "noUnusedLocals": false,
@@ -27,9 +29,16 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@stocktracker/api-contracts": ["./packages/api-contracts/src/index.ts"],
-      "@stocktracker/shared": ["./packages/shared/src/index.ts"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@stocktracker/api-contracts": [
+        "./packages/api-contracts/src/index.ts"
+      ],
+      "@stocktracker/shared": [
+        "./packages/shared/src/index.ts"
+      ]
     }
-  }
+  },
+  "extends": "expo/tsconfig.base"
 }

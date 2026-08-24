@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Stack } from "expo-router";
+// Register Android home-screen widget task handler at module load time
+import "@/widget/widgetTaskHandler";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";

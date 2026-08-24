@@ -1,71 +1,18 @@
 import { Tabs } from "expo-router";
-import { Home, Briefcase, TrendingUp, BarChart3, Star, MoreHorizontal } from "lucide-react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "@/theme/ThemeProvider";
-import { monoCaps } from "@/theme/text";
+import { TabBar } from "@/components/TabBar";
 
 export default function TabsLayout() {
-  const { t } = useTheme();
-  const insets = useSafeAreaInsets();
-
   return (
     <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: t.brandPeriwinkle,
-        tabBarInactiveTintColor: t.textMuted,
-        tabBarStyle: {
-          backgroundColor: t.canvas,
-          borderTopColor: t.hairline,
-          height: 64 + insets.bottom,
-          paddingBottom: insets.bottom,
-        },
-        tabBarLabelStyle: { ...monoCaps(10), letterSpacing: 0.5 },
-        tabBarIconStyle: { marginTop: 2 },
-      }}
+      screenOptions={{ headerShown: false }}
+      tabBar={(props) => <TabBar {...props} />}
     >
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: "Summary",
-          tabBarIcon: ({ color, size }) => <Home color={color} size={size ?? 20} />,
-        }}
-      />
-      <Tabs.Screen
-        name="holdings"
-        options={{
-          title: "Holdings",
-          tabBarIcon: ({ color, size }) => <Briefcase color={color} size={size ?? 20} />,
-        }}
-      />
-      <Tabs.Screen
-        name="performance"
-        options={{
-          title: "Performance",
-          tabBarIcon: ({ color, size }) => <TrendingUp color={color} size={size ?? 20} />,
-        }}
-      />
-      <Tabs.Screen
-        name="analysis"
-        options={{
-          title: "Analysis",
-          tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size ?? 20} />,
-        }}
-      />
-      <Tabs.Screen
-        name="watchlist"
-        options={{
-          title: "Watch",
-          tabBarIcon: ({ color, size }) => <Star color={color} size={size ?? 20} />,
-        }}
-      />
-      <Tabs.Screen
-        name="more"
-        options={{
-          title: "More",
-          tabBarIcon: ({ color, size }) => <MoreHorizontal color={color} size={size ?? 20} />,
-        }}
-      />
+      <Tabs.Screen name="dashboard" options={{ title: "Summary" }} />
+      <Tabs.Screen name="holdings" options={{ title: "Holdings" }} />
+      <Tabs.Screen name="performance" options={{ title: "Performance" }} />
+      <Tabs.Screen name="analysis" options={{ title: "Analysis" }} />
+      <Tabs.Screen name="watchlist" options={{ title: "Watch" }} />
+      <Tabs.Screen name="more" options={{ title: "More" }} />
       <Tabs.Screen name="community" options={{ href: null }} />
       <Tabs.Screen name="cash" options={{ href: null }} />
       <Tabs.Screen name="settings" options={{ href: null }} />
