@@ -1,16 +1,5 @@
 export type HistoryRange =
-  | "1D"
-  | "5D"
-  | "15D"
-  | "1M"
-  | "3M"
-  | "6M"
-  | "YTD"
-  | "1Y"
-  | "5Y"
-  | "All"
-  | "1H"
-  | "MAX_MO";
+  "1D" | "5D" | "15D" | "1M" | "3M" | "6M" | "YTD" | "1Y" | "5Y" | "All" | "1H" | "MAX_MO";
 export type CacheKind = "quote" | "history" | "fundamentals" | "news" | "earnings";
 
 export interface Quote {

@@ -484,7 +484,11 @@ export function TechnicalChart({
   );
 
   const toolCursor =
-    tool === "zoom" ? "cursor-crosshair" : tool === "hline" || tool === "vline" ? "cursor-cell" : "";
+    tool === "zoom"
+      ? "cursor-crosshair"
+      : tool === "hline" || tool === "vline"
+        ? "cursor-cell"
+        : "";
 
   // Fullscreen layout
   const outerCls = isFullscreen ? "fixed inset-0 z-50 flex flex-col bg-[var(--canvas)]" : undefined;
@@ -933,14 +937,24 @@ export function TechnicalChart({
                         stroke="var(--down)"
                         strokeDasharray="3 3"
                         strokeOpacity={0.5}
-                        label={{ value: "70", fill: "var(--text-muted)", fontSize: 9, position: "insideRight" }}
+                        label={{
+                          value: "70",
+                          fill: "var(--text-muted)",
+                          fontSize: 9,
+                          position: "insideRight",
+                        }}
                       />
                       <ReferenceLine
                         y={30}
                         stroke="var(--up)"
                         strokeDasharray="3 3"
                         strokeOpacity={0.5}
-                        label={{ value: "30", fill: "var(--text-muted)", fontSize: 9, position: "insideRight" }}
+                        label={{
+                          value: "30",
+                          fill: "var(--text-muted)",
+                          fontSize: 9,
+                          position: "insideRight",
+                        }}
                       />
                       <ReferenceLine y={50} stroke="var(--hairline)" strokeOpacity={0.4} />
                       <Line
