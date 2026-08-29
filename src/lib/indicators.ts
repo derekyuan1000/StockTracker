@@ -9,6 +9,7 @@ export interface IndicatorOpts {
 }
 
 export interface IndicatorRow extends OHLCBar {
+  wickRange: [number, number]; // [low, high] — Recharts ranged-bar dataKey for candlesticks
   sma: Record<number, number | null>;
   ema: Record<number, number | null>;
   bollUpper: number | null;
@@ -154,6 +155,7 @@ export function buildIndicatorRows(bars: OHLCBar[], opts: IndicatorOpts): Indica
 
     return {
       ...bar,
+      wickRange: [bar.low, bar.high] as [number, number],
       sma,
       ema,
       bollUpper: boll ? boll[i].upper : null,

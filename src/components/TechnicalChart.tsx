@@ -311,6 +311,7 @@ export function TechnicalChart({
   const [refRight, setRefRight] = useState<number | null>(null);
   const [zoomDomain, setZoomDomain] = useState<[number, number] | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [yPanOffset, setYPanOffset] = useState(0);
   const isSelecting = useRef(false);
   const lastHoverRef = useRef<{ price: number; ts: number } | null>(null);
 
@@ -350,13 +351,17 @@ export function TechnicalChart({
 
   const rows = useMemo(
     () =>
-      zoomDomain ? allRows.filter((r) => r.ts >= zoomDomain[0] && r.ts <= zoomDomain[1]) : allRows,
+      zoomDomain
+        ? allRows.filter((r) => r.ts >= zoomDomain[0] && r.ts <= zoomDomain[1])
+        : allRows.slice(-120),
     [allRows, zoomDomain],
   );
 
   const dp = currency === "GBP" ? 2 : 0;
-  const priceMin = rows.length ? Math.min(...rows.map((r) => r.low)) * 0.999 : 0;
-  const priceMax = rows.length ? Math.max(...rows.map((r) => r.high)) * 1.001 : 1;
+  const rawPriceMin = rows.length ? Math.min(...rows.map((r) => r.low)) * 0.999 : 0;
+  const rawPriceMax = rows.length ? Math.max(...rows.map((r) => r.high)) * 1.001 : 1;
+  const priceMin = rawPriceMin + yPanOffset;
+  const priceMax = rawPriceMax + yPanOffset;
   const showSelection = refLeft != null && refRight != null && refLeft !== refRight;
 
   const handleMouseDown = useCallback(
@@ -495,10 +500,10 @@ export function TechnicalChart({
   const cardCls = `overflow-hidden rounded-sm border border-hairline bg-[var(--surface-card)]${isFullscreen ? " flex flex-1 flex-col" : ""}`;
   const bodyRowCls = `flex${isFullscreen ? " flex-1 min-h-0" : ""}`;
   const chartsColCls = `flex flex-col flex-1${isFullscreen ? " min-w-0 overflow-hidden" : ""}`;
-  const pricePaneStyle = isFullscreen ? undefined : { height: hasSubPanes ? 440 : 520 };
+  const pricePaneStyle = isFullscreen ? undefined : { height: hasSubPanes ? 620 : 700 };
   const pricePaneCls = `${toolCursor}${isFullscreen ? " flex-1 min-h-0" : ""}`;
-  const volH = isFullscreen ? 110 : 90;
-  const oscH = isFullscreen ? 180 : 150;
+  const volH = isFullscreen ? 130 : 110;
+  const oscH = isFullscreen ? 200 : 170;
 
   const gridProps = settings.showGrid
     ? { stroke: "var(--hairline)" as const, strokeOpacity: 0.5 }
@@ -517,6 +522,7 @@ export function TechnicalChart({
                 onClick={() => {
                   setInterval(iv);
                   setZoomDomain(null);
+                  setYPanOffset(0);
                 }}
                 className={`num rounded px-2 py-1 text-[11px] font-medium tracking-wide transition-colors ${
                   interval === iv
@@ -527,11 +533,14 @@ export function TechnicalChart({
                 {iv}
               </button>
             ))}
-            {zoomDomain && (
+            {(zoomDomain || yPanOffset !== 0) && (
               <>
                 <span className="mx-1 text-hairline">|</span>
                 <button
-                  onClick={() => setZoomDomain(null)}
+                  onClick={() => {
+                    setZoomDomain(null);
+                    setYPanOffset(0);
+                  }}
                   className="num rounded px-2 py-1 text-[11px] text-[var(--primary)] hover:bg-canvas/60"
                 >
                   ↺ Reset
@@ -683,7 +692,15 @@ export function TechnicalChart({
             {/* ── Chart column ──────────────────────────────────────────────── */}
             <div className={chartsColCls}>
               {/* ── Price pane ──────────────────────────────────────────────── */}
-              <div className={pricePaneCls} style={pricePaneStyle}>
+              <div
+                className={pricePaneCls}
+                style={pricePaneStyle}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  const range = rawPriceMax - rawPriceMin;
+                  setYPanOffset((prev) => prev - (e.deltaY / 300) * range);
+                }}
+              >
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart
                     data={rows}
