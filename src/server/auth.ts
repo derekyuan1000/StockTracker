@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { bearer } from "better-auth/plugins/bearer";
 import { expo } from "@better-auth/expo";
 import { db } from "@/server/db/client";
@@ -38,5 +39,5 @@ export const auth = betterAuth({
         }
       : {}),
   },
-  plugins: [expo(), bearer()],
+  plugins: [expo(), bearer(), tanstackStartCookies()],
 });
