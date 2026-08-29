@@ -149,11 +149,14 @@ const RANGE_PARAMS: Record<HistoryRange, { range: string; interval: string; limi
     "5D": { range: "5d", interval: "15m" },
     "15D": { range: "1mo", interval: "1d", limitDays: 15 },
     "1M": { range: "1mo", interval: "1d" },
+    "3M": { range: "3mo", interval: "1d" },
     "6M": { range: "6mo", interval: "1d" },
     YTD: { range: "ytd", interval: "1d" },
     "1Y": { range: "1y", interval: "1d" },
     "5Y": { range: "5y", interval: "1wk" },
     All: { range: "max", interval: "1d" },
+    "1H": { range: "3mo", interval: "60m" },
+    MAX_MO: { range: "max", interval: "1mo" },
   };
 
 // ─── Public API ───────────────────────────────────────────────────────────────
