@@ -28,7 +28,11 @@ export const getSettings = createServerFn()
       .onConflictDoNothing();
 
     const [row] = await db
-      .select()
+      .select({
+        portfolioPublic: userSettings.portfolioPublic,
+        theme: userSettings.theme,
+        onboarded: userSettings.onboarded,
+      })
       .from(userSettings)
       .where(eq(userSettings.userId, userId))
       .limit(1);
