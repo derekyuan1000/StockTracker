@@ -1,0 +1,1 @@
+ALTER TABLE `user_settings` ADD `display_currency` text DEFAULT 'GBP' NOT NULL;

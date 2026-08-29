@@ -8,6 +8,7 @@ import {
   fetchNews,
   fetchQuote,
 } from "@/server/market/yahoo";
+import { getFxRate, getFxRates } from "@/server/market/fx";
 import type { HistoryRange } from "@/server/market/types";
 import type { Holding } from "@stocktracker/shared";
 
@@ -83,7 +84,10 @@ export async function getPortfolio(userId: string) {
           "",
         units: totalUnits,
         avgBuyP,
-        currency: h.currency,
+        // The live quote is authoritative for the instrument's native currency;
+        // fall back to the stored value when the quote is unavailable. `fxToGBP`
+        // is stamped in a second pass below once all currencies are known.
+        currency: quote?.currency ?? h.currency,
         lastPrice: quote?.lastPrice ?? 0,
         prevClose: quote?.prevClose ?? 0,
         dayLow: quote?.dayLow ?? 0,
@@ -128,9 +132,16 @@ export async function getPortfolio(userId: string) {
         bearCase: h.bearCase || undefined,
         realisedGL: null,
         ytdPct,
+        fxToGBP: 1, // stamped from live FX in the pass below
       } satisfies Holding;
     }),
   );
+
+  // Stamp each holding's native→GBP factor from live FX. Rates are resolved once
+  // for the distinct currency set (cached in-memory), then applied so `compute()`
+  // never has to fetch. GBp/GBP fold in as /100 and 1:1 respectively.
+  const fxRates = await getFxRates(enriched.map((h) => h.currency));
+  for (const h of enriched) h.fxToGBP = fxRates[h.currency] ?? 1;
 
   return {
     holdings: enriched,
@@ -418,6 +429,7 @@ export async function getWidgetSummary(userId: string) {
 
   let totalGBP = meta?.cashGBP ?? 0;
   let dayChangeGBP = 0;
+  let totalCostGBP = 0;
 
   const lotsByTicker = new Map<string, typeof lotRows>();
   for (const lot of lotRows) {
@@ -437,24 +449,38 @@ export async function getWidgetSummary(userId: string) {
       .where(and(eq(quoteCache.ticker, h.ticker), eq(quoteCache.kind, "quote")))
       .limit(1);
 
-    const divisor = h.currency === "GBp" ? 100 : 1;
     if (cachedQuote?.payload) {
       const q = cachedQuote.payload as Record<string, unknown>;
       const lastPrice = typeof q.lastPrice === "number" ? q.lastPrice : 0;
       const prevClose = typeof q.prevClose === "number" ? q.prevClose : 0;
-      totalGBP += (lastPrice * totalUnits) / divisor;
+      // Convert the native price to GBP via live FX (folds in the /100 pence rule
+      // for GBp). The quote payload's currency is authoritative; fall back to the
+      // stored holding currency when absent.
+      const nativeCurrency = typeof q.currency === "string" ? q.currency : h.currency;
+      const f = await getFxRate(nativeCurrency);
+      totalGBP += lastPrice * totalUnits * f;
       if (prevClose > 0) {
-        dayChangeGBP += ((lastPrice - prevClose) * totalUnits) / divisor;
+        dayChangeGBP += (lastPrice - prevClose) * totalUnits * f;
+      }
+      // Cost basis using current FX rate (reasonable widget approximation)
+      for (const lot of tickerLots) {
+        if (lot.units > 0) {
+          totalCostGBP += lot.buyPrice * lot.units * f;
+        }
       }
     }
   }
 
   const dayChangePct = totalGBP > 0 ? (dayChangeGBP / (totalGBP - dayChangeGBP)) * 100 : 0;
+  const lifetimeGBP = totalGBP - totalCostGBP;
+  const lifetimePct = totalCostGBP > 0 ? (lifetimeGBP / totalCostGBP) * 100 : 0;
 
   return {
     totalGBP,
     dayChangeGBP,
     dayChangePct,
+    lifetimeGBP,
+    lifetimePct,
     asOf: new Date().toISOString(),
   };
 }

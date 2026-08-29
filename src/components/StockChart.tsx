@@ -32,7 +32,7 @@ export interface StockChartProps {
   ticker: string;
   avgBuyP?: number;
   targetP?: number;
-  currency?: "GBp" | "GBP";
+  currency?: string;
   analyst?: { targetLow: number; targetHigh: number };
   defaultRange?: ChartRange;
   height?: number;

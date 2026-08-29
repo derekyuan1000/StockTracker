@@ -27,11 +27,3 @@ GOOGLE_CLIENT_SECRET=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
 # FIREBASE_PROJECT_ID=
 # FIREBASE_SERVICE_ACCOUNT_JSON=
 # CRON_SECRET=
-# Local dev secrets for `vite dev` (Nitro's cloudflare preset loads this into process.env).
-# This file is gitignored — never commit it.
-
-# --- Turso (required to boot) ---------------------------------------------
-# Get these from https://turso.tech (turso db create / turso db tokens create),
-# or from an existing dev database you already have.
-TURSO_DATABASE_URL=libsql://stocktracker-derekyuan1000.aws-eu-west-1.turso.io
-TURSO_AUTH_TOKEN=

@@ -1,0 +1,40 @@
+# Exclude all node_modules across the monorepo
+**/node_modules/
+node_modules/
+
+# Generated native folders (contain Windows absolute paths — EAS regenerates these on Linux)
+apps/mobile/android/
+apps/mobile/ios/
+
+# Expo generated
+**/.expo/
+**/dist/
+**/web-build/
+
+# Web app build artifacts
+.next/
+.output/
+dist-ssr/
+
+# Git
+.git/
+
+# Secrets and local env
+.env*.local
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Editor
+.idea/
+.vscode/
+.DS_Store
+
+# Logs
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*

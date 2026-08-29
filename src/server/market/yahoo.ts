@@ -205,7 +205,10 @@ export async function fetchQuote(ticker: string): Promise<Quote> {
     return {
       ticker: (q.symbol as string) ?? (meta.symbol as string) ?? ticker,
       name: name || ticker,
-      currency: ((meta.currency as string) === "GBp" ? "GBp" : "GBP") as "GBp" | "GBP",
+      // Preserve the true native currency (e.g. "USD", "EUR", "GBp") so foreign
+      // holdings can be FX-converted downstream. Default to "GBp" when the feed
+      // omits it, matching the historical UK-listing assumption.
+      currency: (meta.currency as string) || "GBp",
       lastPrice,
       prevClose,
       dayLow: (q.regularMarketDayLow as number) || (meta.regularMarketDayLow as number) || 0,

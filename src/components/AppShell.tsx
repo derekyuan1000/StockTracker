@@ -4,6 +4,7 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
+  CandlestickChart,
   Home,
   Menu,
   Moon,
@@ -47,6 +48,7 @@ const NAV_ITEMS: NavItem[] = [
     tourId: "tab-fundamentals",
   },
   { to: "/analysis", label: "Analysis", icon: <BarChart3 className="size-4" /> },
+  { to: "/technical", label: "Technical", icon: <CandlestickChart className="size-4" /> },
   { to: "/transactions", label: "Transactions", icon: <Receipt className="size-4" /> },
   {
     to: "/community",

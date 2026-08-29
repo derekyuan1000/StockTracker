@@ -20,9 +20,10 @@ export const holdings = sqliteTable(
     name: text("name").notNull(),
     bucket: text("bucket", { enum: ["Fund", "Stock"] }).notNull(),
     sector: text("sector").notNull().default(""),
-    currency: text("currency", { enum: ["GBp", "GBP"] })
-      .notNull()
-      .default("GBp"),
+    // Instrument's native currency (ISO code, or "GBp" for pence-quoted UK
+    // listings). Free text rather than an enum so foreign holdings (USD/EUR/…)
+    // can be priced correctly via FX. Legacy rows are all "GBp"/"GBP".
+    currency: text("currency").notNull().default("GBp"),
     allocTarget: real("alloc_target").notNull().default(0),
     thesis: text("thesis").notNull().default(""),
     bearCase: text("bear_case").notNull().default(""),
@@ -127,6 +128,9 @@ export const userSettings = sqliteTable("user_settings", {
     .notNull()
     .default("dark"),
   onboarded: integer("onboarded", { mode: "boolean" }).notNull().default(false),
+  // Display/base currency for portfolio totals (ISO code). Display-only: all
+  // stored math stays in GBP, this just re-denominates values at render.
+  displayCurrency: text("display_currency").notNull().default("GBP"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),

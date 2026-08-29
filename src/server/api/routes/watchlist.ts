@@ -3,6 +3,7 @@ import type { RouteEntry } from "../router";
 import { db } from "@/server/db/client";
 import { watchlist } from "@/server/db/schema";
 import * as market from "@/server/services/market";
+import { getFxRates } from "@/server/market/fx";
 import { AddWatchlistSchema } from "@stocktracker/api-contracts";
 import type { WatchlistRow } from "@stocktracker/api-contracts";
 
@@ -22,14 +23,22 @@ export const watchlistRoutes: RouteEntry[] = [
       const quotes = await market.getQuotes(rows.map((r) => r.ticker));
       const byTicker = new Map(quotes.map((q) => [q.ticker.toUpperCase(), q]));
 
+      // Resolve native→GBP factors once for the distinct currency set so each
+      // row can carry a GBP-normalised price the client re-denominates to any base.
+      const fxRates = await getFxRates(quotes.map((q) => q.currency));
+
       return rows.map((r) => {
         const q = byTicker.get(r.ticker.toUpperCase());
+        const currency = q?.currency ?? "GBp";
+        const lastPrice = q?.lastPrice ?? 0;
+        const f = fxRates[currency] ?? (currency === "GBp" ? 1 / 100 : 1);
         return {
           ticker: r.ticker,
           name: q?.name || r.name || r.ticker,
-          lastPrice: q?.lastPrice ?? 0,
+          lastPrice,
           prevClose: q?.prevClose ?? 0,
-          currency: q?.currency ?? "GBp",
+          currency,
+          lastPriceGBP: lastPrice * f,
         };
       });
     },

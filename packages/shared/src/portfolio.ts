@@ -7,7 +7,18 @@ export interface Holding {
   sector: string;
   units: number;
   avgBuyP: number;
-  currency: "GBp" | "GBP";
+  /**
+   * The instrument's native currency (ISO code, or "GBp" for pence-quoted UK
+   * listings). `lastPrice` and `avgBuyP` are denominated in this currency:
+   * pence for "GBp", major units otherwise.
+   */
+  currency: string;
+  /**
+   * Native-currency → GBP conversion factor, stamped server-side from live FX
+   * before `compute()` runs. For "GBp" this is `gbpRate / 100`; for "GBP" it is
+   * 1. Defaults to 1 when absent so legacy GBP-only data is unaffected.
+   */
+  fxToGBP?: number;
   lastPrice: number;
   prevClose: number;
   dayLow: number;
@@ -65,6 +76,20 @@ export interface HoldingComputed extends Holding {
   dayChangePct: number;
   upsidePct: number;
   allocActual: number;
+  /** Last price in the instrument's native currency (unconverted). */
+  nativePrice: number;
+  /** The native currency code, surfaced for display alongside the base value. */
+  nativeCurrency: string;
+}
+
+/**
+ * Resolve a holding's native→GBP factor. Prefers the server-stamped `fxToGBP`;
+ * falls back to the historical rule (pence `/100`, pounds `1:1`) so GBP-only
+ * data — and any holding without a stamped rate — behaves exactly as before.
+ */
+export function fxFactor(h: Pick<Holding, "currency" | "fxToGBP">): number {
+  if (h.fxToGBP != null) return h.fxToGBP;
+  return h.currency === "GBp" ? 1 / 100 : 1;
 }
 
 export function compute(
@@ -81,12 +106,13 @@ export function compute(
   dayChangePct: number;
 } {
   const rows: HoldingComputed[] = holdings.map((h) => {
-    // GBP-quoted instruments (funds) don't need the /100 pence conversion
-    const d = h.currency === "GBp" ? 100 : 1;
-    const mv = (h.lastPrice * h.units) / d;
-    const cost = (h.avgBuyP * h.units) / d;
+    // Native → GBP factor. Folds in the pence (/100) rule for "GBp" and live FX
+    // for foreign currencies; 1:1 for GBP.
+    const f = fxFactor(h);
+    const mv = h.lastPrice * h.units * f;
+    const cost = h.avgBuyP * h.units * f;
     const ugl = mv - cost;
-    const dayChangeGBP = ((h.lastPrice - h.prevClose) * h.units) / d;
+    const dayChangeGBP = (h.lastPrice - h.prevClose) * h.units * f;
     const dayChangePct = h.prevClose > 0 ? (h.lastPrice / h.prevClose - 1) * 100 : 0;
     return {
       ...h,
@@ -99,6 +125,8 @@ export function compute(
       upsidePct:
         h.targetP > 0 && h.lastPrice > 0 ? ((h.targetP - h.lastPrice) / h.lastPrice) * 100 : 0,
       allocActual: 0,
+      nativePrice: h.lastPrice,
+      nativeCurrency: h.currency,
     };
   });
   const marketValue = rows.reduce((s, r) => s + r.marketValueGBP, 0);
@@ -107,8 +135,7 @@ export function compute(
   const ugl = rows.reduce((s, r) => s + r.unrealisedGL, 0);
   const dayChangeGBP = rows.reduce((s, r) => s + r.dayChangeGBP, 0);
   const prevTotal =
-    rows.reduce((s, r) => s + (r.prevClose * r.units) / (r.currency === "GBp" ? 100 : 1), 0) +
-    cashGBP;
+    rows.reduce((s, r) => s + r.prevClose * r.units * fxFactor(r), 0) + cashGBP;
   rows.forEach(
     (r) => (r.allocActual = marketValue > 0 ? (r.marketValueGBP / marketValue) * 100 : 0),
   );

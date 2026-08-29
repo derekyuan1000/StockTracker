@@ -16,6 +16,7 @@ import { CardSkeleton } from "@/components/Skeleton";
 import { radius } from "@/theme/tokens";
 import { useIsTablet } from "@/hooks/useIsTablet";
 import type { HistoryRange } from "@/api/endpoints";
+import { refreshWidget } from "@/widget/refreshWidget";
 
 const THEMES: { value: Theme; label: string; description: string }[] = [
   { value: "dark", label: "Dark", description: "Easy on the eyes in low light" },
@@ -82,6 +83,8 @@ export default function SettingsScreen() {
   const { mutate: save, isPending: saving } = useUpdateSettings();
   const isTablet = useIsTablet();
   const [defaultRange, setDefaultRange] = useLocalSetting<HistoryRange>("st-default-range", "1Y");
+  const [widgetPeriod1, setWidgetPeriod1] = useLocalSetting<string>("st-widget-period-1", "1M");
+  const [widgetPeriod2, setWidgetPeriod2] = useLocalSetting<string>("st-widget-period-2", "All");
   // Tablet right-panel ranges (3 configurable slots)
   const [tabletRange1, setTabletRange1] = useLocalSetting<HistoryRange>("st-tablet-range-1", "1M");
   const [tabletRange2, setTabletRange2] = useLocalSetting<HistoryRange>("st-tablet-range-2", "1Y");
@@ -260,6 +263,47 @@ export default function SettingsScreen() {
             ))}
           </View>
         )}
+      </SectionCard>
+
+      <SectionCard title="Widget" description="Choose the two time periods shown in the home screen widget.">
+        <View style={{ gap: 14 }}>
+          {(
+            [
+              ["Row 1", widgetPeriod1, setWidgetPeriod1],
+              ["Row 2", widgetPeriod2, setWidgetPeriod2],
+            ] as [string, string, (v: string) => void][]
+          ).map(([label, val, setter]) => (
+            <View key={label}>
+              <Muted size={11} style={{ marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.6 }}>
+                {label}
+              </Muted>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+                {(["1D", "1W", "1M", "3M", "6M", "YTD", "1Y", "5Y", "All"] as const).map((p) => (
+                  <Pressable
+                    key={p}
+                    onPress={() => {
+                      haptic.selection();
+                      setter(p);
+                      const newP1 = label === "Row 1" ? p : widgetPeriod1;
+                      const newP2 = label === "Row 2" ? p : widgetPeriod2;
+                      refreshWidget(newP1, newP2).catch(() => {});
+                    }}
+                    style={{
+                      borderRadius: radius.sm,
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      backgroundColor: val === p ? t.primary : t.surfaceElevated,
+                    }}
+                  >
+                    <Body medium size={12} style={{ color: val === p ? t.onPrimary : t.textMuted }}>
+                      {p}
+                    </Body>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          ))}
+        </View>
       </SectionCard>
 
       <SectionCard

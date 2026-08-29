@@ -185,7 +185,7 @@ export async function confirmImport(
 
     if (!existing) {
       let name = row.name;
-      let currency: "GBp" | "GBP" = row.currency;
+      let currency: string = row.currency;
       let sector = "";
       try {
         const q = await fetchQuote(row.ticker);

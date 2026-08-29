@@ -11,6 +11,53 @@ export const fmtGBPSigned = (v: number, fractionDigits = 2) => {
   return (v >= 0 ? "+" : "−") + s;
 };
 
+/**
+ * Format a canonical GBP value into a chosen display currency.
+ *
+ * All portfolio math is stored in GBP (see `compute()`); base currency is a
+ * display-only concern. `rate` is the GBP→display factor (1 for GBP itself),
+ * supplied by the server from live FX. Use this for portfolio-value render
+ * sites; keep `fmtGBP` for genuinely GBP-fixed surfaces (e.g. the leaderboard).
+ */
+export const fmtMoney = (
+  valueGBP: number,
+  opts: { currency?: string; rate?: number; fractionDigits?: number } = {},
+) => {
+  const { currency = "GBP", rate = 1, fractionDigits = 2 } = opts;
+  const converted = valueGBP * rate;
+  try {
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency,
+      currencyDisplay: "narrowSymbol",
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+    }).format(converted);
+  } catch {
+    // Unknown/non-ISO code — fall back to a plain number with the code appended.
+    return `${fmtNum(converted, fractionDigits)} ${currency}`;
+  }
+};
+
+/**
+ * Format a price in its own native currency. Handles the pence-quoted "GBp"
+ * convention (shown as `70.50p`) which `Intl` cannot express as a currency.
+ */
+export const fmtNative = (price: number, currency: string, fractionDigits = 2) => {
+  if (currency === "GBp") return `${fmtNum(price, fractionDigits)}p`;
+  try {
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency,
+      currencyDisplay: "narrowSymbol",
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+    }).format(price);
+  } catch {
+    return `${fmtNum(price, fractionDigits)} ${currency}`;
+  }
+};
+
 export const fmtPct = (v: number, digits = 2) => `${v >= 0 ? "+" : ""}${v.toFixed(digits)}%`;
 
 export const fmtNum = (v: number, digits = 0) =>

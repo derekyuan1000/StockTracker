@@ -73,6 +73,8 @@ export const UpdateSettingsSchema = z.object({
   portfolioPublic: z.boolean().optional(),
   theme: z.enum(["dark", "light", "system"]).optional(),
   onboarded: z.boolean().optional(),
+  // ISO code for the display/base currency (e.g. "GBP", "USD", "EUR").
+  displayCurrency: z.string().min(3).max(3).optional(),
 });
 
 export const HistoryRangeSchema = z.enum(["1D", "5D", "15D", "1M", "6M", "YTD", "1Y", "5Y", "All"]);

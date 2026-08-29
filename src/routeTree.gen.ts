@@ -18,6 +18,7 @@ import { Route as FundamentalsRouteImport } from './routes/fundamentals'
 import { Route as HoldingsRouteImport } from './routes/holdings'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as TechnicalRouteImport } from './routes/technical'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ProfilesUserIdRouteImport } from './routes/profiles.$userId'
@@ -69,6 +70,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TechnicalRoute = TechnicalRouteImport.update({
+  id: '/technical',
+  path: '/technical',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
   '/settings': typeof SettingsRoute
+  '/technical': typeof TechnicalRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
   '/settings': typeof SettingsRoute
+  '/technical': typeof TechnicalRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
   '/settings': typeof SettingsRoute
+  '/technical': typeof TechnicalRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/holdings'
     | '/login'
     | '/settings'
+    | '/technical'
     | '/transactions'
     | '/welcome'
     | '/profiles/$userId'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/holdings'
     | '/login'
     | '/settings'
+    | '/technical'
     | '/transactions'
     | '/welcome'
     | '/profiles/$userId'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/holdings'
     | '/login'
     | '/settings'
+    | '/technical'
     | '/transactions'
     | '/welcome'
     | '/profiles/$userId'
@@ -205,6 +217,7 @@ export interface RootRouteChildren {
   HoldingsRoute: typeof HoldingsRoute
   LoginRoute: typeof LoginRoute
   SettingsRoute: typeof SettingsRoute
+  TechnicalRoute: typeof TechnicalRoute
   TransactionsRoute: typeof TransactionsRoute
   WelcomeRoute: typeof WelcomeRoute
   ProfilesUserIdRoute: typeof ProfilesUserIdRoute
@@ -277,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/technical': {
+      id: '/technical'
+      path: '/technical'
+      fullPath: '/technical'
+      preLoaderRoute: typeof TechnicalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/transactions': {
       id: '/transactions'
       path: '/transactions'
@@ -325,6 +345,7 @@ const rootRouteChildren: RootRouteChildren = {
   HoldingsRoute: HoldingsRoute,
   LoginRoute: LoginRoute,
   SettingsRoute: SettingsRoute,
+  TechnicalRoute: TechnicalRoute,
   TransactionsRoute: TransactionsRoute,
   WelcomeRoute: WelcomeRoute,
   ProfilesUserIdRoute: ProfilesUserIdRoute,

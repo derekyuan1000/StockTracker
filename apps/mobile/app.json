@@ -47,8 +47,11 @@
             {
               "name": "Portfolio",
               "label": "StockTracker Portfolio",
-              "minWidth": "180dp",
-              "minHeight": "180dp",
+              "minWidth": "110dp",
+              "minHeight": "73dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "vertical",
               "description": "Current portfolio balance and performance",
               "updatePeriodMillis": 1800000
             }

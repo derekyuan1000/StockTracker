@@ -2,6 +2,13 @@ export type UserSettings = {
   portfolioPublic: boolean;
   theme: "dark" | "light" | "system";
   onboarded: boolean;
+  /** ISO code of the display/base currency. Stored per user; default "GBP". */
+  displayCurrency: string;
+  /**
+   * Live GBP→displayCurrency conversion factor, derived server-side. Not stored;
+   * present on read responses so clients can re-denominate GBP values for display.
+   */
+  gbpToDisplay?: number;
 };
 
 export type PublicTrade = {
@@ -46,15 +53,21 @@ export type PublicProfile = {
 export type WatchlistRow = {
   ticker: string;
   name: string;
+  /** Last price in the instrument's native currency. */
   lastPrice: number;
   prevClose: number;
-  currency: "GBp" | "GBP";
+  /** Native currency ISO code (or "GBp" for pence-quoted UK listings). */
+  currency: string;
+  /** Last price converted to GBP, so clients can re-denominate to any base. */
+  lastPriceGBP: number;
 };
 
 export type WidgetSummary = {
   totalGBP: number;
   dayChangeGBP: number;
   dayChangePct: number;
+  lifetimeGBP: number;
+  lifetimePct: number;
   asOf: string;
 };
 
@@ -62,6 +75,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
   portfolioPublic: false,
   theme: "dark",
   onboarded: false,
+  displayCurrency: "GBP",
+  gbpToDisplay: 1,
 };
 
 // ─── Portfolio Analysis types ─────────────────────────────────────────────────

@@ -178,7 +178,7 @@ export const addHolding = createServerFn({ method: "POST" })
       .where(and(eq(holdings.userId, userId), eq(holdings.ticker, ticker)))
       .limit(1);
 
-    let currency: "GBp" | "GBP" = existing?.currency ?? "GBp";
+    let currency: string = existing?.currency ?? "GBp";
     let name = existing?.name ?? ticker;
 
     if (!existing) {

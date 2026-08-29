@@ -64,6 +64,13 @@
       "when": 1787320906450,
       "tag": "0008_chemical_thunderbolt_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1787655607616,
+      "tag": "0009_shallow_the_watchers",
+      "breakpoints": true
     }
   ]
 }

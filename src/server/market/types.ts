@@ -16,7 +16,13 @@ export type CacheKind = "quote" | "history" | "fundamentals" | "news" | "earning
 export interface Quote {
   ticker: string;
   name: string;
-  currency: "GBp" | "GBP";
+  /**
+   * The instrument's true native currency as reported by the upstream feed
+   * (ISO code such as "USD" / "EUR", or "GBp" for pence-quoted UK listings).
+   * Historically collapsed to "GBP"; now preserved so downstream FX conversion
+   * can price foreign holdings correctly.
+   */
+  currency: string;
   lastPrice: number;
   prevClose: number;
   dayLow: number;

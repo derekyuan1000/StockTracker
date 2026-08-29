@@ -2,45 +2,65 @@ import React from "react";
 import { FlexWidget, TextWidget } from "react-native-android-widget";
 import type { WidgetSummary, PeriodReturn } from "./widgetTaskHandler";
 
-// Widget colour tokens must satisfy HexColor = `#${string}`
 type H = `#${string}`;
 const C: Record<string, H> = {
-  canvas: "#1C1B18",
+  canvas: "#2A2A2A",
   surface: "#2A2823",
   textStrong: "#F2EFE7",
   textMuted: "#A39E93",
   up: "#5FA97C",
   down: "#C96A5E",
   flat: "#C4BFB5",
-  periwinkle: "#bdbbff",
-  hairline: "#2A2823",
 };
 
-type PeriodKey = "1D" | "1W" | "YTD" | "1Y";
-const PERIODS: PeriodKey[] = ["1D", "1W", "YTD", "1Y"];
-
-function getPct(returns: PeriodReturn[], period: PeriodKey): string {
-  const found = returns.find((r) => r.period === period);
-  if (!found) return "–";
-  const sign = found.pct >= 0 ? "+" : "";
-  return `${sign}${found.pct.toFixed(1)}%`;
-}
-
-function getPctColor(returns: PeriodReturn[], period: PeriodKey): H {
-  const found = returns.find((r) => r.period === period);
-  if (!found) return C.textMuted as H;
-  if (found.pct > 0) return C.up as H;
-  if (found.pct < 0) return C.down as H;
-  return C.flat as H;
+function signColor(val: number): H {
+  if (val > 0) return C.up;
+  if (val < 0) return C.down;
+  return C.flat;
 }
 
 function fmtGBP(value: number): string {
-  return `£${value.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `£${Math.abs(value).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function fmtSigned(value: number): string {
-  const sign = value >= 0 ? "+" : "";
-  return `${sign}${fmtGBP(Math.abs(value))}`;
+function fmtPct(pct: number): string {
+  const sign = pct >= 0 ? "+" : "−";
+  return `${sign}${Math.abs(pct).toFixed(2)}%`;
+}
+
+function fmtChange(gbp: number): string {
+  const sign = gbp >= 0 ? "+" : "−";
+  return `${sign}${fmtGBP(gbp)}`;
+}
+
+function PeriodRow({ label, pct, gbp }: { label: string; pct: number | null; gbp: number | null }) {
+  const color = pct != null ? signColor(pct) : C.textMuted;
+  return (
+    <FlexWidget
+      style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        backgroundColor: C.surface,
+        borderRadius: 10,
+        paddingHorizontal: 12,
+        paddingVertical: 11,
+        width: "match_parent",
+      }}
+    >
+      <TextWidget text={label} style={{ fontSize: 11, color: C.textMuted, fontWeight: "500" }} />
+      <FlexWidget style={{ flexDirection: "row", alignItems: "center" }}>
+        <TextWidget
+          text={gbp != null ? fmtChange(gbp) : "–"}
+          style={{ fontSize: 11, color: C.textMuted, marginRight: 8 }}
+        />
+        <TextWidget
+          text={pct != null ? fmtPct(pct) : "–"}
+          style={{ fontSize: 13, color, fontWeight: "600" }}
+        />
+      </FlexWidget>
+    </FlexWidget>
+  );
 }
 
 export type WidgetData = {
@@ -48,13 +68,23 @@ export type WidgetData = {
   returns: PeriodReturn[];
 };
 
-export function PortfolioWidget({ data }: { data: WidgetData | null }) {
-  const dayColor =
-    data && data.summary.dayChangeGBP > 0
-      ? C.up
-      : data && data.summary.dayChangeGBP < 0
-        ? C.down
-        : C.flat;
+function getPeriodData(key: string, data: WidgetData): { pct: number | null; gbp: number | null } {
+  if (key === "All") return { pct: data.summary.lifetimePct, gbp: data.summary.lifetimeGBP };
+  if (key === "1D") return { pct: data.summary.dayChangePct, gbp: data.summary.dayChangeGBP };
+  const ret = data.returns.find((r) => r.period === key);
+  return { pct: ret?.pct ?? null, gbp: ret?.gbp ?? null };
+}
+
+export function PortfolioWidget({
+  data,
+  period1 = "1M",
+  period2 = "All",
+}: {
+  data: WidgetData | null;
+  period1?: string;
+  period2?: string;
+}) {
+  const dayColor = data ? signColor(data.summary.dayChangeGBP) : C.flat;
 
   return (
     <FlexWidget
@@ -70,73 +100,45 @@ export function PortfolioWidget({ data }: { data: WidgetData | null }) {
         borderColor: C.surface,
       }}
     >
-      {/* Header label */}
-      <TextWidget
-        text="STOCKTRACKER"
-        style={{
-          fontSize: 9,
-          color: C.textMuted,
-          fontWeight: "500",
-          letterSpacing: 1,
-        }}
-      />
-
-      {/* Balance block */}
-      <FlexWidget style={{ flexDirection: "column" }}>
+      {/* Balance */}
+      <FlexWidget style={{ flexDirection: "column", width: "match_parent", alignItems: "center" }}>
         <TextWidget
-          text={data ? fmtGBP(data.summary.totalGBP) : "—"}
-          style={{
-            fontSize: 22,
-            color: C.textStrong as H,
-            fontWeight: "bold",
-          }}
+          text={
+            data
+              ? `£${data.summary.totalGBP.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : "—"
+          }
+          style={{ fontSize: 26, color: C.textStrong, fontWeight: "bold", textAlign: "center" }}
           maxLines={1}
         />
         <TextWidget
           text={
             data
-              ? `${fmtSigned(data.summary.dayChangeGBP)} (${data.summary.dayChangePct >= 0 ? "+" : ""}${data.summary.dayChangePct.toFixed(2)}%) today`
+              ? `${fmtChange(data.summary.dayChangeGBP)}  ${fmtPct(data.summary.dayChangePct)}  today`
               : "Sign in to the app"
           }
           style={{
-            fontSize: 11,
+            fontSize: 12,
             color: data ? dayColor : C.textMuted,
-            marginTop: 2,
+            marginTop: 3,
+            textAlign: "center",
           }}
           maxLines={1}
         />
       </FlexWidget>
 
-      {/* Period returns grid */}
-      <FlexWidget
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          backgroundColor: C.surface,
-          borderRadius: 10,
-          padding: 8,
-        }}
-      >
-        {PERIODS.map((period) => (
-          <FlexWidget
-            key={period}
-            style={{ flexDirection: "column", alignItems: "center" }}
-          >
-            <TextWidget
-              text={period}
-              style={{ fontSize: 9, color: C.textMuted, letterSpacing: 0.5 }}
-            />
-            <TextWidget
-              text={data ? getPct(data.returns, period) : "–"}
-              style={{
-                fontSize: 12,
-                color: data ? getPctColor(data.returns, period) : C.textMuted,
-                fontWeight: "500",
-                marginTop: 2,
-              }}
-            />
-          </FlexWidget>
-        ))}
+      {/* Period rows */}
+      <FlexWidget style={{ flexDirection: "column", gap: 7, width: "match_parent" }}>
+        <PeriodRow
+          label={period1}
+          pct={data ? getPeriodData(period1, data).pct : null}
+          gbp={data ? getPeriodData(period1, data).gbp : null}
+        />
+        <PeriodRow
+          label={period2}
+          pct={data ? getPeriodData(period2, data).pct : null}
+          gbp={data ? getPeriodData(period2, data).gbp : null}
+        />
       </FlexWidget>
     </FlexWidget>
   );
