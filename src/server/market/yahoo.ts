@@ -120,7 +120,7 @@ async function rawV7Quote(ticker: string, retried = false): Promise<Record<strin
     return rawV7Quote(ticker, true);
   }
   if (!res.ok) throw new Error(`v7/quote ${res.status} for ${ticker}`);
-  const json = (await res.json()) as any;
+  const json = await res.json();
   const result = json?.quoteResponse?.result?.[0];
   if (!result) throw new Error(`No v7/quote result for ${ticker}`);
   return result;
@@ -135,7 +135,7 @@ async function rawChart(
   const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=${range}&interval=${interval}`;
   const res = await fetch(url, { headers: { "User-Agent": UA } });
   if (!res.ok) throw new Error(`v8/chart ${res.status} for ${ticker}`);
-  const json = (await res.json()) as any;
+  const json = await res.json();
   const result = json?.chart?.result?.[0];
   if (!result) throw new Error(`No chart result for ${ticker}`);
   return result;
@@ -155,7 +155,7 @@ const RANGE_PARAMS: Record<HistoryRange, { range: string; interval: string; limi
     "1Y": { range: "1y", interval: "1d" },
     "5Y": { range: "5y", interval: "1wk" },
     All: { range: "max", interval: "1d" },
-    "1H": { range: "3mo", interval: "60m" },
+    "1H": { range: "60d", interval: "60m" },
     MAX_MO: { range: "max", interval: "1mo" },
   };
 
@@ -165,9 +165,10 @@ export async function fetchQuote(ticker: string): Promise<Quote> {
   return cached(ticker, "quote", 60, async () => {
     // v8 chart: reliable source for current price via meta + spark data
     const chart = await rawChart(ticker, "5d", "1d");
-    const meta: Record<string, unknown> = (chart as any).meta ?? {};
+    const meta = (chart.meta as Record<string, unknown>) ?? {};
     const rawCloses: (number | null)[] =
-      ((chart as any).indicators?.quote?.[0]?.close as (number | null)[] | null) ?? [];
+      (chart.indicators as { quote?: Array<{ close?: (number | null)[] }> } | undefined)?.quote?.[0]
+        ?.close ?? [];
     const validCloses = rawCloses.filter((v): v is number => v != null && v > 0);
     const spark = validCloses.slice(-5);
 
@@ -261,7 +262,7 @@ export async function fetchFundamentals(ticker: string): Promise<Fundamentals> {
         headers: { "User-Agent": UA, ...(cookie ? { Cookie: cookie } : {}) },
       });
       if (res.ok) {
-        const json = (await res.json()) as any;
+        const json = await res.json();
         const result = json?.quoteSummary?.result?.[0];
 
         const profileSector = result?.assetProfile?.sector as string | undefined;
@@ -324,7 +325,9 @@ export async function fetchFundamentals(ticker: string): Promise<Fundamentals> {
           };
         }
       }
-    } catch {}
+    } catch {
+      // best-effort v10 enrichment; fall through to v7 fallbacks
+    }
 
     // v7 fallback for targetP if v10 financialData didn't provide it
     if (targetP === undefined) {
@@ -338,7 +341,10 @@ export async function fetchFundamentals(ticker: string): Promise<Fundamentals> {
     }
 
     const tsToDate = (raw: unknown): string | undefined => {
-      const n = typeof raw === "number" ? raw : (raw as any)?.raw;
+      const n =
+        typeof raw === "number"
+          ? raw
+          : ((raw as Record<string, unknown>)?.raw as number | undefined);
       if (!n || n <= 0) return undefined;
       return new Date(n * 1000).toISOString().slice(0, 10);
     };
@@ -387,19 +393,19 @@ export async function fetchEarnings(ticker: string): Promise<EarningsData> {
 
     if (!res.ok) return { quarters: [] } satisfies EarningsData;
 
-    const json = (await res.json()) as any;
+    const json = await res.json();
     const result = json?.quoteSummary?.result?.[0];
     if (!result) return { quarters: [] } satisfies EarningsData;
 
     // Next earnings date
-    const earningsDates: any[] = result?.calendarEvents?.earnings?.earningsDate ?? [];
+    const earningsDates = (result?.calendarEvents?.earnings?.earningsDate ?? []) as unknown[];
     const nextTs = earningsDates[0]?.raw as number | undefined;
     const nextEarningsDate = nextTs
       ? new Date(nextTs * 1000).toISOString().slice(0, 10)
       : undefined;
 
     // EPS actuals + estimates from earnings.earningsChart.quarterly
-    const earningsChart: any[] = result?.earnings?.earningsChart?.quarterly ?? [];
+    const earningsChart = (result?.earnings?.earningsChart?.quarterly ?? []) as unknown[];
     const epsByLabel = new Map<string, { actual?: number; estimate?: number }>();
     for (const q of earningsChart) {
       epsByLabel.set(q.date as string, {
@@ -409,9 +415,9 @@ export async function fetchEarnings(ticker: string): Promise<EarningsData> {
     }
 
     // Revenue from earnings.financialsChart.quarterly
-    const quarterly: any[] = result?.earnings?.financialsChart?.quarterly ?? [];
+    const quarterly = (result?.earnings?.financialsChart?.quarterly ?? []) as unknown[];
 
-    const quarters: EarningsData["quarters"] = quarterly.slice(-8).map((q: any) => {
+    const quarters: EarningsData["quarters"] = quarterly.slice(-8).map((q) => {
       const label = (q.date as string) ?? "";
       const revenue = (q.revenue?.raw as number | undefined) ?? undefined;
       const eps = epsByLabel.get(label)?.actual ?? undefined;
@@ -427,8 +433,21 @@ export async function fetchHistory(ticker: string, range: HistoryRange = "6M"): 
   const { range: r, interval, limitDays } = RANGE_PARAMS[range];
   return cached(`${ticker}:${range}`, "history", 3600, async () => {
     const chart = await rawChart(ticker, r, interval);
-    const timestamps: number[] = (chart as any).timestamp ?? [];
-    const ohlcv = (chart as any).indicators?.quote?.[0] ?? {};
+    const timestamps = (chart.timestamp as number[]) ?? [];
+    const ohlcv =
+      (
+        chart.indicators as
+          | {
+              quote?: Array<{
+                open?: number[];
+                high?: number[];
+                low?: number[];
+                close?: number[];
+                volume?: number[];
+              }>;
+            }
+          | undefined
+      )?.quote?.[0] ?? {};
     const bars = timestamps
       .map((ts, i) => ({
         ts: ts * 1000,
@@ -452,8 +471,8 @@ export async function fetchNews(ticker: string): Promise<NewsItem[]> {
     const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(ticker)}&newsCount=10&quotesCount=0`;
     const res = await fetch(url, { headers: { "User-Agent": UA } });
     if (!res.ok) return [];
-    const json = (await res.json()) as any;
-    const items: any[] = json?.news ?? [];
+    const json = await res.json();
+    const items = (json?.news ?? []) as unknown[];
     return items.map((n) => ({
       date: new Date((n.providerPublishTime ?? 0) * 1000).toISOString().slice(0, 10),
       source: (n.publisher as string) ?? "",
@@ -495,8 +514,8 @@ export async function searchSymbols(query: string): Promise<SearchResult[]> {
   const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=10&newsCount=0`;
   const res = await fetch(url, { headers: { "User-Agent": UA } });
   if (!res.ok) return [];
-  const json = (await res.json()) as any;
-  const quotes: any[] = json?.quotes ?? [];
+  const json = await res.json();
+  const quotes = (json?.quotes ?? []) as unknown[];
   return quotes
     .filter((q) => q.symbol && q.shortname)
     .map((q) => ({ ticker: q.symbol as string, name: q.shortname as string }));

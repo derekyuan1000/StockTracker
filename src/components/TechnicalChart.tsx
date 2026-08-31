@@ -1,14 +1,5 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
-import {
-  ChevronDown,
-  Maximize2,
-  Minimize2,
-  Minus,
-  MousePointer2,
-  Settings2,
-  Trash2,
-  ZoomIn,
-} from "lucide-react";
+import { ChevronDown, Maximize2, Minimize2, Settings2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Bar,
@@ -17,8 +8,6 @@ import {
   ComposedChart,
   Line,
   ReferenceLine,
-  ReferenceArea,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -62,8 +51,8 @@ function formatLabel(ts: number, iv: CandleInterval): string {
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-// ─── Drawing tools ─────────────────────────────────────────────────────────────
-type DrawTool = "cursor" | "zoom" | "hline" | "vline";
+// ─── Layout ────────────────────────────────────────────────────────────────────
+const CANDLE_PX = 20; // pixels per bar
 
 // ─── Indicators ───────────────────────────────────────────────────────────────
 const SMA_PERIODS = [20, 50, 200];
@@ -103,11 +92,6 @@ interface BarShapeProps {
   width: number;
   height: number;
   payload?: CandlePayload;
-}
-
-interface ChartMouseEvent {
-  activeLabel?: number | string;
-  activePayload?: Array<{ payload: CandlePayload }>;
 }
 
 const TICK_STYLE = { fill: "var(--text-muted)", fontSize: 11, fontFamily: "JetBrains Mono" };
@@ -274,17 +258,6 @@ export interface TechnicalChartProps {
   defaultInterval?: CandleInterval;
 }
 
-const DRAW_TOOLS: { key: DrawTool; title: string; icon: React.ReactNode }[] = [
-  { key: "cursor", title: "Cursor", icon: <MousePointer2 className="size-4" /> },
-  { key: "zoom", title: "Zoom Select — drag to zoom", icon: <ZoomIn className="size-4" /> },
-  { key: "hline", title: "Horizontal Ray — click to add", icon: <Minus className="size-4" /> },
-  {
-    key: "vline",
-    title: "Vertical Line — click to add",
-    icon: <Minus className="size-4 rotate-90" />,
-  },
-];
-
 export function TechnicalChart({
   ticker,
   currency,
@@ -304,16 +277,10 @@ export function TechnicalChart({
     logScale: false,
     showAvgBuy: true,
   });
-  const [tool, setTool] = useState<DrawTool>("cursor");
-  const [hlines, setHlines] = useState<number[]>([]);
-  const [vlines, setVlines] = useState<number[]>([]);
-  const [refLeft, setRefLeft] = useState<number | null>(null);
-  const [refRight, setRefRight] = useState<number | null>(null);
-  const [zoomDomain, setZoomDomain] = useState<[number, number] | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [yPanOffset, setYPanOffset] = useState(0);
-  const isSelecting = useRef(false);
-  const lastHoverRef = useRef<{ price: number; ts: number } | null>(null);
+  const chartColRef = useRef<HTMLDivElement>(null);
+  const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
+  const [containerWidth, setContainerWidth] = useState(900);
 
   const indicatorDropdown = useDropdown();
   const settingsDropdown = useDropdown();
@@ -326,6 +293,14 @@ export function TechnicalChart({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [isFullscreen]);
+
+  useEffect(() => {
+    const el = chartColRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setContainerWidth(el.clientWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const { data: rawBars = [], isLoading } = useQuery({
     queryKey: ["price-history", ticker, INTERVAL_TO_RANGE[interval]],
@@ -344,73 +319,60 @@ export function TechnicalChart({
     [indicators],
   );
 
-  const allRows = useMemo(
-    () => buildIndicatorRows(rawBars, indicatorOpts),
-    [rawBars, indicatorOpts],
-  );
+  const rows = useMemo(() => buildIndicatorRows(rawBars, indicatorOpts), [rawBars, indicatorOpts]);
 
-  const rows = useMemo(
-    () =>
-      zoomDomain
-        ? allRows.filter((r) => r.ts >= zoomDomain[0] && r.ts <= zoomDomain[1])
-        : allRows.slice(-120),
-    [allRows, zoomDomain],
-  );
+  // Auto-scroll to rightmost (most recent) data whenever rows or ticker changes
+  useEffect(() => {
+    if (scrollEl) scrollEl.scrollLeft = scrollEl.scrollWidth;
+  }, [rows, ticker, scrollEl]);
+
+  // Wheel → horizontal scroll (passive:false required to call preventDefault)
+  useEffect(() => {
+    if (!scrollEl) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      scrollEl.scrollLeft += e.deltaY + e.deltaX;
+    };
+    scrollEl.addEventListener("wheel", onWheel, { passive: false });
+    return () => scrollEl.removeEventListener("wheel", onWheel);
+  }, [scrollEl]);
+
+  // Drag-to-pan
+  useEffect(() => {
+    if (!scrollEl) return;
+    let startX = 0;
+    let startScrollLeft = 0;
+    let dragging = false;
+
+    const onDown = (e: MouseEvent) => {
+      dragging = true;
+      startX = e.pageX;
+      startScrollLeft = scrollEl.scrollLeft;
+      scrollEl.style.cursor = "grabbing";
+    };
+    const onMove = (e: MouseEvent) => {
+      if (!dragging) return;
+      e.preventDefault();
+      scrollEl.scrollLeft = startScrollLeft - (e.pageX - startX);
+    };
+    const onUp = () => {
+      dragging = false;
+      scrollEl.style.cursor = "";
+    };
+
+    scrollEl.addEventListener("mousedown", onDown);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      scrollEl.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [scrollEl]);
 
   const dp = currency === "GBP" ? 2 : 0;
-  const rawPriceMin = rows.length ? Math.min(...rows.map((r) => r.low)) * 0.999 : 0;
-  const rawPriceMax = rows.length ? Math.max(...rows.map((r) => r.high)) * 1.001 : 1;
-  const priceMin = rawPriceMin + yPanOffset;
-  const priceMax = rawPriceMax + yPanOffset;
-  const showSelection = refLeft != null && refRight != null && refLeft !== refRight;
-
-  const handleMouseDown = useCallback(
-    (e: ChartMouseEvent) => {
-      if (tool !== "zoom") return;
-      if (e?.activeLabel != null) {
-        isSelecting.current = true;
-        setRefLeft(Number(e.activeLabel));
-        setRefRight(null);
-      }
-    },
-    [tool],
-  );
-
-  const handleMouseMove = useCallback((e: ChartMouseEvent) => {
-    if (e?.activePayload?.[0]?.payload && e.activeLabel != null) {
-      lastHoverRef.current = {
-        price: e.activePayload[0].payload.close,
-        ts: Number(e.activeLabel),
-      };
-    }
-    if (isSelecting.current && e?.activeLabel != null) setRefRight(Number(e.activeLabel));
-  }, []);
-
-  const handleMouseUp = useCallback(() => {
-    if (isSelecting.current && refLeft != null && refRight != null && refLeft !== refRight) {
-      const l = Math.min(refLeft, refRight),
-        r = Math.max(refLeft, refRight);
-      if (r > l) setZoomDomain([l, r]);
-    }
-    isSelecting.current = false;
-    setRefLeft(null);
-    setRefRight(null);
-  }, [refLeft, refRight]);
-
-  const handleMouseLeave = useCallback(() => {
-    if (isSelecting.current) {
-      isSelecting.current = false;
-      setRefLeft(null);
-      setRefRight(null);
-    }
-  }, []);
-
-  const handleChartClick = useCallback(() => {
-    const hover = lastHoverRef.current;
-    if (!hover) return;
-    if (tool === "hline") setHlines((prev) => [...prev, hover.price]);
-    else if (tool === "vline") setVlines((prev) => [...prev, hover.ts]);
-  }, [tool]);
+  const priceMin = rows.length ? Math.min(...rows.map((r) => r.low)) * 0.999 : 0;
+  const priceMax = rows.length ? Math.max(...rows.map((r) => r.high)) * 1.001 : 1;
 
   function toggleIndicator(key: keyof Indicators) {
     setIndicators((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -488,22 +450,16 @@ export function TechnicalChart({
     [interval, dp],
   );
 
-  const toolCursor =
-    tool === "zoom"
-      ? "cursor-crosshair"
-      : tool === "hline" || tool === "vline"
-        ? "cursor-cell"
-        : "";
+  const chartWidth = Math.max(containerWidth, rows.length * CANDLE_PX);
+  const pricePaneH = isFullscreen ? (hasSubPanes ? 560 : 700) : hasSubPanes ? 600 : 720;
+  const volH = isFullscreen ? 140 : 160;
+  const oscH = isFullscreen ? 200 : 240;
 
   // Fullscreen layout
   const outerCls = isFullscreen ? "fixed inset-0 z-50 flex flex-col bg-[var(--canvas)]" : undefined;
-  const cardCls = `overflow-hidden rounded-sm border border-hairline bg-[var(--surface-card)]${isFullscreen ? " flex flex-1 flex-col" : ""}`;
+  const cardCls = `rounded-sm border border-hairline bg-[var(--surface-card)]${isFullscreen ? " flex flex-1 flex-col" : ""}`;
   const bodyRowCls = `flex${isFullscreen ? " flex-1 min-h-0" : ""}`;
-  const chartsColCls = `flex flex-col flex-1${isFullscreen ? " min-w-0 overflow-hidden" : ""}`;
-  const pricePaneStyle = isFullscreen ? undefined : { height: hasSubPanes ? 800 : 1000 };
-  const pricePaneCls = `${toolCursor}${isFullscreen ? " flex-1 min-h-0" : ""}`;
-  const volH = isFullscreen ? 160 : 200;
-  const oscH = isFullscreen ? 260 : 320;
+  const chartsColCls = `flex flex-col flex-1 min-w-0`;
 
   const gridProps = settings.showGrid
     ? { stroke: "var(--hairline)" as const, strokeOpacity: 0.5 }
@@ -519,11 +475,7 @@ export function TechnicalChart({
             {CANDLE_INTERVALS.map((iv) => (
               <button
                 key={iv}
-                onClick={() => {
-                  setInterval(iv);
-                  setZoomDomain(null);
-                  setYPanOffset(0);
-                }}
+                onClick={() => setInterval(iv)}
                 className={`num rounded px-2 py-1 text-[11px] font-medium tracking-wide transition-colors ${
                   interval === iv
                     ? "bg-canvas text-[var(--primary)]"
@@ -533,20 +485,6 @@ export function TechnicalChart({
                 {iv}
               </button>
             ))}
-            {(zoomDomain || yPanOffset !== 0) && (
-              <>
-                <span className="mx-1 text-hairline">|</span>
-                <button
-                  onClick={() => {
-                    setZoomDomain(null);
-                    setYPanOffset(0);
-                  }}
-                  className="num rounded px-2 py-1 text-[11px] text-[var(--primary)] hover:bg-canvas/60"
-                >
-                  ↺ Reset
-                </button>
-              </>
-            )}
           </div>
 
           {/* Right controls */}
@@ -660,401 +598,326 @@ export function TechnicalChart({
           </div>
         ) : (
           <div className={bodyRowCls}>
-            {/* ── Drawing tools sidebar ─────────────────────────────────────── */}
-            <div className="flex shrink-0 flex-col items-center gap-0.5 border-r border-hairline bg-[var(--surface-elevated)] px-1 py-2">
-              {DRAW_TOOLS.map(({ key, title, icon }) => (
-                <button
-                  key={key}
-                  title={title}
-                  onClick={() => setTool(key)}
-                  className={`rounded p-1.5 transition-colors ${
-                    tool === key
-                      ? "bg-[var(--primary)]/10 text-[var(--primary)]"
-                      : "text-text-muted hover:bg-canvas/60 hover:text-text-body"
-                  }`}
-                >
-                  {icon}
-                </button>
-              ))}
-              <div className="my-1 w-6 border-t border-hairline" />
-              <button
-                title="Clear all drawings"
-                onClick={() => {
-                  setHlines([]);
-                  setVlines([]);
-                }}
-                className="rounded p-1.5 text-text-muted transition-colors hover:bg-canvas/60 hover:text-text-body"
-              >
-                <Trash2 className="size-4" />
-              </button>
-            </div>
-
             {/* ── Chart column ──────────────────────────────────────────────── */}
-            <div className={chartsColCls}>
-              {/* ── Price pane ──────────────────────────────────────────────── */}
-              <div
-                className={pricePaneCls}
-                style={pricePaneStyle}
-                onWheel={(e) => {
-                  e.preventDefault();
-                  const range = rawPriceMax - rawPriceMin;
-                  setYPanOffset((prev) => prev - (e.deltaY / 300) * range);
-                }}
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart
-                    data={rows}
-                    margin={{ top: 12, right: 8, left: 0, bottom: 0 }}
-                    syncId={SYNC_ID}
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseLeave}
-                    onClick={handleChartClick}
-                  >
-                    {gridProps && <CartesianGrid {...gridProps} />}
-                    <XAxis
-                      {...xAxisProps}
-                      tickFormatter={(t) => formatTick(t, interval)}
-                      hide={bottomPane !== "price"}
-                    />
-                    <YAxis
-                      domain={[priceMin, priceMax]}
-                      scale={yScale}
-                      tick={TICK_STYLE}
-                      axisLine={false}
-                      tickLine={false}
-                      width={64}
-                      tickFormatter={(v) => fmtNum(v, dp)}
-                      orientation="right"
-                    />
-                    <Tooltip content={priceTooltip} />
+            <div ref={chartColRef} className={chartsColCls}>
+              {/* ── Horizontal scroll wrapper (all panes scroll together) ─────── */}
+              <div ref={setScrollEl} className="overflow-x-auto">
+                <div style={{ width: chartWidth, display: "flex", flexDirection: "column" }}>
+                  {/* ── Price pane ──────────────────────────────────────────────── */}
+                  <div style={{ height: pricePaneH, overflow: "hidden" }}>
+                    <ComposedChart
+                      width={chartWidth}
+                      height={pricePaneH}
+                      data={rows}
+                      margin={{ top: 12, right: 8, left: 0, bottom: 0 }}
+                      syncId={SYNC_ID}
+                    >
+                      {gridProps && <CartesianGrid {...gridProps} />}
+                      <XAxis
+                        {...xAxisProps}
+                        tickFormatter={(t) => formatTick(t, interval)}
+                        hide={bottomPane !== "price"}
+                      />
+                      <YAxis
+                        domain={[priceMin, priceMax]}
+                        scale={yScale}
+                        tick={TICK_STYLE}
+                        axisLine={false}
+                        tickLine={false}
+                        width={64}
+                        tickFormatter={(v) => fmtNum(v, dp)}
+                        orientation="right"
+                      />
+                      <Tooltip content={priceTooltip} />
 
-                    {indicators.bollinger && (
-                      <>
-                        <Line
-                          type="monotone"
-                          dataKey="bollUpper"
-                          stroke="#bdbbff"
-                          strokeWidth={1}
-                          strokeDasharray="4 3"
-                          strokeOpacity={0.7}
-                          dot={false}
-                          isAnimationActive={false}
-                          connectNulls={false}
-                          name="BB Upper"
+                      {indicators.bollinger && (
+                        <>
+                          <Line
+                            type="monotone"
+                            dataKey="bollUpper"
+                            stroke="#bdbbff"
+                            strokeWidth={1}
+                            strokeDasharray="4 3"
+                            strokeOpacity={0.7}
+                            dot={false}
+                            isAnimationActive={false}
+                            connectNulls={false}
+                            name="BB Upper"
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="bollMid"
+                            stroke="#bdbbff"
+                            strokeWidth={1}
+                            strokeOpacity={0.5}
+                            dot={false}
+                            isAnimationActive={false}
+                            connectNulls={false}
+                            name="BB Mid"
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="bollLower"
+                            stroke="#bdbbff"
+                            strokeWidth={1}
+                            strokeDasharray="4 3"
+                            strokeOpacity={0.7}
+                            dot={false}
+                            isAnimationActive={false}
+                            connectNulls={false}
+                            name="BB Lower"
+                          />
+                        </>
+                      )}
+
+                      {indicators.ma &&
+                        SMA_PERIODS.map((p) => (
+                          <Line
+                            key={`sma${p}`}
+                            type="monotone"
+                            dataKey={`sma.${p}`}
+                            stroke={SMA_COLORS[p]}
+                            strokeWidth={1.5}
+                            dot={false}
+                            isAnimationActive={false}
+                            connectNulls={false}
+                            name={`SMA ${p}`}
+                          />
+                        ))}
+                      {indicators.ma &&
+                        EMA_PERIODS.map((p) => (
+                          <Line
+                            key={`ema${p}`}
+                            type="monotone"
+                            dataKey={`ema.${p}`}
+                            stroke={EMA_COLORS[p]}
+                            strokeWidth={1.5}
+                            strokeDasharray="5 3"
+                            dot={false}
+                            isAnimationActive={false}
+                            connectNulls={false}
+                            name={`EMA ${p}`}
+                          />
+                        ))}
+
+                      <Bar dataKey="wickRange" shape={CandleShape} isAnimationActive={false} />
+
+                      {settings.showAvgBuy && avgBuyP != null && avgBuyP > 0 && (
+                        <ReferenceLine
+                          y={avgBuyP}
+                          stroke="#fc4c02"
+                          strokeDasharray="4 4"
+                          label={{
+                            value: `Avg ${fmtNum(avgBuyP, dp)}`,
+                            fill: "#fc4c02",
+                            fontSize: 10,
+                            position: "insideTopRight",
+                          }}
                         />
-                        <Line
-                          type="monotone"
-                          dataKey="bollMid"
-                          stroke="#bdbbff"
-                          strokeWidth={1}
+                      )}
+                    </ComposedChart>
+                  </div>
+
+                  {/* ── Volume pane ─────────────────────────────────────────────── */}
+                  {indicators.volume && (
+                    <div
+                      className="shrink-0 cursor-crosshair overflow-hidden border-t border-hairline"
+                      style={{ height: volH }}
+                    >
+                      <BarChart
+                        width={chartWidth}
+                        height={volH}
+                        data={rows}
+                        margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+                        syncId={SYNC_ID}
+                      >
+                        {gridProps && (
+                          <CartesianGrid {...gridProps} vertical={false} horizontal={true} />
+                        )}
+                        <XAxis
+                          {...xAxisProps}
+                          tickFormatter={(t) => formatTick(t, interval)}
+                          hide={bottomPane !== "volume"}
+                        />
+                        <YAxis
+                          tick={TICK_STYLE}
+                          axisLine={false}
+                          tickLine={false}
+                          width={64}
+                          orientation="right"
+                          tickFormatter={(v) =>
+                            v >= 1_000_000
+                              ? `${(v / 1_000_000).toFixed(0)}M`
+                              : v >= 1_000
+                                ? `${(v / 1_000).toFixed(0)}K`
+                                : String(v)
+                          }
+                        />
+                        <Tooltip
+                          contentStyle={TOOLTIP_STYLE}
+                          labelStyle={{ color: "var(--text-muted)", fontSize: 11 }}
+                          itemStyle={{ color: "var(--text-body)" }}
+                          labelFormatter={(t) => formatLabel(t as number, interval)}
+                          formatter={(v: number) => [
+                            v >= 1_000_000
+                              ? `${(v / 1_000_000).toFixed(2)}M`
+                              : v >= 1_000
+                                ? `${(v / 1_000).toFixed(0)}K`
+                                : String(v),
+                            "Volume",
+                          ]}
+                        />
+                        <Bar dataKey="volume" shape={VolumeBar} isAnimationActive={false} />
+                      </BarChart>
+                    </div>
+                  )}
+
+                  {/* ── RSI pane ────────────────────────────────────────────────── */}
+                  {indicators.rsi && (
+                    <div
+                      className="shrink-0 cursor-crosshair overflow-hidden border-t border-hairline"
+                      style={{ height: oscH }}
+                    >
+                      <ComposedChart
+                        width={chartWidth}
+                        height={oscH}
+                        data={rows}
+                        margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+                        syncId={SYNC_ID}
+                      >
+                        {gridProps && (
+                          <CartesianGrid {...gridProps} vertical={false} horizontal={true} />
+                        )}
+                        <XAxis
+                          {...xAxisProps}
+                          tickFormatter={(t) => formatTick(t, interval)}
+                          hide={bottomPane !== "rsi"}
+                        />
+                        <YAxis
+                          domain={[0, 100]}
+                          ticks={[30, 50, 70]}
+                          tick={TICK_STYLE}
+                          axisLine={false}
+                          tickLine={false}
+                          width={64}
+                          orientation="right"
+                        />
+                        <Tooltip
+                          contentStyle={TOOLTIP_STYLE}
+                          labelStyle={{ color: "var(--text-muted)", fontSize: 11 }}
+                          itemStyle={{ color: "var(--text-body)" }}
+                          labelFormatter={(t) => formatLabel(t as number, interval)}
+                          formatter={(v: number) => [v.toFixed(2), "RSI"]}
+                        />
+                        <ReferenceLine
+                          y={70}
+                          stroke="var(--down)"
+                          strokeDasharray="3 3"
                           strokeOpacity={0.5}
-                          dot={false}
-                          isAnimationActive={false}
-                          connectNulls={false}
-                          name="BB Mid"
+                          label={{
+                            value: "70",
+                            fill: "var(--text-muted)",
+                            fontSize: 9,
+                            position: "insideRight",
+                          }}
                         />
+                        <ReferenceLine
+                          y={30}
+                          stroke="var(--up)"
+                          strokeDasharray="3 3"
+                          strokeOpacity={0.5}
+                          label={{
+                            value: "30",
+                            fill: "var(--text-muted)",
+                            fontSize: 9,
+                            position: "insideRight",
+                          }}
+                        />
+                        <ReferenceLine y={50} stroke="var(--hairline)" strokeOpacity={0.4} />
                         <Line
                           type="monotone"
-                          dataKey="bollLower"
+                          dataKey="rsi"
                           stroke="#bdbbff"
-                          strokeWidth={1}
-                          strokeDasharray="4 3"
-                          strokeOpacity={0.7}
-                          dot={false}
-                          isAnimationActive={false}
-                          connectNulls={false}
-                          name="BB Lower"
-                        />
-                      </>
-                    )}
-
-                    {indicators.ma &&
-                      SMA_PERIODS.map((p) => (
-                        <Line
-                          key={`sma${p}`}
-                          type="monotone"
-                          dataKey={`sma.${p}`}
-                          stroke={SMA_COLORS[p]}
                           strokeWidth={1.5}
                           dot={false}
                           isAnimationActive={false}
                           connectNulls={false}
-                          name={`SMA ${p}`}
+                          name="RSI"
                         />
-                      ))}
-                    {indicators.ma &&
-                      EMA_PERIODS.map((p) => (
+                      </ComposedChart>
+                    </div>
+                  )}
+
+                  {/* ── MACD pane ───────────────────────────────────────────────── */}
+                  {indicators.macd && (
+                    <div
+                      className="shrink-0 cursor-crosshair overflow-hidden border-t border-hairline"
+                      style={{ height: oscH }}
+                    >
+                      <ComposedChart
+                        width={chartWidth}
+                        height={oscH}
+                        data={rows}
+                        margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+                        syncId={SYNC_ID}
+                      >
+                        {gridProps && (
+                          <CartesianGrid {...gridProps} vertical={false} horizontal={true} />
+                        )}
+                        <XAxis
+                          {...xAxisProps}
+                          tickFormatter={(t) => formatTick(t, interval)}
+                          hide={bottomPane !== "macd"}
+                        />
+                        <YAxis
+                          tick={TICK_STYLE}
+                          axisLine={false}
+                          tickLine={false}
+                          width={64}
+                          orientation="right"
+                          tickFormatter={(v) => fmtNum(v, dp + 2)}
+                        />
+                        <Tooltip
+                          contentStyle={TOOLTIP_STYLE}
+                          labelStyle={{ color: "var(--text-muted)", fontSize: 11 }}
+                          itemStyle={{ color: "var(--text-body)" }}
+                          labelFormatter={(t) => formatLabel(t as number, interval)}
+                          formatter={(v: number, name: string) => [fmtNum(v, dp + 2), name]}
+                        />
+                        <ReferenceLine y={0} stroke="var(--hairline)" strokeOpacity={0.7} />
+                        <Bar
+                          dataKey="macdHist"
+                          shape={MacdBar}
+                          isAnimationActive={false}
+                          name="Hist"
+                        />
                         <Line
-                          key={`ema${p}`}
                           type="monotone"
-                          dataKey={`ema.${p}`}
-                          stroke={EMA_COLORS[p]}
+                          dataKey="macdLine"
+                          stroke="#fc4c02"
                           strokeWidth={1.5}
-                          strokeDasharray="5 3"
                           dot={false}
                           isAnimationActive={false}
                           connectNulls={false}
-                          name={`EMA ${p}`}
+                          name="MACD"
                         />
-                      ))}
-
-                    <Bar dataKey="wickRange" shape={CandleShape} isAnimationActive={false} />
-
-                    {/* User drawings */}
-                    {hlines.map((price, i) => (
-                      <ReferenceLine
-                        key={`hl${i}`}
-                        y={price}
-                        stroke="var(--primary)"
-                        strokeDasharray="4 4"
-                        strokeOpacity={0.75}
-                        strokeWidth={1.5}
-                        label={{
-                          value: fmtNum(price, dp),
-                          fill: "var(--primary)",
-                          fontSize: 10,
-                          position: "insideTopRight",
-                        }}
-                      />
-                    ))}
-                    {vlines.map((ts, i) => (
-                      <ReferenceLine
-                        key={`vl${i}`}
-                        x={ts}
-                        stroke="var(--primary)"
-                        strokeDasharray="4 4"
-                        strokeOpacity={0.75}
-                        strokeWidth={1.5}
-                      />
-                    ))}
-
-                    {settings.showAvgBuy && avgBuyP != null && avgBuyP > 0 && (
-                      <ReferenceLine
-                        y={avgBuyP}
-                        stroke="#fc4c02"
-                        strokeDasharray="4 4"
-                        label={{
-                          value: `Avg ${fmtNum(avgBuyP, dp)}`,
-                          fill: "#fc4c02",
-                          fontSize: 10,
-                          position: "insideTopRight",
-                        }}
-                      />
-                    )}
-
-                    {showSelection && (
-                      <ReferenceArea
-                        x1={Math.min(refLeft!, refRight!)}
-                        x2={Math.max(refLeft!, refRight!)}
-                        fill="var(--text-muted)"
-                        fillOpacity={0.1}
-                        stroke="var(--text-muted)"
-                        strokeOpacity={0.3}
-                        strokeWidth={1}
-                      />
-                    )}
-                  </ComposedChart>
-                </ResponsiveContainer>
+                        <Line
+                          type="monotone"
+                          dataKey="macdSignal"
+                          stroke="#bdbbff"
+                          strokeWidth={1.5}
+                          dot={false}
+                          isAnimationActive={false}
+                          connectNulls={false}
+                          name="Signal"
+                        />
+                      </ComposedChart>
+                    </div>
+                  )}
+                </div>
+                {/* end inner width div */}
               </div>
-
-              {/* ── Volume pane ─────────────────────────────────────────────── */}
-              {indicators.volume && (
-                <div
-                  className="shrink-0 cursor-crosshair border-t border-hairline"
-                  style={{ height: volH }}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={rows}
-                      margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
-                      syncId={SYNC_ID}
-                    >
-                      {gridProps && (
-                        <CartesianGrid {...gridProps} vertical={false} horizontal={true} />
-                      )}
-                      <XAxis
-                        {...xAxisProps}
-                        tickFormatter={(t) => formatTick(t, interval)}
-                        hide={bottomPane !== "volume"}
-                      />
-                      <YAxis
-                        tick={TICK_STYLE}
-                        axisLine={false}
-                        tickLine={false}
-                        width={64}
-                        orientation="right"
-                        tickFormatter={(v) =>
-                          v >= 1_000_000
-                            ? `${(v / 1_000_000).toFixed(0)}M`
-                            : v >= 1_000
-                              ? `${(v / 1_000).toFixed(0)}K`
-                              : String(v)
-                        }
-                      />
-                      <Tooltip
-                        contentStyle={TOOLTIP_STYLE}
-                        labelStyle={{ color: "var(--text-muted)", fontSize: 11 }}
-                        itemStyle={{ color: "var(--text-body)" }}
-                        labelFormatter={(t) => formatLabel(t as number, interval)}
-                        formatter={(v: number) => [
-                          v >= 1_000_000
-                            ? `${(v / 1_000_000).toFixed(2)}M`
-                            : v >= 1_000
-                              ? `${(v / 1_000).toFixed(0)}K`
-                              : String(v),
-                          "Volume",
-                        ]}
-                      />
-                      <Bar dataKey="volume" shape={VolumeBar} isAnimationActive={false} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-
-              {/* ── RSI pane ────────────────────────────────────────────────── */}
-              {indicators.rsi && (
-                <div
-                  className="shrink-0 cursor-crosshair border-t border-hairline"
-                  style={{ height: oscH }}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart
-                      data={rows}
-                      margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
-                      syncId={SYNC_ID}
-                    >
-                      {gridProps && (
-                        <CartesianGrid {...gridProps} vertical={false} horizontal={true} />
-                      )}
-                      <XAxis
-                        {...xAxisProps}
-                        tickFormatter={(t) => formatTick(t, interval)}
-                        hide={bottomPane !== "rsi"}
-                      />
-                      <YAxis
-                        domain={[0, 100]}
-                        ticks={[30, 50, 70]}
-                        tick={TICK_STYLE}
-                        axisLine={false}
-                        tickLine={false}
-                        width={64}
-                        orientation="right"
-                      />
-                      <Tooltip
-                        contentStyle={TOOLTIP_STYLE}
-                        labelStyle={{ color: "var(--text-muted)", fontSize: 11 }}
-                        itemStyle={{ color: "var(--text-body)" }}
-                        labelFormatter={(t) => formatLabel(t as number, interval)}
-                        formatter={(v: number) => [v.toFixed(2), "RSI"]}
-                      />
-                      <ReferenceLine
-                        y={70}
-                        stroke="var(--down)"
-                        strokeDasharray="3 3"
-                        strokeOpacity={0.5}
-                        label={{
-                          value: "70",
-                          fill: "var(--text-muted)",
-                          fontSize: 9,
-                          position: "insideRight",
-                        }}
-                      />
-                      <ReferenceLine
-                        y={30}
-                        stroke="var(--up)"
-                        strokeDasharray="3 3"
-                        strokeOpacity={0.5}
-                        label={{
-                          value: "30",
-                          fill: "var(--text-muted)",
-                          fontSize: 9,
-                          position: "insideRight",
-                        }}
-                      />
-                      <ReferenceLine y={50} stroke="var(--hairline)" strokeOpacity={0.4} />
-                      <Line
-                        type="monotone"
-                        dataKey="rsi"
-                        stroke="#bdbbff"
-                        strokeWidth={1.5}
-                        dot={false}
-                        isAnimationActive={false}
-                        connectNulls={false}
-                        name="RSI"
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-
-              {/* ── MACD pane ───────────────────────────────────────────────── */}
-              {indicators.macd && (
-                <div
-                  className="shrink-0 cursor-crosshair border-t border-hairline"
-                  style={{ height: oscH }}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart
-                      data={rows}
-                      margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
-                      syncId={SYNC_ID}
-                    >
-                      {gridProps && (
-                        <CartesianGrid {...gridProps} vertical={false} horizontal={true} />
-                      )}
-                      <XAxis
-                        {...xAxisProps}
-                        tickFormatter={(t) => formatTick(t, interval)}
-                        hide={bottomPane !== "macd"}
-                      />
-                      <YAxis
-                        tick={TICK_STYLE}
-                        axisLine={false}
-                        tickLine={false}
-                        width={64}
-                        orientation="right"
-                        tickFormatter={(v) => fmtNum(v, dp + 2)}
-                      />
-                      <Tooltip
-                        contentStyle={TOOLTIP_STYLE}
-                        labelStyle={{ color: "var(--text-muted)", fontSize: 11 }}
-                        itemStyle={{ color: "var(--text-body)" }}
-                        labelFormatter={(t) => formatLabel(t as number, interval)}
-                        formatter={(v: number, name: string) => [fmtNum(v, dp + 2), name]}
-                      />
-                      <ReferenceLine y={0} stroke="var(--hairline)" strokeOpacity={0.7} />
-                      <Bar
-                        dataKey="macdHist"
-                        shape={MacdBar}
-                        isAnimationActive={false}
-                        name="Hist"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="macdLine"
-                        stroke="#fc4c02"
-                        strokeWidth={1.5}
-                        dot={false}
-                        isAnimationActive={false}
-                        connectNulls={false}
-                        name="MACD"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="macdSignal"
-                        stroke="#bdbbff"
-                        strokeWidth={1.5}
-                        dot={false}
-                        isAnimationActive={false}
-                        connectNulls={false}
-                        name="Signal"
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
+              {/* end scroll wrapper */}
 
               {/* ── MA/BB legend ────────────────────────────────────────────── */}
               {(indicators.ma || indicators.bollinger) && (

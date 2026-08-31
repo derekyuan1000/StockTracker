@@ -36,3 +36,6 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Mobile app — lives in its own repo
+apps/mobile/

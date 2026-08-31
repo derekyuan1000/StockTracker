@@ -1,29 +1,40 @@
-# Local dev secrets for `vite dev` (Nitro's cloudflare preset loads this into process.env).
-# This file is gitignored — never commit it.
+# Local dev secrets — copy this to `.dev.vars` and fill in your values.
+# The `.dev.vars` file is gitignored and must never be committed.
 
-# --- Turso (required to boot) ---------------------------------------------
-# Get these from https://turso.tech (turso db create / turso db tokens create),
-# or from an existing dev database you already have.
-TURSO_DATABASE_URL=libsql://stocktracker-derekyuan1000.aws-eu-west-1.turso.io
-TURSO_AUTH_TOKEN=eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODYzMzkyMzMsImlkIjoiMDE5ZjA2ZTMtMjYwMS03NTRjLWI3ZGQtYmI5N2U4YzYwMTM0Iiwia2lkIjoiY25vZjJoekNLSlF1V0NHSlRSd041aXR3M2pyb3pjYURMTHV3Wm5uM1JIRSIsInJpZCI6IjhlMWE1YzM1LWE1NjMtNDUyMy1iMzQwLWQxNWYzNzMzZTI5ZCJ9.VmrY2YjAbTJ36zGNmVN-NvNqqPI4fMcUpwz9aEE8_v9Bl9H8pnjMcJUztYSc-19KJO0sXpZVaE3YtasB5QzoCA
+# --- Turso (required) --------------------------------------------------------
+# Create a database at https://turso.tech, then run:
+#   turso db show <db-name>          → DATABASE_URL
+#   turso db tokens create <db-name> → AUTH_TOKEN
+TURSO_DATABASE_URL=libsql://<your-db-name>.<region>.turso.io
+TURSO_AUTH_TOKEN=<your-turso-auth-token>
 
-# --- Better Auth (required to boot) ----------------------------------------
-BETTER_AUTH_SECRET=1tOAnkJty4VgARQtN8qjtJXGpivxSwAuRZL6mHf8YkI=
+# --- Better Auth (required) --------------------------------------------------
+# Generate a secret: openssl rand -base64 32
+# URL must match the server origin exactly (no trailing slash).
+BETTER_AUTH_SECRET=<at-least-32-char-random-string>
 BETTER_AUTH_URL=http://localhost:8080
 
-# --- Google OAuth (required to boot — auth.ts wires it up unconditionally) -
-# Create at https://console.cloud.google.com/apis/credentials
-# Authorized redirect URI: http://localhost:8080/api/auth/callback/google
-GOOGLE_CLIENT_ID=vb3ug6pb465skevsl21it8e7plh2bg55.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+# --- Google OAuth (required) -------------------------------------------------
+# Create credentials at https://console.cloud.google.com/apis/credentials
+# Application type: Web application
+# Authorised redirect URI: http://localhost:8080/api/auth/callback/google
+GOOGLE_CLIENT_ID=<your-google-client-id>.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=<your-google-client-secret>
 
-# --- Optional (only needed if you exercise these features) -----------------
+# --- Optional features -------------------------------------------------------
+# AI insights (Claude SDK)
 # ANTHROPIC_API_KEY=
 # ANTHROPIC_MODEL=claude-sonnet-4-6
+
+# Apple OAuth (leave blank if not using)
 # APPLE_CLIENT_ID=
 # APPLE_TEAM_ID=
 # APPLE_KEY_ID=
 # APPLE_PRIVATE_KEY=
+
+# Firebase (push notifications, leave blank if not using)
 # FIREBASE_PROJECT_ID=
 # FIREBASE_SERVICE_ACCOUNT_JSON=
+
+# Cron job auth token (generate any random string)
 # CRON_SECRET=
