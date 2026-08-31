@@ -1,9 +1,11 @@
-import { copyFileSync } from "fs";
+import { copyFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const lib = join(root, "node_modules/react-native-android-widget");
+
+if (!existsSync(lib)) process.exit(0);
 
 copyFileSync(
   join(root, "patches/files/RNWidgetUtil.java"),
