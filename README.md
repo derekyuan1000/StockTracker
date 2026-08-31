@@ -10,8 +10,12 @@ Simple Dashboard for Tracking Your Stock Portfolio with all of the information y
   </tr>
 </table>
 
-<img src="screenshots/dashboard.png" alt="Dashboard" />
-<img src="screenshots/technical.png" alt="Technical analysis" />
+<table>
+  <tr>
+    <td><img src="screenshots/dashboard.png" alt="Dashboard" /></td>
+    <td><img src="screenshots/technical.png" alt="Technical analysis" /></td>
+  </tr>
+</table>
 
 ---
 
