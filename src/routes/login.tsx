@@ -40,17 +40,6 @@ function GitHubIcon() {
   );
 }
 
-function MicrosoftIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#F25022" d="M1 1h10v10H1z" />
-      <path fill="#00A4EF" d="M13 1h10v10H13z" />
-      <path fill="#7FBA00" d="M1 13h10v10H1z" />
-      <path fill="#FFB900" d="M13 13h10v10H13z" />
-    </svg>
-  );
-}
-
 function MailIcon() {
   return (
     <svg
@@ -169,7 +158,7 @@ function LoginPage() {
     }
   }
 
-  async function signInWithSocial(provider: "google" | "github" | "microsoft") {
+  async function signInWithSocial(provider: "google" | "github") {
     setSocialLoading(provider);
     try {
       await authClient.signIn.social({ provider, callbackURL: "/dashboard" });
@@ -191,7 +180,6 @@ function LoginPage() {
     const labels: Record<string, string> = {
       google: "Redirecting to Google…",
       github: "Redirecting to GitHub…",
-      microsoft: "Redirecting to Microsoft…",
     };
     return <LoadingScreen label={labels[socialLoading] ?? "Redirecting…"} />;
   }
@@ -436,11 +424,6 @@ function LoginPage() {
                     [
                       { provider: "google", label: "Continue with Google", Icon: GoogleIcon },
                       { provider: "github", label: "Continue with GitHub", Icon: GitHubIcon },
-                      {
-                        provider: "microsoft",
-                        label: "Continue with Microsoft",
-                        Icon: MicrosoftIcon,
-                      },
                     ] as const
                   ).map(({ provider, label, Icon }) => (
                     <button
