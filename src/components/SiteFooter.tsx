@@ -108,6 +108,20 @@ export function SiteFooter() {
           <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-white/40">
             &copy; 2026 Derek Yuan · All rights reserved
           </p>
+          <div className="flex gap-4">
+            <Link
+              to="/privacy"
+              className="font-mono text-[11px] uppercase tracking-[0.08em] text-white/40 transition-colors hover:text-white/70"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              to="/terms"
+              className="font-mono text-[11px] uppercase tracking-[0.08em] text-white/40 transition-colors hover:text-white/70"
+            >
+              Terms &amp; Conditions
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

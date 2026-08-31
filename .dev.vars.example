@@ -21,10 +21,29 @@ BETTER_AUTH_URL=http://localhost:8080
 GOOGLE_CLIENT_ID=<your-google-client-id>.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=<your-google-client-secret>
 
+# --- Resend (email verification) ---------------------------------------------
+# Sign up at https://resend.com → API Keys → Create API key
+# For local dev you can use the test address: onboarding@resend.dev (no domain needed)
+# In production, verify your domain and set EMAIL_FROM to your own address.
+RESEND_API_KEY=re_<your-resend-api-key>
+EMAIL_FROM=StockTracker <stocktracker@derekyuan.co.uk>
+
 # --- Optional features -------------------------------------------------------
 # AI insights (Claude SDK)
 # ANTHROPIC_API_KEY=
 # ANTHROPIC_MODEL=claude-sonnet-4-6
+
+# GitHub OAuth (leave blank if not using)
+# Create at https://github.com/settings/developers → New OAuth App
+# Callback URL: http://localhost:8080/api/auth/callback/github
+# GITHUB_CLIENT_ID=
+# GITHUB_CLIENT_SECRET=
+
+# Microsoft OAuth (leave blank if not using)
+# Create at https://portal.azure.com → App registrations → New registration
+# Redirect URI: http://localhost:8080/api/auth/callback/microsoft
+# MICROSOFT_CLIENT_ID=
+# MICROSOFT_CLIENT_SECRET=
 
 # Apple OAuth (leave blank if not using)
 # APPLE_CLIENT_ID=

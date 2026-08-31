@@ -20,7 +20,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { getSession } from "@/fns/auth";
 import { getSettings } from "@/fns/settings";
 
-const PUBLIC_PATHS = ["/", "/community", "/login"];
+const PUBLIC_PATHS = ["/", "/community", "/login", "/privacy", "/terms"];
 
 /** Low-opacity brand gradient ribbon echo for the full-screen state bands. */
 function StateRibbon() {

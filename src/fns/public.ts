@@ -12,6 +12,17 @@ import {
 } from "@/server/db/schema";
 import { user } from "@/server/db/auth-schema";
 import { fetchHistory, fetchTickerTape } from "@/server/market/yahoo";
+import * as portfolioService from "@/server/services/portfolio";
+import type { PeriodReturn } from "@/server/services/portfolio";
+import type { Holding } from "@stocktracker/shared";
+
+export type { PeriodReturn };
+
+export type PublicPortfolio = {
+  holdings: Holding[];
+  cashGBP: number;
+  realisedGL: number;
+};
 
 export type PublicTrade = {
   displayName: string;
@@ -237,6 +248,49 @@ export const getPublicProfile = createServerFn()
   });
 
 // Curated market ticker tape (no auth required)
-export const getPublicTicker = createServerFn().handler(
-  async (): Promise<TickerItem[]> => fetchTickerTape(),
+export const getPublicTicker = createServerFn().handler(async (): Promise<TickerItem[]> =>
+  fetchTickerTape(),
 );
+
+// Public portfolio — full holdings + market data (null if private/not found)
+export const getPublicPortfolio = createServerFn()
+  .validator((raw: unknown) => z.object({ userId: z.string() }).parse(raw))
+  .handler(async ({ data }): Promise<PublicPortfolio | null> => {
+    const { userId } = data;
+    const [settings] = await db
+      .select({ portfolioPublic: userSettings.portfolioPublic })
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId))
+      .limit(1);
+    if (!settings?.portfolioPublic) return null;
+    const result = await portfolioService.getPortfolio(userId);
+    return result as unknown as PublicPortfolio;
+  });
+
+// Public portfolio value history over a range
+export const getPublicPortfolioHistory = createServerFn()
+  .validator((raw: unknown) => z.object({ userId: z.string(), range: z.string() }).parse(raw))
+  .handler(async ({ data }): Promise<{ ts: number; value: number }[]> => {
+    const { userId, range } = data;
+    const [settings] = await db
+      .select({ portfolioPublic: userSettings.portfolioPublic })
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId))
+      .limit(1);
+    if (!settings?.portfolioPublic) return [];
+    return portfolioService.getPortfolioHistory(userId, range);
+  });
+
+// Public portfolio period returns (1W/1M/6M/1Y/3Y)
+export const getPublicPortfolioReturns = createServerFn()
+  .validator((raw: unknown) => z.object({ userId: z.string() }).parse(raw))
+  .handler(async ({ data }): Promise<PeriodReturn[]> => {
+    const { userId } = data;
+    const [settings] = await db
+      .select({ portfolioPublic: userSettings.portfolioPublic })
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId))
+      .limit(1);
+    if (!settings?.portfolioPublic) return [];
+    return portfolioService.getPortfolioReturns(userId);
+  });

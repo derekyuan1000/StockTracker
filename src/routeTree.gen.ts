@@ -17,8 +17,11 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FundamentalsRouteImport } from './routes/fundamentals'
 import { Route as HoldingsRouteImport } from './routes/holdings'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TechnicalRouteImport } from './routes/technical'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ProfilesUserIdRouteImport } from './routes/profiles.$userId'
@@ -65,6 +68,16 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -73,6 +86,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const TechnicalRoute = TechnicalRouteImport.update({
   id: '/technical',
   path: '/technical',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TransactionsRoute = TransactionsRouteImport.update({
@@ -110,8 +128,11 @@ export interface FileRoutesByFullPath {
   '/fundamentals': typeof FundamentalsRoute
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/technical': typeof TechnicalRoute
+  '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
@@ -127,8 +148,11 @@ export interface FileRoutesByTo {
   '/fundamentals': typeof FundamentalsRoute
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/technical': typeof TechnicalRoute
+  '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
@@ -145,8 +169,11 @@ export interface FileRoutesById {
   '/fundamentals': typeof FundamentalsRoute
   '/holdings': typeof HoldingsRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/technical': typeof TechnicalRoute
+  '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
   '/welcome': typeof WelcomeRoute
   '/profiles/$userId': typeof ProfilesUserIdRoute
@@ -164,8 +191,11 @@ export interface FileRouteTypes {
     | '/fundamentals'
     | '/holdings'
     | '/login'
+    | '/privacy'
+    | '/reset-password'
     | '/settings'
     | '/technical'
+    | '/terms'
     | '/transactions'
     | '/welcome'
     | '/profiles/$userId'
@@ -181,8 +211,11 @@ export interface FileRouteTypes {
     | '/fundamentals'
     | '/holdings'
     | '/login'
+    | '/privacy'
+    | '/reset-password'
     | '/settings'
     | '/technical'
+    | '/terms'
     | '/transactions'
     | '/welcome'
     | '/profiles/$userId'
@@ -198,8 +231,11 @@ export interface FileRouteTypes {
     | '/fundamentals'
     | '/holdings'
     | '/login'
+    | '/privacy'
+    | '/reset-password'
     | '/settings'
     | '/technical'
+    | '/terms'
     | '/transactions'
     | '/welcome'
     | '/profiles/$userId'
@@ -216,8 +252,11 @@ export interface RootRouteChildren {
   FundamentalsRoute: typeof FundamentalsRoute
   HoldingsRoute: typeof HoldingsRoute
   LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
   TechnicalRoute: typeof TechnicalRoute
+  TermsRoute: typeof TermsRoute
   TransactionsRoute: typeof TransactionsRoute
   WelcomeRoute: typeof WelcomeRoute
   ProfilesUserIdRoute: typeof ProfilesUserIdRoute
@@ -283,6 +322,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -295,6 +348,13 @@ declare module '@tanstack/react-router' {
       path: '/technical'
       fullPath: '/technical'
       preLoaderRoute: typeof TechnicalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/transactions': {
@@ -344,8 +404,11 @@ const rootRouteChildren: RootRouteChildren = {
   FundamentalsRoute: FundamentalsRoute,
   HoldingsRoute: HoldingsRoute,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
   TechnicalRoute: TechnicalRoute,
+  TermsRoute: TermsRoute,
   TransactionsRoute: TransactionsRoute,
   WelcomeRoute: WelcomeRoute,
   ProfilesUserIdRoute: ProfilesUserIdRoute,
