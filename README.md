@@ -129,6 +129,12 @@ scripts/          # DB maintenance scripts
 
 ---
 
+## Related
+
+- **Mobile app:** [github.com/derekyuan1000/StockTracker-Mobile](https://github.com/derekyuan1000/StockTracker-Mobile) — iOS and Android companion with home screen widget and biometric unlock
+
+---
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for code style, conventions, and how to submit changes.
