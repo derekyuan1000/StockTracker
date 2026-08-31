@@ -32,6 +32,25 @@ export const publicRoutes: RouteEntry[] = [
   },
   {
     method: "GET",
+    pattern: "/api/v1/public/profiles/:userId/portfolio",
+    requireAuth: false,
+    handler: async ({ params }) => pub.getPublicPortfolioData(params.userId),
+  },
+  {
+    method: "GET",
+    pattern: "/api/v1/public/profiles/:userId/history",
+    requireAuth: false,
+    handler: async ({ params, query }) =>
+      pub.getPublicPortfolioHistoryData(params.userId, query.get("range") ?? "1Y"),
+  },
+  {
+    method: "GET",
+    pattern: "/api/v1/public/profiles/:userId/returns",
+    requireAuth: false,
+    handler: async ({ params }) => pub.getPublicPortfolioReturnsData(params.userId),
+  },
+  {
+    method: "GET",
     pattern: "/api/v1/public/ticker",
     requireAuth: false,
     handler: async () => pub.getPublicTicker(),

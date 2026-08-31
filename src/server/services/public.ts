@@ -10,6 +10,8 @@ import {
 } from "@/server/db/schema";
 import { user } from "@/server/db/auth-schema";
 import { fetchHistory, fetchTickerTape } from "@/server/market/yahoo";
+import * as portfolioService from "@/server/services/portfolio";
+import type { PeriodReturn } from "@/server/services/portfolio";
 import type {
   LeaderboardEntry,
   PublicProfile,
@@ -197,4 +199,33 @@ export async function getPublicProfile(userId: string): Promise<PublicProfile | 
 
 export async function getPublicTicker(): Promise<TickerItem[]> {
   return fetchTickerTape();
+}
+
+// ─── getPublicPortfolioData ────────────────────────────────────────────────────
+
+async function checkPublic(userId: string): Promise<boolean> {
+  const [settings] = await db
+    .select({ portfolioPublic: userSettings.portfolioPublic })
+    .from(userSettings)
+    .where(eq(userSettings.userId, userId))
+    .limit(1);
+  return settings?.portfolioPublic === true;
+}
+
+export async function getPublicPortfolioData(userId: string) {
+  if (!(await checkPublic(userId))) return null;
+  return portfolioService.getPortfolio(userId);
+}
+
+export async function getPublicPortfolioHistoryData(
+  userId: string,
+  range: string,
+): Promise<{ ts: number; value: number }[]> {
+  if (!(await checkPublic(userId))) return [];
+  return portfolioService.getPortfolioHistory(userId, range);
+}
+
+export async function getPublicPortfolioReturnsData(userId: string): Promise<PeriodReturn[]> {
+  if (!(await checkPublic(userId))) return [];
+  return portfolioService.getPortfolioReturns(userId);
 }
