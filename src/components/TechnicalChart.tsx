@@ -500,10 +500,10 @@ export function TechnicalChart({
   const cardCls = `overflow-hidden rounded-sm border border-hairline bg-[var(--surface-card)]${isFullscreen ? " flex flex-1 flex-col" : ""}`;
   const bodyRowCls = `flex${isFullscreen ? " flex-1 min-h-0" : ""}`;
   const chartsColCls = `flex flex-col flex-1${isFullscreen ? " min-w-0 overflow-hidden" : ""}`;
-  const pricePaneStyle = isFullscreen ? undefined : { height: hasSubPanes ? 620 : 700 };
+  const pricePaneStyle = isFullscreen ? undefined : { height: hasSubPanes ? 800 : 1000 };
   const pricePaneCls = `${toolCursor}${isFullscreen ? " flex-1 min-h-0" : ""}`;
-  const volH = isFullscreen ? 130 : 110;
-  const oscH = isFullscreen ? 200 : 170;
+  const volH = isFullscreen ? 160 : 200;
+  const oscH = isFullscreen ? 260 : 320;
 
   const gridProps = settings.showGrid
     ? { stroke: "var(--hairline)" as const, strokeOpacity: 0.5 }
