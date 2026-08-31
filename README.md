@@ -129,6 +129,11 @@ scripts/          # DB maintenance scripts
 
 ---
 
+## Commands
+
+- [**Web app commands**](COMMANDS.md) — dev server, build, database, deployment
+- [**Mobile app commands**](apps/mobile/COMMANDS.md) — Expo, EAS build, environment setup
+
 ## Related
 
 - **Mobile app:** [github.com/derekyuan1000/StockTracker-Mobile](https://github.com/derekyuan1000/StockTracker-Mobile) — iOS and Android companion with home screen widget and biometric unlock
